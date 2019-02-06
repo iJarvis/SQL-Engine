@@ -7,17 +7,8 @@ import net.sf.jsqlparser.statement.Statement;
 
 public class Main {
 
-    Statement stmt;
+    public static void main(String[] args) {
 
-    {
-        try {
-            stmt = CCJSqlParserUtil.parse("SELECT * FROM tab1");
-
-        } catch (JSQLParserException e) {
-            e.printStackTrace();
-        }
-
-        if(stmt.)
     }
 
 }
