@@ -7,18 +7,18 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import java.sql.SQLException;
 
 import java.io.*;
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws ParseException, IOException {
+    public static void main(String[] args) throws ParseException, IOException, SQLException {
         Scanner scanner = new Scanner(System.in);
 
 
         String expr = scanner.nextLine();
-        System.out.println("readed line" + expr);
         CCJSqlParser parser = new CCJSqlParser(new StringReader(expr));
         Statement query = parser.Statement();
         if(query instanceof Select)
@@ -44,7 +44,7 @@ public class Main {
         }
         else
         {
-            System.out.println("Unknown statement");
+            throw new java.sql.SQLException("I can't understand "+query);
         }
 
 
