@@ -9,6 +9,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import sun.tools.jconsole.Tab;
 
 import javax.management.Query;
 import java.io.*;
@@ -20,13 +21,16 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
 
-        String expr = scanner.next();
+        String expr = scanner.nextLine();
+        System.out.println("readed line" + expr);
         CCJSqlParser parser = new CCJSqlParser(new StringReader(expr));
         Statement query = parser.Statement();
         if(query instanceof Select)
         {
-            PlainSelect plainSelect = (PlainSelect)query;
-            Table table =(Table) plainSelect.getFromItem();
+            Select select = (Select)query;
+
+            PlainSelect plainSelect =(PlainSelect) select.getSelectBody();
+            Table table = (Table) plainSelect.getFromItem();
             String table_name = table.getName();
             BufferedReader br = new BufferedReader(new FileReader("data/"+table_name+".csv"));
             try {
