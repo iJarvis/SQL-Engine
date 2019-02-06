@@ -2,15 +2,22 @@ package dubstep;
 
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.JSqlParser;
-
-import java.io.Reader;
-import java.io.StringReader;
-import java.sql.Statement;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.Statement;
 
 public class Main {
 
-    StringReader input = new StringReader("SELECT * FROM R");
+    Statement stmt;
 
+    {
+        try {
+            stmt = CCJSqlParserUtil.parse("SELECT * FROM tab1");
+
+        } catch (JSQLParserException e) {
+            e.printStackTrace();
+        }
+
+        if(stmt.)
+    }
 
 }
