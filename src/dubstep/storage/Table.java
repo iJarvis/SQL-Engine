@@ -1,6 +1,6 @@
 package dubstep.storage;
 
-import dubstep.utils.tuple;
+import dubstep.utils.Tuple;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import sun.misc.Lock;
@@ -11,7 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class table {
+public class Table {
 
     String tableName;
     ArrayList<ColumnDefinition> columnDefinitions;
@@ -20,7 +20,7 @@ public class table {
     BufferedReader tableReader;
     Integer currentMaxTid;
 
-    public table(CreateTable createTable) {
+    public Table(CreateTable createTable) {
         tableName = createTable.getTable().getName();
         columnDefinitions = (ArrayList) createTable.getColumnDefinitions();
         dataFile = "data/" + tableName + ".dat";
@@ -30,7 +30,7 @@ public class table {
         try {
             tableLock.lock();
         } catch (InterruptedException e) {
-            System.out.println("unable to lock table " + this.tableName);
+            System.out.println("unable to lock Table " + this.tableName);
             e.printStackTrace();
         }
     }
@@ -54,7 +54,7 @@ public class table {
 
     }
 
-    public boolean readTuples(int tupleCount, ArrayList<tuple> tupleBuffer) {
+    public boolean readTuples(int tupleCount, ArrayList<Tuple> tupleBuffer) {
 
         int readTuples = 0;
         int TidStart = this.currentMaxTid;
@@ -65,7 +65,7 @@ public class table {
 
 
         if (this.tableReader == null) {
-            System.out.println("Stop !! - Table read not initialized or table read already complete");
+            System.out.println("Stop !! - Table read not initialized or Table read already complete");
             this.unlockTable();
             return false;
         } else {
@@ -97,9 +97,9 @@ public class table {
 
     }
 
-    void convertToTuples(ArrayList<tuple> tupleBuffer, ArrayList<String> fileBuffer, int TidStart, int tupleCount, int readTuples) {
+    void convertToTuples(ArrayList<Tuple> tupleBuffer, ArrayList<String> fileBuffer, int TidStart, int tupleCount, int readTuples) {
         for (String tupleString : fileBuffer) {
-            tupleBuffer.add(new tuple(tupleString, tupleCount++, this.columnDefinitions));
+            tupleBuffer.add(new Tuple(tupleString, tupleCount++, this.columnDefinitions));
 
         }
     }

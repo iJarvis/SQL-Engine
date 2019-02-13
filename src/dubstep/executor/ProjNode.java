@@ -1,10 +1,10 @@
 package dubstep.executor;
 
-import dubstep.utils.tuple;
+import dubstep.utils.Tuple;
 
-public class projNode extends baseNode {
+public class ProjNode extends BaseNode {
     @Override
-    tuple GetNextRow() {
+    Tuple GetNextRow() {
         return null;
     }
 

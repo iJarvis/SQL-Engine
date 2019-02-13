@@ -1,10 +1,10 @@
 package dubstep.executor;
 
-import dubstep.utils.tuple;
+import dubstep.utils.Tuple;
 
-public class joinNode extends baseNode {
+public class JoinNode extends BaseNode {
     @Override
-    tuple GetNextRow() {
+    Tuple GetNextRow() {
         return null;
     }
 
