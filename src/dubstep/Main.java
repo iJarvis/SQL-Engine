@@ -1,10 +1,9 @@
 package dubstep;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import dubstep.storage.table;
-import dubstep.storage.tableManager;
-import dubstep.utils.queryTimer;
-import dubstep.utils.tuple;
+import dubstep.storage.Table;
+import dubstep.storage.TableManager;
+import dubstep.utils.QueryTimer;
+import dubstep.utils.Tuple;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
-    static tableManager mySchema = new tableManager();
+    static TableManager mySchema = new TableManager();
 
     // Globals used across project
     static public Integer maxThread = 1;
@@ -28,7 +27,7 @@ public class Main {
 
     public static void main(String[] args) throws ParseException, SQLException {
         Scanner scanner = new Scanner(System.in);
-        queryTimer timer = new queryTimer();
+        QueryTimer timer = new QueryTimer();
 
         while (scanner.hasNext()) {
 
@@ -50,18 +49,18 @@ public class Main {
             if (query instanceof CreateTable) {
                 CreateTable createQuery = (CreateTable) query;
                 if (!mySchema.createTable(createQuery))
-                    System.out.println("Unable to create table - table already exists");
+                    System.out.println("Unable to create Table - Table already exists");
             } else if (query instanceof Select) {
                 Select selectQuery = (Select) query;
                 PlainSelect plainSelect = (PlainSelect) selectQuery.getSelectBody();
                 String tableName = plainSelect.getFromItem().toString();
-                table table = mySchema.getTable(tableName);
+                Table table = mySchema.getTable(tableName);
                 if (table == null)
                     continue;
                 table.initRead();
-                ArrayList<tuple> tupleBuffer = new ArrayList<tuple>();
+                ArrayList<Tuple> tupleBuffer = new ArrayList<Tuple>();
                 table.readTuples(20, tupleBuffer);
-                for (tuple tuple : tupleBuffer) {
+                for (Tuple tuple : tupleBuffer) {
                     System.out.println(tuple.getProjection());
                 }
 

@@ -1,33 +1,33 @@
 package dubstep.executor;
 
-import dubstep.utils.queryTimer;
-import dubstep.utils.tuple;
+import dubstep.utils.QueryTimer;
+import dubstep.utils.Tuple;
 
 import static dubstep.Main.explain_mode;
 
-abstract class baseNode {
+abstract class BaseNode {
     node_type type;
-    queryTimer timer; //user for probing running time for every node
-    baseNode innerNode,outerNode;  //Inner node is used for every node - outer node is used for join
+    QueryTimer timer; //user for probing running time for every node
+    BaseNode innerNode,outerNode;  //Inner node is used for every node - outer node is used for join
     Integer tupleCount; //
 
-    protected abstract tuple GetNextRow();
+    abstract Tuple GetNextRow();
 
     abstract void ResetIterator();
 
-    baseNode()
+    BaseNode()
     {
-        timer = new queryTimer();
+        timer = new QueryTimer();
         timer.reset();
         tupleCount = 0;
     }
 
-    tuple GetNextTuple()
+    Tuple GetNextTuple()
     {
         if(explain_mode)
             timer.start();
 
-        tuple nextRow = this.GetNextRow();
+        Tuple nextRow = this.GetNextRow();
 
 
         if(explain_mode) {

@@ -5,11 +5,11 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 import java.util.ArrayList;
 
-public class tuple {
+public class Tuple {
     int Tid;
     ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
 
-    public tuple(String csv_string, int Tid, ArrayList<ColumnDefinition> columnDefinitions) {
+    public Tuple(String csv_string, int Tid, ArrayList<ColumnDefinition> columnDefinitions) {
         String[] args = csv_string.split("\\|");
         Tid = this.Tid;
         for (int i = 0; i < args.length; i++) {

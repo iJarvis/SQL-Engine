@@ -1,6 +1,6 @@
 package dubstep.utils;
 
-public class queryTimer {
+public class QueryTimer {
 
     private Long totalTime;
     private Long start;
@@ -8,7 +8,7 @@ public class queryTimer {
 
     public void start() {
 
-        assert running = false : "Start already running queryTimer";
+        assert running = false : "Start already running QueryTimer";
         start = System.currentTimeMillis();
         running = true;
 

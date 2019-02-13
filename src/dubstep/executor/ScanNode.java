@@ -1,22 +1,20 @@
 package dubstep.executor;
 
-import dubstep.storage.table;
-import dubstep.storage.tableManager;
-import dubstep.utils.tuple;
+import dubstep.storage.Table;
+import dubstep.storage.TableManager;
+import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 
 import java.util.ArrayList;
 
-import static dubstep.Main.scanBufferSize;
-
-public class scanNode extends baseNode {
-    table scanTable;
-    ArrayList<tuple> tupleBuffer;
+public class ScanNode extends BaseNode {
+    Table scanTable;
+    ArrayList<Tuple> tupleBuffer;
     Expression filter;
 
 
 
-    scanNode(String tableName, Expression filter, tableManager mySchema) {
+    ScanNode(String tableName, Expression filter, TableManager mySchema) {
 
         this.scanTable = mySchema.getTable(tableName);
         this.filter = filter;
@@ -29,7 +27,7 @@ public class scanNode extends baseNode {
 
 
     @Override
-    public tuple GetNextRow() {
+    public Tuple GetNextRow() {
 
         return null;
 

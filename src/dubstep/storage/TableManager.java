@@ -5,23 +5,23 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import java.util.HashMap;
 
 
-public class tableManager {
+public class TableManager {
 
-    HashMap<String, table> tableDirectory = new HashMap<>();
+    HashMap<String, Table> tableDirectory = new HashMap<>();
 
     public boolean createTable(CreateTable createTable) {
         String tableName = createTable.getTable().getName();
         if (tableDirectory.containsKey(tableName))
             return false;
         else
-            tableDirectory.put(tableName, new table(createTable));
+            tableDirectory.put(tableName, new Table(createTable));
         return true;
     }
 
-    public table getTable(String tableName) {
-        table table = tableDirectory.get(tableName);
+    public Table getTable(String tableName) {
+        Table table = tableDirectory.get(tableName);
         if (table == null)
-            System.out.println("table not found");
+            System.out.println("Table not found");
         return table;
     }
 
