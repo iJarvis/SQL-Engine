@@ -41,11 +41,8 @@ public class Table {
 
     public boolean initRead() {
         try {
-
             this.tableReader = new BufferedReader(new FileReader(dataFile));
             this.currentMaxTid = 0;
-
-
         } catch (FileNotFoundException e) {
             System.out.println("datafile node found" + this.dataFile);
 
@@ -63,15 +60,14 @@ public class Table {
 
         this.lockTable();
 
-
         if (this.tableReader == null) {
-            System.out.println("Stop !! - Table read not initialized or Table read already complete");
+            System.err.println("Stop !! - Table read not initialized or Table read already complete");
             this.unlockTable();
             return false;
         } else {
 
             try {
-                String line = "";
+                String line;
 
                 while (tupleCount > readTuples && (line = this.tableReader.readLine()) != null) {
                     fileBuffer.add(line);
@@ -94,13 +90,11 @@ public class Table {
 
         }
         return (readTuples == tupleCount);
-
     }
 
-    void convertToTuples(ArrayList<Tuple> tupleBuffer, ArrayList<String> fileBuffer, int TidStart, int tupleCount, int readTuples) {
+    void convertToTuples(ArrayList<Tuple> tupleBuffer, ArrayList<String> fileBuffer, int tidStart, int tupleCount, int readTuples) {
         for (String tupleString : fileBuffer) {
             tupleBuffer.add(new Tuple(tupleString, tupleCount++, this.columnDefinitions));
-
         }
     }
 

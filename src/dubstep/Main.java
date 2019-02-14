@@ -20,10 +20,12 @@ public class Main {
     static TableManager mySchema = new TableManager();
 
     // Globals used across project
-    static public Integer maxThread = 1;
-    static public Boolean debug_mode = false; // will print out logs - all logs should be routed through this flag
-    static public Boolean explain_mode = false; // will print statistics of the code
-    static public Integer scanBufferSize = 100; //  number of rows cached per scan from disk
+    static public int maxThread = 1;
+    static public boolean DEBUG_MODE = false; // will print out logs - all logs should be routed through this flag
+    static public boolean EXPLAIN_MODE = false; // will print statistics of the code
+    static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
+
+    public static final String PROMPT = "$>";
 
     public static void main(String[] args) throws ParseException, SQLException {
         Scanner scanner = new Scanner(System.in);
@@ -31,16 +33,15 @@ public class Main {
 
         while (scanner.hasNext()) {
 
-            String sql_string = scanner.nextLine();
+            String sqlString = scanner.nextLine();
 
-            if (sql_string == null)
+            if (sqlString == null)
                 continue;
 
-            if (sql_string.equals("\\q") || sql_string.equals("quit") || sql_string.equals("exit"))
+            if (sqlString.equals("\\q") || sqlString.equals("quit") || sqlString.equals("exit"))
                 break;
 
-
-            CCJSqlParser parser = new CCJSqlParser(new StringReader(sql_string));
+            CCJSqlParser parser = new CCJSqlParser(new StringReader(sqlString));
             Statement query = parser.Statement();
 
             timer.reset();
@@ -48,15 +49,18 @@ public class Main {
 
             if (query instanceof CreateTable) {
                 CreateTable createQuery = (CreateTable) query;
-                if (!mySchema.createTable(createQuery))
+                if (!mySchema.createTable(createQuery)) {
                     System.out.println("Unable to create Table - Table already exists");
+                }
             } else if (query instanceof Select) {
                 Select selectQuery = (Select) query;
                 PlainSelect plainSelect = (PlainSelect) selectQuery.getSelectBody();
                 String tableName = plainSelect.getFromItem().toString();
                 Table table = mySchema.getTable(tableName);
-                if (table == null)
+                if (table == null) {
+                    //shouldn't we through an error here?
                     continue;
+                }
                 table.initRead();
                 ArrayList<Tuple> tupleBuffer = new ArrayList<Tuple>();
                 table.readTuples(20, tupleBuffer);
@@ -67,12 +71,11 @@ public class Main {
 
                 System.out.println("select yet to be implemented");
             } else {
-                throw new java.sql.SQLException("I can't understand " + sql_string);
+                throw new java.sql.SQLException("I can't understand " + sqlString);
             }
             timer.stop();
             System.out.println("Execution time = " + timer.getTotalTime());
             timer.reset();
-
 
         }
     }

@@ -6,12 +6,12 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import java.util.ArrayList;
 
 public class Tuple {
-    int Tid;
-    ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
+    int tid;
+    private ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
 
-    public Tuple(String csv_string, int Tid, ArrayList<ColumnDefinition> columnDefinitions) {
+    public Tuple(String csv_string, int tid, ArrayList<ColumnDefinition> columnDefinitions) {
         String[] args = csv_string.split("\\|");
-        Tid = this.Tid;
+        tid = this.tid;
         for (int i = 0; i < args.length; i++) {
             String dataType = columnDefinitions.get(i).getColDataType().getDataType();
             if (dataType.equals("int"))
@@ -27,12 +27,10 @@ public class Tuple {
                 valueArray.add(new DateValue(args[i]));
 
             else {
-                System.out.println("data type " + dataType + "not found");
+                System.err.println("data type " + dataType + "not found");
                 break;
             }
         }
-
-
     }
 
     public String getProjection(Integer[] projVector) {
@@ -41,7 +39,6 @@ public class Tuple {
             output = output + valueArray.get(projVector[i]).toString();
         }
         return output;
-
     }
 
     public String getProjection() {
@@ -51,9 +48,6 @@ public class Tuple {
         }
         output = output.substring(0, output.length() - 1);
         return output;
-
     }
-
-
 }
 
