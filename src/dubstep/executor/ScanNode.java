@@ -27,14 +27,14 @@ public class ScanNode extends BaseNode {
 
 
     @Override
-    public Tuple GetNextRow() {
+    public Tuple getNextRow() {
 
         return null;
 
     }
 
     @Override
-    void ResetIterator() {
+    void resetIterator() {
 
     }
 }
