@@ -4,12 +4,12 @@ import dubstep.utils.Tuple;
 
 public class ProjNode extends BaseNode {
     @Override
-    Tuple GetNextRow() {
+    Tuple getNextRow() {
         return null;
     }
 
     @Override
-    void ResetIterator() {
+    void resetIterator() {
 
     }
 }

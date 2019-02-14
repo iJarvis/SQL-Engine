@@ -6,14 +6,14 @@ import dubstep.utils.Tuple;
 import static dubstep.Main.explain_mode;
 
 abstract class BaseNode {
-    node_type type;
+    NodeType type;
     QueryTimer timer; //user for probing running time for every node
     BaseNode innerNode,outerNode;  //Inner node is used for every node - outer node is used for join
     Integer tupleCount; //
 
-    abstract Tuple GetNextRow();
+    abstract Tuple getNextRow();
 
-    abstract void ResetIterator();
+    abstract void resetIterator();
 
     BaseNode()
     {
@@ -22,12 +22,12 @@ abstract class BaseNode {
         tupleCount = 0;
     }
 
-    Tuple GetNextTuple()
+    Tuple getNextTuple()
     {
         if(explain_mode)
             timer.start();
 
-        Tuple nextRow = this.GetNextRow();
+        Tuple nextRow = this.getNextRow();
 
 
         if(explain_mode) {
@@ -37,9 +37,9 @@ abstract class BaseNode {
 
         return  nextRow;
 
-    };
+    }
 
-    enum node_type {
+    enum NodeType {
         SORT_NODE, PROJ_NODE, SELECT_NODE, SCAN_NODE
     }
 
