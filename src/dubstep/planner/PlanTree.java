@@ -5,13 +5,12 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 
 public class PlanTree {
 
-    public BaseNode GeneratePlan(PlainSelect plainSelect)
-    {
+    public static BaseNode generatePlan(PlainSelect plainSelect) {
+
         return null;
     }
 
-    public BaseNode OptimizePlan(BaseNode generatedPlan)
-    {
+    public BaseNode optimizePlan(BaseNode generatedPlan) {
         BaseNode optimizedPlan = null;
         return optimizedPlan;
     }

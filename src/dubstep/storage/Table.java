@@ -82,12 +82,9 @@ public class Table {
                 tupleBuffer.clear();
                 convertToTuples(tupleBuffer, fileBuffer, TidStart, tupleCount, readTuples);
                 fileBuffer.clear();
-
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
         return (readTuples == tupleCount);
     }
@@ -97,5 +94,4 @@ public class Table {
             tupleBuffer.add(new Tuple(tupleString, tupleCount++, this.columnDefinitions));
         }
     }
-
 }
