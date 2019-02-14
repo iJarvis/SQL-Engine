@@ -3,7 +3,7 @@ package dubstep.executor;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
 
-import static dubstep.Main.explain_mode;
+import static dubstep.Main.EXPLAIN_MODE;
 
 abstract class BaseNode {
     NodeType type;
@@ -24,13 +24,13 @@ abstract class BaseNode {
 
     Tuple getNextTuple()
     {
-        if(explain_mode)
+        if(EXPLAIN_MODE)
             timer.start();
 
         Tuple nextRow = this.getNextRow();
 
 
-        if(explain_mode) {
+        if(EXPLAIN_MODE) {
             tupleCount++;
             timer.stop();
         }
