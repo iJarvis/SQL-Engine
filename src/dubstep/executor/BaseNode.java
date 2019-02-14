@@ -5,11 +5,11 @@ import dubstep.utils.Tuple;
 
 import static dubstep.Main.explain_mode;
 
-abstract class BaseNode {
+abstract public class BaseNode {
     NodeType type;
     QueryTimer timer; //user for probing running time for every node
     BaseNode innerNode,outerNode;  //Inner node is used for every node - outer node is used for join
-    Integer tupleCount; //
+    Integer tupleCount;
 
     abstract Tuple getNextRow();
 
