@@ -31,6 +31,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         QueryTimer timer = new QueryTimer();
 
+        System.out.print(PROMPT);
         while (scanner.hasNext()) {
 
             String sqlString = scanner.nextLine();
@@ -67,8 +68,6 @@ public class Main {
                 for (Tuple tuple : tupleBuffer) {
                     System.out.println(tuple.getProjection());
                 }
-
-
                 System.out.println("select yet to be implemented");
             } else {
                 throw new java.sql.SQLException("I can't understand " + sqlString);
@@ -77,6 +76,7 @@ public class Main {
             System.out.println("Execution time = " + timer.getTotalTime());
             timer.reset();
 
+            System.out.print(PROMPT);
         }
     }
 
