@@ -22,7 +22,7 @@ abstract public class BaseNode {
         tupleCount = 0;
     }
 
-    Tuple getNextTuple()
+    public Tuple getNextTuple()
     {
         if(EXPLAIN_MODE)
             timer.start();

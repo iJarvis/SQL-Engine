@@ -1,5 +1,6 @@
 package dubstep.executor;
 
+import com.sun.istack.internal.Nullable;
 import dubstep.storage.Table;
 import dubstep.storage.TableManager;
 import dubstep.utils.Tuple;
@@ -8,11 +9,13 @@ import net.sf.jsqlparser.expression.Expression;
 import java.util.ArrayList;
 
 public class ScanNode extends BaseNode {
+
     Table scanTable;
     ArrayList<Tuple> tupleBuffer;
     Expression filter;
+    int currentIndex = -1;
 
-    ScanNode(String tableName, Expression filter, TableManager mySchema) {
+    public ScanNode(String tableName, Expression filter, TableManager mySchema) {
         this.scanTable = mySchema.getTable(tableName);
         this.filter = filter;
         this.outerNode = null;
@@ -21,20 +24,19 @@ public class ScanNode extends BaseNode {
         scanTable.initRead();
         ArrayList<Tuple> tupleBuffer = new ArrayList<Tuple>();
         scanTable.readTuples(20, tupleBuffer);
-        for (Tuple tuple : tupleBuffer) {
-            System.out.println(tuple.getProjection());
-        }
     }
 
+    @Nullable
     @Override
-    public Tuple getNextRow() {
-
-        return null;
-
+    Tuple getNextRow() {
+        if (tupleBuffer.size() <= currentIndex+1) {
+            return null;
+        }
+        return tupleBuffer.get(++currentIndex);
     }
 
     @Override
     void resetIterator() {
-
+        currentIndex = -1;
     }
 }
