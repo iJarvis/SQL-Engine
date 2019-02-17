@@ -60,6 +60,7 @@ public class Main {
                 Table table = mySchema.getTable(tableName);
                 if (table == null) {
                     //shouldn't we through an error here?
+                    System.out.print(PROMPT);
                     continue;
                 }
                 table.initRead();
