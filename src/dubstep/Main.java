@@ -1,5 +1,7 @@
 package dubstep;
 
+import dubstep.executor.BaseNode;
+import dubstep.planner.PlanTree;
 import dubstep.storage.Table;
 import dubstep.storage.TableManager;
 import dubstep.utils.QueryTimer;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
-    static TableManager mySchema = new TableManager();
+    public static TableManager mySchema = new TableManager();
 
     // Globals used across project
     static public int maxThread = 1;
@@ -56,19 +58,12 @@ public class Main {
             } else if (query instanceof Select) {
                 Select selectQuery = (Select) query;
                 PlainSelect plainSelect = (PlainSelect) selectQuery.getSelectBody();
-                String tableName = plainSelect.getFromItem().toString();
-                Table table = mySchema.getTable(tableName);
-                if (table == null) {
-                    //shouldn't we through an error here?
-                    continue;
-                }
-                table.initRead();
-                ArrayList<Tuple> tupleBuffer = new ArrayList<Tuple>();
-                table.readTuples(20, tupleBuffer);
-                for (Tuple tuple : tupleBuffer) {
+                BaseNode root = PlanTree.generatePlan(plainSelect);
+                Tuple tuple = root.getNextTuple();
+                while (tuple != null) {
                     System.out.println(tuple.getProjection());
+                    tuple = root.getNextTuple();
                 }
-                System.out.println("select yet to be implemented");
             } else {
                 throw new java.sql.SQLException("I can't understand " + sqlString);
             }
