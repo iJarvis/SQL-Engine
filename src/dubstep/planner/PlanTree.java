@@ -3,6 +3,7 @@ package dubstep.planner;
 import dubstep.executor.BaseNode;
 import dubstep.executor.ProjNode;
 import dubstep.executor.ScanNode;
+import dubstep.executor.SelectNode;
 import dubstep.storage.DubTable;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
@@ -40,7 +41,8 @@ public class PlanTree {
 
         //assuming there will always be a select node over our scan node
         Expression filter = plainSelect.getWhere();
-        //TODO: create a Select node
+        BaseNode selectNode = new SelectNode(filter);
+        selectNode.innerNode = scanNode;
 
         //handle projection
         List<SelectItem> projItems = plainSelect.getSelectItems();
@@ -52,7 +54,7 @@ public class PlanTree {
             cols.add(item.toString());
         }
         BaseNode projNode = new ProjNode(cols);
-        projNode.innerNode = scanNode;
+        projNode.innerNode = selectNode;
 
         return projNode;
     }
