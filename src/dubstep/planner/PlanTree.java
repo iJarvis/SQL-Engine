@@ -1,23 +1,60 @@
 package dubstep.planner;
 
 import dubstep.executor.BaseNode;
+import dubstep.executor.ProjNode;
 import dubstep.executor.ScanNode;
-import dubstep.storage.Table;
-import net.sf.jsqlparser.statement.select.PlainSelect;
+import dubstep.storage.DubTable;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static dubstep.Main.mySchema;
 
 public class PlanTree {
 
     public static BaseNode generatePlan(PlainSelect plainSelect) {
-        String tableName = plainSelect.getFromItem().toString();
-        Table table = mySchema.getTable(tableName);
-        if (table == null) {
-            //shouldn't we through an error here?
-            throw new IllegalStateException("Table not found in our schema");
+        //Handle lowermost node
+        FromItem fromItem = plainSelect.getFromItem();
+        BaseNode scanNode;
+        if (fromItem instanceof SubSelect) {
+            SelectBody selectBody = ((SubSelect) fromItem).getSelectBody();
+            if (selectBody instanceof PlainSelect) {
+                scanNode = generatePlan((PlainSelect) selectBody);
+            } else {
+                throw new UnsupportedOperationException("Subselect is of type other than PlainSelect");
+            }
+        } else if (fromItem instanceof Table) {
+            String tableName = fromItem.toString();
+            DubTable table = mySchema.getTable(tableName);
+            if (table == null) {
+                //shouldn't we through an error here?
+                throw new IllegalStateException("DubTable not found in our schema");
+            }
+            scanNode = new ScanNode(tableName, null, mySchema);
+        } else {
+            throw new UnsupportedOperationException("We don't support this FROM clause");
         }
-        ScanNode scanNode = new ScanNode(tableName, null, mySchema);
-        return scanNode;
+
+        //assuming there will always be a select node over our scan node
+        Expression filter = plainSelect.getWhere();
+        //TODO: create a Select node
+
+        //handle projection
+        List<SelectItem> projItems = plainSelect.getSelectItems();
+        List<String> cols = new ArrayList<>();
+        for (SelectItem item : projItems) {
+            if (!(item instanceof SelectExpressionItem)) {
+                throw new UnsupportedOperationException("We don't support this column type yet");
+            }
+            cols.add(item.toString());
+        }
+        BaseNode projNode = new ProjNode(cols);
+        projNode.innerNode = scanNode;
+
+        return projNode;
     }
 
     public BaseNode optimizePlan(BaseNode generatedPlan) {
