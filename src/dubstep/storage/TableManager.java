@@ -7,21 +7,21 @@ import java.util.HashMap;
 
 public class TableManager {
 
-    HashMap<String, Table> tableDirectory = new HashMap<>();
+    HashMap<String, DubTable> tableDirectory = new HashMap<>();
 
     public boolean createTable(CreateTable createTable) {
         String tableName = createTable.getTable().getName();
         if (tableDirectory.containsKey(tableName))
             return false;
         else
-            tableDirectory.put(tableName, new Table(createTable));
+            tableDirectory.put(tableName, new DubTable(createTable));
         return true;
     }
 
-    public Table getTable(String tableName) {
-        Table table = tableDirectory.get(tableName);
+    public DubTable getTable(String tableName) {
+        DubTable table = tableDirectory.get(tableName);
         if (table == null)
-            System.out.println("Table not found");
+            System.out.println("DubTable not found");
         return table;
     }
 

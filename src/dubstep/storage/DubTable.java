@@ -11,7 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Table {
+public class DubTable {
 
     String tableName;
     ArrayList<ColumnDefinition> columnDefinitions;
@@ -20,7 +20,7 @@ public class Table {
     BufferedReader tableReader;
     Integer currentMaxTid;
 
-    public Table(CreateTable createTable) {
+    public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
         columnDefinitions = (ArrayList) createTable.getColumnDefinitions();
         dataFile = "data/" + tableName + ".dat";
@@ -30,7 +30,7 @@ public class Table {
         try {
             tableLock.lock();
         } catch (InterruptedException e) {
-            System.out.println("unable to lock Table " + this.tableName);
+            System.out.println("unable to lock DubTable " + this.tableName);
             e.printStackTrace();
         }
     }
@@ -61,7 +61,7 @@ public class Table {
         this.lockTable();
 
         if (this.tableReader == null) {
-            System.err.println("Stop !! - Table read not initialized or Table read already complete");
+            System.err.println("Stop !! - DubTable read not initialized or DubTable read already complete");
             this.unlockTable();
             return false;
         } else {

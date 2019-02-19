@@ -8,15 +8,14 @@ import static dubstep.Main.EXPLAIN_MODE;
 abstract public class BaseNode {
     NodeType type;
     QueryTimer timer; //user for probing running time for every node
-    BaseNode innerNode,outerNode;  //Inner node is used for every node - outer node is used for join
+    public BaseNode innerNode, outerNode;  //Inner node is used for every node - outer node is used for join
     Integer tupleCount;
 
     abstract Tuple getNextRow();
 
     abstract void resetIterator();
 
-    BaseNode()
-    {
+    BaseNode() {
         timer = new QueryTimer();
         timer.reset();
         tupleCount = 0;
