@@ -9,6 +9,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class DubTable {
@@ -44,8 +46,9 @@ public class DubTable {
             this.tableReader = new BufferedReader(new FileReader(dataFile));
             this.currentMaxTid = 0;
         } catch (FileNotFoundException e) {
-            System.out.println("datafile node found" + this.dataFile);
-
+            System.out.println("datafile not found : " + this.dataFile);
+            Path path = FileSystems.getDefault().getPath(".");
+            System.out.println("Current working directory : " + path.toAbsolutePath());
         }
         return (tableReader == null);
 
