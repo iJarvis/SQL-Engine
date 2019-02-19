@@ -33,6 +33,23 @@ public class Tuple {
         }
     }
 
+    public Tuple(Tuple inputTuple, ArrayList<Integer> ProjectionVector)
+    {
+        this.tid = -1;
+        for(Integer columnIndex : ProjectionVector)
+        {
+            this.valueArray.add(inputTuple.valueArray.get(columnIndex));
+        }
+    }
+
+    public  Tuple(Tuple innerTup, Tuple outerTuple)
+    {
+
+        this.tid = -1;
+        this.valueArray.addAll(innerTup.valueArray);
+        this.valueArray.addAll(outerTuple.valueArray);
+    }
+
     public String getProjection(Integer[] projVector) {
         String output = "";
         for (int i = 0; i < projVector.length; i++) {
@@ -41,7 +58,7 @@ public class Tuple {
         return output;
     }
 
-    public String getProjection() {
+    public String GetProjection() {
         String output = "";
         for (PrimitiveValue value : valueArray) {
             output = output + value.toString() + "|";
