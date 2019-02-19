@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DubTable {
 
@@ -51,6 +52,15 @@ public class DubTable {
 
     }
 
+    public void ResetRead()
+    {
+        try {
+            this.tableReader.reset();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public boolean readTuples(int tupleCount, ArrayList<Tuple> tupleBuffer) {
 
         int readTuples = 0;
@@ -63,7 +73,7 @@ public class DubTable {
         if (this.tableReader == null) {
             System.err.println("Stop !! - DubTable read not initialized or DubTable read already complete");
             this.unlockTable();
-            return false;
+            return true;
         } else {
 
             try {
@@ -86,12 +96,28 @@ public class DubTable {
                 e.printStackTrace();
             }
         }
-        return (readTuples == tupleCount);
+        return (!(readTuples == tupleCount));
     }
 
     void convertToTuples(ArrayList<Tuple> tupleBuffer, ArrayList<String> fileBuffer, int tidStart, int tupleCount, int readTuples) {
         for (String tupleString : fileBuffer) {
             tupleBuffer.add(new Tuple(tupleString, tupleCount++, this.columnDefinitions));
         }
+    }
+
+    public String GetTableName()
+    {
+        return this.tableName;
+    }
+
+    public ArrayList<String> GetColumnList()
+    {
+        ArrayList<String> columnList = new ArrayList<>() ;
+        for (Object columnDefinition : this.columnDefinitions)
+        {
+            columnList.add( this.tableName+columnDefinition.toString());
+
+        }
+        return  columnList;
     }
 }
