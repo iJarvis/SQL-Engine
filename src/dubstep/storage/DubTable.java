@@ -113,9 +113,9 @@ public class DubTable {
     public ArrayList<String> GetColumnList()
     {
         ArrayList<String> columnList = new ArrayList<>() ;
-        for (Object columnDefinition : this.columnDefinitions)
+        for (ColumnDefinition columnDefinition : this.columnDefinitions)
         {
-            columnList.add( this.tableName+columnDefinition.toString());
+           columnList.add( this.tableName+"."+columnDefinition.getColumnName());
 
         }
         return  columnList;
