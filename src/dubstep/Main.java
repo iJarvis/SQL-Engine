@@ -59,7 +59,7 @@ public class Main {
                 BaseNode root = PlanTree.generatePlan(plainSelect);
                 Tuple tuple = root.getNextTuple();
                 while (tuple != null) {
-                    System.out.println(tuple.getProjection());
+                    System.out.println(tuple.GetProjection());
                     tuple = root.getNextTuple();
                 }
             } else {

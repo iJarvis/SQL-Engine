@@ -41,20 +41,14 @@ public class PlanTree {
 
         //assuming there will always be a select node over our scan node
         Expression filter = plainSelect.getWhere();
-        BaseNode selectNode = new SelectNode(filter);
+        BaseNode selectNode = new SelectNode(filter, scanNode);
         selectNode.innerNode = scanNode;
 
         //handle projection
-        List<SelectItem> projItems = plainSelect.getSelectItems();
-        List<String> cols = new ArrayList<>();
-        for (SelectItem item : projItems) {
-            if (!(item instanceof SelectExpressionItem)) {
-                throw new UnsupportedOperationException("We don't support this column type yet");
-            }
-            cols.add(item.toString());
-        }
-        BaseNode projNode = new ProjNode(cols);
-        projNode.innerNode = selectNode;
+        List<SelectItem> selectItems = plainSelect.getSelectItems();
+
+        BaseNode projNode = new ProjNode(selectItems, selectNode);
+
 
         return projNode;
     }
