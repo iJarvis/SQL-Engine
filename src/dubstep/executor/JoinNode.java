@@ -1,6 +1,5 @@
 package dubstep.executor;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import dubstep.utils.Tuple;
 
 import java.util.ArrayList;
@@ -11,28 +10,24 @@ public class JoinNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        if(initJoin == false)
-        {
+        if (initJoin == false) {
             innerTuple = this.innerNode.getNextRow();
             initJoin = true;
         }
-        Tuple outerTuple,resultTuple = null;
+        Tuple outerTuple, resultTuple = null;
         outerTuple = this.outerNode.getNextRow();
 
 
-        if(outerTuple != null)
-        {
-            return new Tuple(innerTuple,outerTuple);
-        }
-        else
-        {
+        if (outerTuple != null) {
+            return new Tuple(innerTuple, outerTuple);
+        } else {
             this.outerNode.resetIterator();
             innerTuple = this.innerNode.getNextRow();
             outerTuple = this.outerNode.getNextRow();
-            if(innerTuple == null || outerTuple == null)
+            if (innerTuple == null || outerTuple == null)
                 return null;
             else
-                return new Tuple(innerTuple,outerTuple);
+                return new Tuple(innerTuple, outerTuple);
         }
     }
 

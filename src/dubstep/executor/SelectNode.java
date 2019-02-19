@@ -7,7 +7,7 @@ public class SelectNode extends BaseNode {
 
     private Expression filter;
 
-    public SelectNode(Expression filter,BaseNode InnerNode) {
+    public SelectNode(Expression filter, BaseNode InnerNode) {
         this.filter = filter;
         this.innerNode = InnerNode;
         this.InitProjectionInfo();
@@ -15,7 +15,7 @@ public class SelectNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        if(filter == null)
+        if (filter == null)
             return this.innerNode.getNextRow();
         else
             return null;
@@ -25,6 +25,7 @@ public class SelectNode extends BaseNode {
     void resetIterator() {
         this.innerNode.resetIterator();
     }
+
     @Override
     void InitProjectionInfo() {
         this.ProjectionInfo = this.innerNode.ProjectionInfo;
