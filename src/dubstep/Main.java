@@ -2,7 +2,6 @@ package dubstep;
 
 import dubstep.executor.BaseNode;
 import dubstep.planner.PlanTree;
-import dubstep.storage.Table;
 import dubstep.storage.TableManager;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
@@ -15,7 +14,6 @@ import net.sf.jsqlparser.statement.select.Select;
 
 import java.io.StringReader;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -53,7 +51,7 @@ public class Main {
             if (query instanceof CreateTable) {
                 CreateTable createQuery = (CreateTable) query;
                 if (!mySchema.createTable(createQuery)) {
-                    System.out.println("Unable to create Table - Table already exists");
+                    System.out.println("Unable to create DubTable - DubTable already exists");
                 }
             } else if (query instanceof Select) {
                 Select selectQuery = (Select) query;
