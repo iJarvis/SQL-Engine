@@ -10,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class DubTable {
 
@@ -52,8 +51,7 @@ public class DubTable {
 
     }
 
-    public void ResetRead()
-    {
+    public void ResetRead() {
         try {
             this.tableReader.reset();
         } catch (IOException e) {
@@ -105,19 +103,16 @@ public class DubTable {
         }
     }
 
-    public String GetTableName()
-    {
+    public String GetTableName() {
         return this.tableName;
     }
 
-    public ArrayList<String> GetColumnList()
-    {
-        ArrayList<String> columnList = new ArrayList<>() ;
-        for (ColumnDefinition columnDefinition : this.columnDefinitions)
-        {
-           columnList.add( this.tableName+"."+columnDefinition.getColumnName());
+    public ArrayList<String> GetColumnList() {
+        ArrayList<String> columnList = new ArrayList<>();
+        for (ColumnDefinition columnDefinition : this.columnDefinitions) {
+            columnList.add(this.tableName + "." + columnDefinition.getColumnName());
 
         }
-        return  columnList;
+        return columnList;
     }
 }

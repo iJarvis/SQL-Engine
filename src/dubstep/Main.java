@@ -17,15 +17,13 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main {
+    public static final String PROMPT = "$>";
     public static TableManager mySchema = new TableManager();
-
     // Globals used across project
     static public int maxThread = 1;
     static public boolean DEBUG_MODE = false; // will print out logs - all logs should be routed through this flag
     static public boolean EXPLAIN_MODE = false; // will print statistics of the code
     static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
-
-    public static final String PROMPT = "$>";
 
     public static void main(String[] args) throws ParseException, SQLException {
         Scanner scanner = new Scanner(System.in);

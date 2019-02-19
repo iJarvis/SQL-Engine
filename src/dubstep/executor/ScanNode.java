@@ -24,39 +24,36 @@ public class ScanNode extends BaseNode {
         this.innerNode = null;
         tupleBuffer = new ArrayList<>();
         scanTable.initRead();
-        ReadComplete =  scanTable.readTuples(20, tupleBuffer);
+        ReadComplete = scanTable.readTuples(20, tupleBuffer);
         this.InitProjectionInfo();
     }
 
     @Nullable
     @Override
     Tuple getNextRow() {
-        if (tupleBuffer.size() <= currentIndex+1) {
-            if(!ReadComplete) {
+        if (tupleBuffer.size() <= currentIndex + 1) {
+            if (!ReadComplete) {
                 ReadComplete = scanTable.readTuples(20, tupleBuffer);
                 return tupleBuffer.get(++currentIndex);
-            }
-            else
+            } else
                 return null;
-        }
-        else
+        } else
             return tupleBuffer.get(++currentIndex);
     }
 
     @Override
     void resetIterator() {
         currentIndex = -1;
-        if(ReadComplete){
+        if (ReadComplete) {
             ReadComplete = false;
             scanTable.initRead();
-        }
-        else {
+        } else {
             this.scanTable.ResetRead();
         }
     }
 
     @Override
     void InitProjectionInfo() {
-            this.ProjectionInfo = scanTable.GetColumnList();
+        this.ProjectionInfo = scanTable.GetColumnList();
     }
 }
