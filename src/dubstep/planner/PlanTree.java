@@ -34,7 +34,7 @@ public class PlanTree {
             List<Join> joins = plainSelect.getJoins();
             if (joins != null) {
                 String table2Name = joins.get(0).toString();
-                if (mySchema.getTable(table2Name) {
+                if (mySchema.getTable(table2Name) == null) {
                     throw new IllegalStateException("Table not found");
                 }
                 BaseNode scanNode2 = new ScanNode(table2Name, null, mySchema);
