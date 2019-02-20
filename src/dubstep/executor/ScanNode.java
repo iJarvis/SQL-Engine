@@ -13,7 +13,7 @@ public class ScanNode extends BaseNode {
     DubTable scanTable;
     ArrayList<Tuple> tupleBuffer;
     Expression filter;
-    int currentIndex = -1;
+    int currentIndex = 0;
     Boolean ReadComplete = false;
 
     public ScanNode(String tableName, Expression filter, TableManager mySchema) {
@@ -31,19 +31,20 @@ public class ScanNode extends BaseNode {
     @Nullable
     @Override
     Tuple getNextRow() {
-        if (tupleBuffer.size() <= currentIndex + 1) {
+        if (tupleBuffer.size() < currentIndex + 1) {
             if (!ReadComplete) {
                 ReadComplete = scanTable.readTuples(20, tupleBuffer);
-                return tupleBuffer.get(++currentIndex);
+                currentIndex = 0;
+                return tupleBuffer.get(currentIndex++);
             } else
                 return null;
         } else
-            return tupleBuffer.get(++currentIndex);
+            return tupleBuffer.get(currentIndex++);
     }
 
     @Override
     void resetIterator() {
-        currentIndex = -1;
+        currentIndex = 0;
         if (ReadComplete) {
             ReadComplete = false;
             scanTable.initRead();

@@ -8,6 +8,12 @@ public class JoinNode extends BaseNode {
 
     Tuple innerTuple;
     Boolean initJoin = false;
+    public JoinNode(BaseNode innerNode,BaseNode outerNode)
+    {
+        this.innerNode = innerNode;
+        this.outerNode = outerNode;
+        this.InitProjectionInfo();
+    }
 
     @Override
     Tuple getNextRow() {

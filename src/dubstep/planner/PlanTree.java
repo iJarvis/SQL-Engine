@@ -38,9 +38,9 @@ public class PlanTree {
                     throw new IllegalStateException("Table not found");
                 }
                 BaseNode scanNode2 = new ScanNode(table2Name, null, mySchema);
-                JoinNode joinNode = new JoinNode();
-                joinNode.innerNode = scanNode;
-                joinNode.outerNode = scanNode2;
+                JoinNode joinNode = new JoinNode(scanNode,scanNode2);
+
+
                 scanRoot = joinNode;
             } else {
                 scanRoot = scanNode;
