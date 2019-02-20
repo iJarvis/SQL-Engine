@@ -47,7 +47,7 @@ public class JoinNode extends BaseNode {
 
     @Override
     void InitProjectionInfo() {
-        this.ProjectionInfo = new ArrayList<>(this.innerNode.ProjectionInfo);
-        this.ProjectionInfo.addAll(this.outerNode.ProjectionInfo);
+        this.projectionInfo = new ArrayList<>(this.innerNode.projectionInfo);
+        this.projectionInfo.addAll(this.outerNode.projectionInfo);
     }
 }
