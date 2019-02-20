@@ -10,30 +10,30 @@ import java.util.List;
 public class ProjNode extends BaseNode {
 
 
-    ArrayList<Integer> ProjectionVector = new ArrayList<>();
-    Boolean IsCompleteProjection; // handle * cases
-    List<SelectItem> SelectItems; //used for building of projection info
+    ArrayList<Integer> projectionVector = new ArrayList<>();
+    boolean isCompleteProjection; // handle * cases
+    List<SelectItem> selectItems; //used for building of projection info
 
 
     public ProjNode(List<SelectItem> selectItems, BaseNode InnerNode) {
         super();
         this.innerNode = InnerNode;
-        this.SelectItems = selectItems;
+        this.selectItems = selectItems;
 
         for (SelectItem item : selectItems) {
             if (!(item instanceof SelectExpressionItem)) {
                 // case select * from table
                 if (item.toString().equals("*"))
-                    this.IsCompleteProjection = true;
+                    this.isCompleteProjection = true;
                 else
                     throw new UnsupportedOperationException("We don't support this column type yet");
             } else {
-                this.IsCompleteProjection = false;
+                this.isCompleteProjection = false;
                 String col_name = item.toString();
                 // case select db.col from table
                 if (col_name.indexOf('.') >= 0) {
-                    if (this.innerNode.ProjectionInfo.indexOf(col_name) >= 0)
-                        ProjectionVector.add(this.innerNode.ProjectionInfo.indexOf(col_name));
+                    if (this.innerNode.projectionInfo.indexOf(col_name) >= 0)
+                        projectionVector.add(this.innerNode.projectionInfo.indexOf(col_name));
                     else
                         throw new UnsupportedOperationException("Unknown column name" + col_name);
                 }
@@ -41,7 +41,7 @@ public class ProjNode extends BaseNode {
                 else {
                     boolean found = false;
                     int currentIndex = 0, foundIndex = -1;
-                    for (String col : this.innerNode.ProjectionInfo) {
+                    for (String col : this.innerNode.projectionInfo) {
                         if (col_name.equals(col.split("\\.")[1])) {
                             if (found)
                                 throw new UnsupportedOperationException("Ambiguous column name" + col_name);
@@ -54,7 +54,7 @@ public class ProjNode extends BaseNode {
                         currentIndex++;
                     }
                     if (found)
-                        ProjectionVector.add(foundIndex);
+                        projectionVector.add(foundIndex);
                     else
                         throw new UnsupportedOperationException("Unknown column name" + col_name);
                 }
@@ -74,10 +74,10 @@ public class ProjNode extends BaseNode {
         if (nextRow == null)
             return null;
 
-        if (IsCompleteProjection)
+        if (isCompleteProjection)
             return nextRow;
         else
-            return new Tuple(nextRow, ProjectionVector);
+            return new Tuple(nextRow, projectionVector);
 
 
     }
@@ -89,12 +89,12 @@ public class ProjNode extends BaseNode {
 
     @Override
     void InitProjectionInfo() {
-        if (IsCompleteProjection)
-            this.ProjectionInfo = this.innerNode.ProjectionInfo;
+        if (isCompleteProjection)
+            this.projectionInfo = this.innerNode.projectionInfo;
         else {
-            ProjectionInfo = new ArrayList<>();
-            for (Object selectItem : this.SelectItems) {
-                ProjectionInfo.add(selectItem.toString());
+            projectionInfo = new ArrayList<>();
+            for (Object selectItem : this.selectItems) {
+                projectionInfo.add(selectItem.toString());
             }
         }
 
