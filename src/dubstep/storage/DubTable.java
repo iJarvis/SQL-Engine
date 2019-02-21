@@ -54,7 +54,7 @@ public class DubTable {
 
     }
 
-    public void ResetRead() {
+    public void resetRead() {
         try {
             this.tableReader.reset();
         } catch (IOException e) {

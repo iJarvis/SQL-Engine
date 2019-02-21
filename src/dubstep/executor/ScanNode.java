@@ -25,7 +25,7 @@ public class ScanNode extends BaseNode {
         tupleBuffer = new ArrayList<>();
         scanTable.initRead();
         ReadComplete = scanTable.readTuples(20, tupleBuffer);
-        this.InitProjectionInfo();
+        this.initProjectionInfo();
     }
 
     @Nullable
@@ -49,12 +49,12 @@ public class ScanNode extends BaseNode {
             ReadComplete = false;
             scanTable.initRead();
         } else {
-            this.scanTable.ResetRead();
+            this.scanTable.resetRead();
         }
     }
 
     @Override
-    void InitProjectionInfo() {
+    void initProjectionInfo() {
         this.projectionInfo = scanTable.GetColumnList();
     }
 }

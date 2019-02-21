@@ -24,7 +24,7 @@ abstract public class BaseNode {
 
     abstract void resetIterator();
 
-    abstract void InitProjectionInfo();
+    abstract void initProjectionInfo();
 
     public Tuple getNextTuple() {
         if (EXPLAIN_MODE)
@@ -45,8 +45,6 @@ abstract public class BaseNode {
     enum NodeType {
         SORT_NODE, PROJ_NODE, SELECT_NODE, SCAN_NODE
     }
-
-
 }
 
 
