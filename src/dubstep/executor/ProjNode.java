@@ -63,7 +63,7 @@ public class ProjNode extends BaseNode {
             }
 
         }
-        InitProjectionInfo();
+        initProjectionInfo();
 
 
     }
@@ -88,7 +88,7 @@ public class ProjNode extends BaseNode {
     }
 
     @Override
-    void InitProjectionInfo() {
+    void initProjectionInfo() {
         if (isCompleteProjection)
             this.projectionInfo = this.innerNode.projectionInfo;
         else {

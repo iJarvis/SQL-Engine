@@ -3,7 +3,6 @@ package dubstep.storage;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
-import sun.misc.Lock;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -12,22 +11,24 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 public class DubTable {
 
     String tableName;
-    ArrayList<ColumnDefinition> columnDefinitions;
+    List<ColumnDefinition> columnDefinitions;
     String dataFile;
-    Lock tableLock = new Lock();
+//    Lock tableLock = new Lock();
     BufferedReader tableReader;
     Integer currentMaxTid;
 
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
-        columnDefinitions = (ArrayList) createTable.getColumnDefinitions();
+        columnDefinitions =  createTable.getColumnDefinitions();
         dataFile = "data/" + tableName + ".dat";
     }
-
+/*
     void lockTable() {
         try {
             tableLock.lock();
@@ -35,10 +36,10 @@ public class DubTable {
             System.out.println("unable to lock DubTable " + this.tableName);
             e.printStackTrace();
         }
-    }
+    }*/
 
     void unlockTable() {
-        tableLock.unlock();
+//        tableLock.unlock();
     }
 
     public boolean initRead() {
@@ -54,7 +55,7 @@ public class DubTable {
 
     }
 
-    public void ResetRead() {
+    public void resetRead() {
         try {
             this.tableReader.reset();
         } catch (IOException e) {
@@ -69,7 +70,7 @@ public class DubTable {
 
         ArrayList<String> fileBuffer = new ArrayList<>();
 
-        this.lockTable();
+//        this.lockTable();
 
         if (this.tableReader == null) {
             System.err.println("Stop !! - DubTable read not initialized or DubTable read already complete");
@@ -89,7 +90,7 @@ public class DubTable {
                     this.tableReader.close();
                     this.currentMaxTid = 0;
                 }
-                this.tableLock.unlock();
+//                this.tableLock.unlock();
                 tupleBuffer.clear();
                 convertToTuples(tupleBuffer, fileBuffer, TidStart, tupleCount, readTuples);
                 fileBuffer.clear();
@@ -114,7 +115,6 @@ public class DubTable {
         ArrayList<String> columnList = new ArrayList<>();
         for (ColumnDefinition columnDefinition : this.columnDefinitions) {
             columnList.add(this.tableName + "." + columnDefinition.getColumnName());
-
         }
         return columnList;
     }

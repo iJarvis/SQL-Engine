@@ -40,8 +40,18 @@ public class PlanTree {
                 BaseNode scanNode2 = new ScanNode(table2Name, null, mySchema);
                 JoinNode joinNode = new JoinNode(scanNode,scanNode2);
 
-
-                scanRoot = joinNode;
+                if (joins.size() == 1) {
+                    scanRoot = joinNode;
+                } else {
+                    //handle 3 table join
+                    String table3Name = joins.get(1).toString();
+                    if (mySchema.getTable(table3Name) == null) {
+                        throw new IllegalStateException("Table not found");
+                    }
+                    BaseNode scanNode3 = new ScanNode(table3Name, null, mySchema);
+                    JoinNode joinNode2 = new JoinNode(scanNode3, joinNode);
+                    scanRoot = joinNode2;
+                }
             } else {
                 scanRoot = scanNode;
             }

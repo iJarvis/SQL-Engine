@@ -10,7 +10,7 @@ public class SelectNode extends BaseNode {
     public SelectNode(Expression filter, BaseNode InnerNode) {
         this.filter = filter;
         this.innerNode = InnerNode;
-        this.InitProjectionInfo();
+        this.initProjectionInfo();
     }
 
     @Override
@@ -27,7 +27,7 @@ public class SelectNode extends BaseNode {
     }
 
     @Override
-    void InitProjectionInfo() {
+    void initProjectionInfo() {
         this.projectionInfo = this.innerNode.projectionInfo;
 
     }
