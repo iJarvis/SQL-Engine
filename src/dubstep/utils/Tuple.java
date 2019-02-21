@@ -4,12 +4,13 @@ import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Tuple {
     int tid;
     private ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
 
-    public Tuple(String csv_string, int tid, ArrayList<ColumnDefinition> columnDefinitions) {
+    public Tuple(String csv_string, int tid, List<ColumnDefinition> columnDefinitions) {
         String[] args = csv_string.split("\\|");
         tid = this.tid;
         for (int i = 0; i < args.length; i++) {

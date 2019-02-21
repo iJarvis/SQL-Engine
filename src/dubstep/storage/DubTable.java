@@ -12,11 +12,12 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DubTable {
 
     String tableName;
-    ArrayList<ColumnDefinition> columnDefinitions;
+    List<ColumnDefinition> columnDefinitions;
     String dataFile;
     Lock tableLock = new Lock();
     BufferedReader tableReader;
@@ -24,7 +25,7 @@ public class DubTable {
 
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
-        columnDefinitions = (ArrayList) createTable.getColumnDefinitions();
+        columnDefinitions =  createTable.getColumnDefinitions();
         dataFile = "data/" + tableName + ".dat";
     }
 
@@ -114,7 +115,6 @@ public class DubTable {
         ArrayList<String> columnList = new ArrayList<>();
         for (ColumnDefinition columnDefinition : this.columnDefinitions) {
             columnList.add(this.tableName + "." + columnDefinition.getColumnName());
-
         }
         return columnList;
     }
