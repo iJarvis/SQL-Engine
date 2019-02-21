@@ -1,6 +1,5 @@
 package dubstep.executor;
 
-import com.sun.istack.internal.Nullable;
 import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
 import dubstep.utils.Tuple;
@@ -28,7 +27,6 @@ public class ScanNode extends BaseNode {
         this.initProjectionInfo();
     }
 
-    @Nullable
     @Override
     Tuple getNextRow() {
         if (tupleBuffer.size() < currentIndex + 1) {

@@ -21,7 +21,7 @@ public class JoinNode extends BaseNode {
             innerTuple = this.innerNode.getNextRow();
             initJoin = true;
         }
-        Tuple outerTuple, resultTuple = null;
+        Tuple outerTuple;
         outerTuple = this.outerNode.getNextRow();
 
         if (outerTuple != null) {
