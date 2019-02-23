@@ -56,11 +56,7 @@ public class DubTable {
     }
 
     public void resetRead() {
-        try {
-            this.tableReader.reset();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        initRead();
     }
 
     public boolean readTuples(int tupleCount, ArrayList<Tuple> tupleBuffer) {

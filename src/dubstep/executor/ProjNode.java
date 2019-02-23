@@ -9,11 +9,9 @@ import java.util.List;
 
 public class ProjNode extends BaseNode {
 
-
-    ArrayList<Integer> projectionVector = new ArrayList<>();
-    boolean isCompleteProjection; // handle * cases
-    List<SelectItem> selectItems; //used for building of projection info
-
+    private List<Integer> projectionVector = new ArrayList<>();
+    private boolean isCompleteProjection; // handle * cases
+    private List<SelectItem> selectItems; //used for building of projection info
 
     public ProjNode(List<SelectItem> selectItems, BaseNode InnerNode) {
         super();
@@ -49,7 +47,6 @@ public class ProjNode extends BaseNode {
                                 found = true;
                                 foundIndex = currentIndex;
                             }
-
                         }
                         currentIndex++;
                     }
@@ -58,14 +55,10 @@ public class ProjNode extends BaseNode {
                     else
                         throw new UnsupportedOperationException("Unknown column name" + col_name);
                 }
-
-
             }
-
         }
+
         initProjectionInfo();
-
-
     }
 
     @Override
@@ -78,8 +71,6 @@ public class ProjNode extends BaseNode {
             return nextRow;
         else
             return new Tuple(nextRow, projectionVector);
-
-
     }
 
     @Override
@@ -97,8 +88,5 @@ public class ProjNode extends BaseNode {
                 projectionInfo.add(selectItem.toString());
             }
         }
-
     }
-
-
 }
