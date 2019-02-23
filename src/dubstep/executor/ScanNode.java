@@ -29,7 +29,7 @@ public class ScanNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        if (tupleBuffer.size() < currentIndex + 1) {
+        if (tupleBuffer.size() < currentIndex + 1 || tupleBuffer.size() == 0) {
             if (!ReadComplete) {
                 ReadComplete = scanTable.readTuples(20, tupleBuffer);
                 currentIndex = 0;
