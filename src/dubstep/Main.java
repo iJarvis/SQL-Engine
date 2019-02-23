@@ -11,6 +11,8 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.Union;
 
 import java.io.StringReader;
 import java.sql.SQLException;
@@ -53,8 +55,13 @@ public class Main {
                 }
             } else if (query instanceof Select) {
                 Select selectQuery = (Select) query;
-                PlainSelect plainSelect = (PlainSelect) selectQuery.getSelectBody();
-                BaseNode root = PlanTree.generatePlan(plainSelect);
+                SelectBody selectBody = selectQuery.getSelectBody();
+                BaseNode root;
+                if (selectBody instanceof PlainSelect) {
+                    root = PlanTree.generatePlan((PlainSelect) selectBody);
+                } else {
+                    root = PlanTree.generateUnionPlan((Union) selectBody);
+                }
                 Tuple tuple = root.getNextTuple();
                 while (tuple != null) {
                     System.out.println(tuple.GetProjection());

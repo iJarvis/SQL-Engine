@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 public class JoinNode extends BaseNode {
 
-    Tuple innerTuple;
-    Boolean initJoin = false;
+    private Tuple innerTuple;
+    private boolean initJoin = false;
 
     public JoinNode(BaseNode innerNode,BaseNode outerNode) {
         this.innerNode = innerNode;
@@ -17,7 +17,7 @@ public class JoinNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        if (initJoin == false) {
+        if (!initJoin) {
             innerTuple = this.innerNode.getNextRow();
             initJoin = true;
         }

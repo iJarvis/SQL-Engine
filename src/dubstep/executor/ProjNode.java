@@ -1,5 +1,6 @@
 package dubstep.executor;
 
+import dubstep.utils.Logger;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
@@ -84,7 +85,7 @@ public class ProjNode extends BaseNode {
             this.projectionInfo = this.innerNode.projectionInfo;
         else {
             projectionInfo = new ArrayList<>();
-            for (Object selectItem : this.selectItems) {
+            for (SelectItem selectItem : this.selectItems) {
                 projectionInfo.add(selectItem.toString());
             }
         }
