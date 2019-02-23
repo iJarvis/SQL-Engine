@@ -25,7 +25,7 @@ public class DubTable {
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
         columnDefinitions =  createTable.getColumnDefinitions();
-        dataFile = "data/" + tableName + ".dat";
+        dataFile = "data/" + tableName + ".csv";
     }
 /*
     void lockTable() {
