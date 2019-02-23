@@ -33,6 +33,7 @@ public class ScanNode extends BaseNode {
             if (tupleBuffer.size() < currentIndex + 1) {
                 if (!ReadComplete) {
                     ReadComplete = scanTable.readTuples(20, tupleBuffer);
+                    currentIndex = 0;
                     continue;
                 } else
                     return null;
