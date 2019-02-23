@@ -10,7 +10,7 @@ public class JoinNode extends BaseNode {
     Boolean initJoin = false;
 
     public JoinNode(BaseNode innerNode,BaseNode outerNode) {
-        this.innerNode = innerNode;
+        this.innerNgit saode = innerNode;
         this.outerNode = outerNode;
         this.initProjectionInfo();
     }
