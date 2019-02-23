@@ -34,6 +34,9 @@ public class Main {
 
             String sqlString = scanner.nextLine();
 
+            while(sqlString.indexOf(';') < 0)
+                sqlString = sqlString +" "+scanner.nextLine();
+
             if (sqlString == null)
                 continue;
 
@@ -64,6 +67,7 @@ public class Main {
                 throw new java.sql.SQLException("I can't understand " + sqlString);
             }
             timer.stop();
+           if(DEBUG_MODE)
             System.out.println("Execution time = " + timer.getTotalTime());
             timer.reset();
 
