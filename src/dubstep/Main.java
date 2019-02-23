@@ -37,7 +37,7 @@ public class Main {
             String sqlString = scanner.nextLine();
 
             while(sqlString.indexOf(';') < 0)
-                sqlString = sqlString +" "+scanner.nextLine();
+                sqlString = sqlString + " " + scanner.nextLine();
 
             if (sqlString == null)
                 continue;

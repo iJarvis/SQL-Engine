@@ -76,12 +76,18 @@ public class PlanTree {
     }
 
     private static BaseNode generateUnionPlanUtil(List<PlainSelect> plainSelects) {
+        BaseNode root;
         if (plainSelects.size() == 2) {
             //base case
-            return new UnionNode(generatePlan(plainSelects.get(0)), generatePlan(plainSelects.get(1)));
+            root = new UnionNode(generatePlan(plainSelects.get(0)), generatePlan(plainSelects.get(1)));
+        } else {
+            //recur
+            BaseNode leftNode = generatePlan(plainSelects.get(0));
+            plainSelects.remove(0);
+            BaseNode rightNode = generateUnionPlanUtil(plainSelects);
+            root = new UnionNode(leftNode, rightNode);
         }
-        //recur
-        return null;
+        return root;
     }
 
     public BaseNode optimizePlan(BaseNode generatedPlan) {
