@@ -12,7 +12,6 @@ public class TableManager {
     public boolean createTable(CreateTable createTable) {
 
         String tableName = createTable.getTable().getName();
-        System.out.println("Creating Table "+tableName+"...");
         if (tableDirectory.containsKey(tableName))
             return false;
         else
