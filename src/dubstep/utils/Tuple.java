@@ -34,7 +34,7 @@ public class Tuple {
         }
     }
 
-    public Tuple(Tuple inputTuple, ArrayList<Integer> ProjectionVector) {
+    public Tuple(Tuple inputTuple, List<Integer> ProjectionVector) {
         this.tid = -1;
         for (Integer columnIndex : ProjectionVector) {
             this.valueArray.add(inputTuple.valueArray.get(columnIndex));

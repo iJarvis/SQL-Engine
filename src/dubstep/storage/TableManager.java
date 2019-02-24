@@ -10,6 +10,7 @@ public class TableManager {
     HashMap<String, DubTable> tableDirectory = new HashMap<>();
 
     public boolean createTable(CreateTable createTable) {
+
         String tableName = createTable.getTable().getName();
         if (tableDirectory.containsKey(tableName))
             return false;

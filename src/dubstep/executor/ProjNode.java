@@ -1,5 +1,6 @@
 package dubstep.executor;
 
+import dubstep.utils.Logger;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
@@ -9,11 +10,9 @@ import java.util.List;
 
 public class ProjNode extends BaseNode {
 
-
-    ArrayList<Integer> projectionVector = new ArrayList<>();
-    boolean isCompleteProjection; // handle * cases
-    List<SelectItem> selectItems; //used for building of projection info
-
+    private List<Integer> projectionVector = new ArrayList<>();
+    private boolean isCompleteProjection; // handle * cases
+    private List<SelectItem> selectItems; //used for building of projection info
 
     public ProjNode(List<SelectItem> selectItems, BaseNode InnerNode) {
         super();
@@ -27,7 +26,10 @@ public class ProjNode extends BaseNode {
                     this.isCompleteProjection = true;
                 else
                     throw new UnsupportedOperationException("We don't support this column type yet");
-            } else {
+            }
+            // All other projection cases
+            else {
+
                 this.isCompleteProjection = false;
                 String col_name = item.toString();
                 // case select db.col from table
@@ -42,14 +44,14 @@ public class ProjNode extends BaseNode {
                     boolean found = false;
                     int currentIndex = 0, foundIndex = -1;
                     for (String col : this.innerNode.projectionInfo) {
-                        if (col_name.equals(col.split("\\.")[1])) {
+
+                        if ((col.indexOf('.') >= 0 && col_name.equals(col.split("\\.")[1])) || (col.indexOf('.') < 0 && col_name.equals(col)) ) {
                             if (found)
                                 throw new UnsupportedOperationException("Ambiguous column name" + col_name);
                             else {
                                 found = true;
                                 foundIndex = currentIndex;
                             }
-
                         }
                         currentIndex++;
                     }
@@ -58,14 +60,10 @@ public class ProjNode extends BaseNode {
                     else
                         throw new UnsupportedOperationException("Unknown column name" + col_name);
                 }
-
-
             }
-
         }
+
         initProjectionInfo();
-
-
     }
 
     @Override
@@ -78,8 +76,6 @@ public class ProjNode extends BaseNode {
             return nextRow;
         else
             return new Tuple(nextRow, projectionVector);
-
-
     }
 
     @Override
@@ -93,12 +89,9 @@ public class ProjNode extends BaseNode {
             this.projectionInfo = this.innerNode.projectionInfo;
         else {
             projectionInfo = new ArrayList<>();
-            for (Object selectItem : this.selectItems) {
+            for (SelectItem selectItem : this.selectItems) {
                 projectionInfo.add(selectItem.toString());
             }
         }
-
     }
-
-
 }

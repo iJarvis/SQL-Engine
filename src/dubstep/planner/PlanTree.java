@@ -6,7 +6,6 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static dubstep.Main.mySchema;
@@ -69,6 +68,26 @@ public class PlanTree {
         BaseNode projNode = new ProjNode(selectItems, selectNode);
 
         return projNode;
+    }
+
+    public static BaseNode generateUnionPlan(Union union) {
+        List<PlainSelect> plainSelects = union.getPlainSelects();
+        return generateUnionPlanUtil(plainSelects);
+    }
+
+    private static BaseNode generateUnionPlanUtil(List<PlainSelect> plainSelects) {
+        BaseNode root;
+        if (plainSelects.size() == 2) {
+            //base case
+            root = new UnionNode(generatePlan(plainSelects.get(0)), generatePlan(plainSelects.get(1)));
+        } else {
+            //recur
+            BaseNode leftNode = generatePlan(plainSelects.get(0));
+            plainSelects.remove(0);
+            BaseNode rightNode = generateUnionPlanUtil(plainSelects);
+            root = new UnionNode(leftNode, rightNode);
+        }
+        return root;
     }
 
     public BaseNode optimizePlan(BaseNode generatedPlan) {

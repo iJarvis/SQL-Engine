@@ -1,4 +1,7 @@
-CREATE TABLE R ( A int, B int );
-CREATE TABLE S ( B int, C int );
-CREATE TABLE T ( C int, D int );
-SELECT R.A, T.D FROM R, S, T;
+CREATE TABLE R (A int, B int);
+
+SELECT A, B FROM R
+  UNION
+SELECT A, B FROM R
+  UNION
+SELECT A, B FROM R;

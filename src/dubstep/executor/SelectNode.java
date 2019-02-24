@@ -29,6 +29,5 @@ public class SelectNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         this.projectionInfo = this.innerNode.projectionInfo;
-
     }
 }

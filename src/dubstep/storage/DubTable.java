@@ -12,7 +12,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
 
 public class DubTable {
 
@@ -26,7 +25,7 @@ public class DubTable {
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
         columnDefinitions =  createTable.getColumnDefinitions();
-        dataFile = "data/" + tableName + ".dat";
+        dataFile = "data/" + tableName + ".csv";
     }
 /*
     void lockTable() {
@@ -56,11 +55,7 @@ public class DubTable {
     }
 
     public void resetRead() {
-        try {
-            this.tableReader.reset();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        initRead();
     }
 
     public boolean readTuples(int tupleCount, ArrayList<Tuple> tupleBuffer) {
