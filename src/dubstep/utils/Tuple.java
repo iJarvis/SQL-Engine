@@ -1,6 +1,7 @@
 package dubstep.utils;
 
 import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 import java.util.ArrayList;
@@ -63,6 +64,26 @@ public class Tuple {
         }
         output = output.substring(0, output.length() - 1);
         return output;
+    }
+
+    public PrimitiveValue GetValue(Column column,ArrayList<String> projInfo)
+    {
+        String findStr = column.getWholeColumnName();
+        int index;
+        boolean found = false;
+        int final_index = 0;
+        for( String col : projInfo)
+        {
+            if(col.equals(findStr)) {
+
+                found = true;
+                break;
+            }
+            final_index++;
+        }
+        if(!found)
+            throw new UnsupportedOperationException("column not found tuple.getvalue");
+        return valueArray.get(final_index);
     }
 }
 
