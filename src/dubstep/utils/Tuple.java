@@ -1,9 +1,11 @@
 package dubstep.utils;
 
 import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Tuple {
@@ -34,11 +36,9 @@ public class Tuple {
         }
     }
 
-    public Tuple(Tuple inputTuple, List<Integer> ProjectionVector) {
-        this.tid = -1;
-        for (Integer columnIndex : ProjectionVector) {
-            this.valueArray.add(inputTuple.valueArray.get(columnIndex));
-        }
+    public Tuple(List<PrimitiveValue> tempvalueArray) {
+       this.tid = -1;
+       this.valueArray.addAll(tempvalueArray);
     }
 
     public Tuple(Tuple innerTup, Tuple outerTuple) {
@@ -48,13 +48,6 @@ public class Tuple {
         this.valueArray.addAll(outerTuple.valueArray);
     }
 
-    public String getProjection(Integer[] projVector) {
-        String output = "";
-        for (int i = 0; i < projVector.length; i++) {
-            output = output + valueArray.get(projVector[i]).toString();
-        }
-        return output;
-    }
 
     public String GetProjection() {
         String output = "";
@@ -63,6 +56,37 @@ public class Tuple {
         }
         output = output.substring(0, output.length() - 1);
         return output;
+    }
+
+    public PrimitiveValue GetValue(Column column,ArrayList<String> projInfo)
+    {
+        String findStr = column.getWholeColumnName();
+        String findStr1 = column.getColumnName();
+        int index;
+        boolean found = false;
+        int final_index = 0;
+        for( String col : projInfo)
+        {
+
+
+            if((col.equals(findStr)) || (col.equals(findStr1) )) {
+
+                found = true;
+                break;
+            }
+            if(col.indexOf('.') >= 0 )
+                col = col.split("\\.")[1];
+            if(col.equals(findStr1))
+            {
+                found =true;
+                break;
+            }
+
+            final_index++;
+        }
+        if(!found)
+            throw new UnsupportedOperationException("column not found tuple.getvalue");
+        return valueArray.get(final_index);
     }
 }
 
