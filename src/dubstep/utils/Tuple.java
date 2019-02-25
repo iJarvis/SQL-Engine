@@ -5,6 +5,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Tuple {
@@ -35,11 +36,9 @@ public class Tuple {
         }
     }
 
-    public Tuple(Tuple inputTuple, List<Integer> ProjectionVector) {
-        this.tid = -1;
-        for (Integer columnIndex : ProjectionVector) {
-            this.valueArray.add(inputTuple.valueArray.get(columnIndex));
-        }
+    public Tuple(List<PrimitiveValue> tempvalueArray) {
+       this.tid = -1;
+       this.valueArray.addAll(tempvalueArray);
     }
 
     public Tuple(Tuple innerTup, Tuple outerTuple) {
@@ -49,13 +48,6 @@ public class Tuple {
         this.valueArray.addAll(outerTuple.valueArray);
     }
 
-    public String getProjection(Integer[] projVector) {
-        String output = "";
-        for (int i = 0; i < projVector.length; i++) {
-            output = output + valueArray.get(projVector[i]).toString();
-        }
-        return output;
-    }
 
     public String GetProjection() {
         String output = "";

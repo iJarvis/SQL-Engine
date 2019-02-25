@@ -1,10 +1,13 @@
 package dubstep.executor;
 
-import dubstep.utils.Logger;
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.eval.Eval;
+import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +16,7 @@ public class ProjNode extends BaseNode {
     private List<Integer> projectionVector = new ArrayList<>();
     private boolean isCompleteProjection; // handle * cases
     private List<SelectItem> selectItems; //used for building of projection info
+    private List<SelectExpressionItem> selectExpressionItems = new ArrayList<>();
 
     public ProjNode(List<SelectItem> selectItems, BaseNode InnerNode) {
         super();
@@ -24,42 +28,12 @@ public class ProjNode extends BaseNode {
                 // case select * from table
                 if (item.toString().equals("*"))
                     this.isCompleteProjection = true;
-                else
                     throw new UnsupportedOperationException("We don't support this column type yet");
             }
             // All other projection cases
             else {
+                selectExpressionItems.add((SelectExpressionItem)item);
 
-                this.isCompleteProjection = false;
-                String col_name = ((SelectExpressionItem) item).getExpression().toString();
-                // case select db.col from table
-                if (col_name.indexOf('.') >= 0) {
-                    if (this.innerNode.projectionInfo.indexOf(col_name) >= 0)
-                        projectionVector.add(this.innerNode.projectionInfo.indexOf(col_name));
-                    else
-                        throw new UnsupportedOperationException("Unknown column name" + col_name);
-                }
-                // case select col from table 
-                else {
-                    boolean found = false;
-                    int currentIndex = 0, foundIndex = -1;
-                    for (String col : this.innerNode.projectionInfo) {
-
-                        if ((col.indexOf('.') >= 0 && col_name.equals(col.split("\\.")[1])) || (col.indexOf('.') < 0 && col_name.equals(col)) ) {
-                            if (found)
-                                throw new UnsupportedOperationException("Ambiguous column name" + col_name);
-                            else {
-                                found = true;
-                                foundIndex = currentIndex;
-                            }
-                        }
-                        currentIndex++;
-                    }
-                    if (found)
-                        projectionVector.add(foundIndex);
-                    else
-                        throw new UnsupportedOperationException("Unknown column name" + col_name);
-                }
             }
         }
 
@@ -68,14 +42,31 @@ public class ProjNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
+        List<PrimitiveValue> values = new ArrayList<>();
         Tuple nextRow = this.innerNode.getNextRow();
         if (nextRow == null)
             return null;
+        Eval eval = new Eval() {
+            @Override
+            public PrimitiveValue eval(Column column) throws SQLException {
+                return nextRow.GetValue(column, innerNode.projectionInfo);
+            }
+        };
+        for(SelectExpressionItem expression : this.selectExpressionItems)
+        {
+            try {
+
+                PrimitiveValue value = eval.eval(expression.getExpression());
+                values.add(value);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
 
         if (isCompleteProjection)
             return nextRow;
         else
-            return new Tuple(nextRow, projectionVector);
+            return new Tuple(values);
     }
 
     @Override
