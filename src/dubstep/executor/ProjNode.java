@@ -31,7 +31,7 @@ public class ProjNode extends BaseNode {
             else {
 
                 this.isCompleteProjection = false;
-                String col_name = item.toString();
+                String col_name = ((SelectExpressionItem) item).getExpression().toString();
                 // case select db.col from table
                 if (col_name.indexOf('.') >= 0) {
                     if (this.innerNode.projectionInfo.indexOf(col_name) >= 0)
@@ -90,7 +90,12 @@ public class ProjNode extends BaseNode {
         else {
             projectionInfo = new ArrayList<>();
             for (SelectItem selectItem : this.selectItems) {
-                projectionInfo.add(selectItem.toString());
+                String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
+                String alias = ((SelectExpressionItem) selectItem).getAlias();
+                if(alias == null)
+                projectionInfo.add(columnName);
+                else
+                    projectionInfo.add(alias);
             }
         }
     }

@@ -29,25 +29,25 @@ public class PlanTree {
             if (table == null) {
                 throw new IllegalStateException("DubTable not found in our schema");
             }
-            BaseNode scanNode = new ScanNode(tableName, null, mySchema);
+            BaseNode scanNode = new ScanNode((Table)fromItem, null, mySchema);
             List<Join> joins = plainSelect.getJoins();
             if (joins != null) {
-                String table2Name = joins.get(0).toString();
-                if (mySchema.getTable(table2Name) == null) {
+                FromItem table2 = joins.get(0).getRightItem();
+                if (mySchema.getTable(table2.toString()) == null) {
                     throw new IllegalStateException("Table not found");
                 }
-                BaseNode scanNode2 = new ScanNode(table2Name, null, mySchema);
+                BaseNode scanNode2 = new ScanNode(table2, null, mySchema);
                 JoinNode joinNode = new JoinNode(scanNode,scanNode2);
 
                 if (joins.size() == 1) {
                     scanRoot = joinNode;
                 } else {
                     //handle 3 table join
-                    String table3Name = joins.get(1).toString();
-                    if (mySchema.getTable(table3Name) == null) {
+                    FromItem table3 = joins.get(1).getRightItem();
+                    if (mySchema.getTable(table3.toString()) == null) {
                         throw new IllegalStateException("Table not found");
                     }
-                    BaseNode scanNode3 = new ScanNode(table3Name, null, mySchema);
+                    BaseNode scanNode3 = new ScanNode(table3, null, mySchema);
                     JoinNode joinNode2 = new JoinNode(scanNode3, joinNode);
                     scanRoot = joinNode2;
                 }

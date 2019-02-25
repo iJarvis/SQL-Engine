@@ -1,6 +1,7 @@
 package dubstep.storage;
 
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
@@ -106,10 +107,12 @@ public class DubTable {
         return this.tableName;
     }
 
-    public ArrayList<String> GetColumnList() {
+    public ArrayList<String> GetColumnList(Table fromItem) {
+        String alias = fromItem.getAlias();
+        String fromName = alias == null ? this.tableName : alias;
         ArrayList<String> columnList = new ArrayList<>();
         for (ColumnDefinition columnDefinition : this.columnDefinitions) {
-            columnList.add(this.tableName + "." + columnDefinition.getColumnName());
+            columnList.add(fromName + "." + columnDefinition.getColumnName());
         }
         return columnList;
     }

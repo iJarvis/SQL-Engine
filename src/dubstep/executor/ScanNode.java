@@ -1,9 +1,10 @@
 package dubstep.executor;
-
 import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.FromItem;
 
 import java.util.ArrayList;
 
@@ -14,17 +15,25 @@ public class ScanNode extends BaseNode {
     Expression filter;
     int currentIndex = 0;
     Boolean ReadComplete = false;
+    Table FromItem;
 
-    public ScanNode(String tableName, Expression filter, TableManager mySchema) {
+    public ScanNode(FromItem fromItem, Expression filter, TableManager mySchema) {
         super();
-        this.scanTable = mySchema.getTable(tableName);
-        this.filter = filter;
-        this.outerNode = null;
-        this.innerNode = null;
-        tupleBuffer = new ArrayList<>();
-        scanTable.initRead();
-        ReadComplete = scanTable.readTuples(20, tupleBuffer);
-        this.initProjectionInfo();
+        if(!(fromItem instanceof Table)) {
+            throw new UnsupportedOperationException("Scan node call without table");
+
+        }
+            FromItem = (Table)fromItem;
+            String tableName = fromItem.toString();
+            this.scanTable = mySchema.getTable(tableName);
+            this.filter = filter;
+            this.outerNode = null;
+            this.innerNode = null;
+            tupleBuffer = new ArrayList<>();
+            scanTable.initRead();
+            ReadComplete = scanTable.readTuples(20, tupleBuffer);
+            this.initProjectionInfo();
+
     }
 
     @Override
@@ -55,6 +64,6 @@ public class ScanNode extends BaseNode {
 
     @Override
     void initProjectionInfo() {
-        this.projectionInfo = scanTable.GetColumnList();
+        this.projectionInfo = scanTable.GetColumnList(FromItem);
     }
 }
