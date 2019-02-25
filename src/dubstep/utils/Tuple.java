@@ -61,16 +61,27 @@ public class Tuple {
     public PrimitiveValue GetValue(Column column,ArrayList<String> projInfo)
     {
         String findStr = column.getWholeColumnName();
+        String findStr1 = column.getColumnName();
         int index;
         boolean found = false;
         int final_index = 0;
         for( String col : projInfo)
         {
-            if(col.equals(findStr)) {
+
+
+            if((col.equals(findStr)) || (col.equals(findStr1) )) {
 
                 found = true;
                 break;
             }
+            if(col.indexOf('.') >= 0 )
+                col = col.split("\\.")[1];
+            if(col.equals(findStr1))
+            {
+                found =true;
+                break;
+            }
+
             final_index++;
         }
         if(!found)
