@@ -24,7 +24,7 @@ public class PlanTree {
                 throw new UnsupportedOperationException("Subselect is of type other than PlainSelect");
             }
         } else if (fromItem instanceof Table) {
-            String tableName = fromItem.toString();
+            String tableName = ((Table) fromItem).getWholeTableName();
             DubTable table = mySchema.getTable(tableName);
             if (table == null) {
                 throw new IllegalStateException("DubTable not found in our schema");
