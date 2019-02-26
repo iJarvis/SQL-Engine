@@ -1,4 +1,5 @@
 package dubstep.executor;
+
 import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
 import dubstep.utils.Tuple;
@@ -10,29 +11,28 @@ import java.util.ArrayList;
 
 public class ScanNode extends BaseNode {
 
-    DubTable scanTable;
-    ArrayList<Tuple> tupleBuffer;
-    Expression filter;
-    int currentIndex = 0;
-    Boolean ReadComplete = false;
-    Table FromItem;
+    private DubTable scanTable;
+    private ArrayList<Tuple> tupleBuffer;
+    private Expression filter;
+    private int currentIndex = 0;
+    private boolean readComplete = false;
+    private Table fromTable;
 
     public ScanNode(FromItem fromItem, Expression filter, TableManager mySchema) {
         super();
-        if(!(fromItem instanceof Table)) {
+        if (!(fromItem instanceof Table)) {
             throw new UnsupportedOperationException("Scan node call without table");
-
         }
-            FromItem = (Table)fromItem;
-            String tableName = fromItem.toString();
-            this.scanTable = mySchema.getTable(tableName);
-            this.filter = filter;
-            this.outerNode = null;
-            this.innerNode = null;
-            tupleBuffer = new ArrayList<>();
-            scanTable.initRead();
-            ReadComplete = scanTable.readTuples(20, tupleBuffer);
-            this.initProjectionInfo();
+        this.fromTable = (Table) fromItem;
+        String tableName = fromTable.getName();
+        this.scanTable = mySchema.getTable(tableName);
+        this.filter = filter;
+        this.outerNode = null;
+        this.innerNode = null;
+        tupleBuffer = new ArrayList<>();
+        scanTable.initRead();
+        readComplete = scanTable.readTuples(20, tupleBuffer);
+        this.initProjectionInfo();
 
     }
 
@@ -40,8 +40,8 @@ public class ScanNode extends BaseNode {
     Tuple getNextRow() {
         while (1 == 1) {
             if (tupleBuffer.size() < currentIndex + 1) {
-                if (!ReadComplete) {
-                    ReadComplete = scanTable.readTuples(20, tupleBuffer);
+                if (!readComplete) {
+                    readComplete = scanTable.readTuples(20, tupleBuffer);
                     currentIndex = 0;
                     continue;
                 } else
@@ -54,8 +54,8 @@ public class ScanNode extends BaseNode {
     @Override
     void resetIterator() {
         currentIndex = 0;
-        if (ReadComplete) {
-            ReadComplete = false;
+        if (readComplete) {
+            readComplete = false;
             scanTable.initRead();
         } else {
             this.scanTable.resetRead();
@@ -64,6 +64,6 @@ public class ScanNode extends BaseNode {
 
     @Override
     void initProjectionInfo() {
-        this.projectionInfo = scanTable.GetColumnList(FromItem);
+        this.projectionInfo = scanTable.GetColumnList(fromTable);
     }
 }
