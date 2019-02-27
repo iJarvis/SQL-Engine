@@ -1,6 +1,7 @@
 package dubstep.executor;
 
 import dubstep.storage.DubTable;
+import dubstep.storage.Scanner;
 import dubstep.storage.TableManager;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
@@ -17,6 +18,7 @@ public class ScanNode extends BaseNode {
     private int currentIndex = 0;
     private boolean readComplete = false;
     private Table fromTable;
+    private Scanner scanner;
 
     public ScanNode(FromItem fromItem, Expression filter, TableManager mySchema) {
         super();
@@ -30,8 +32,9 @@ public class ScanNode extends BaseNode {
         this.outerNode = null;
         this.innerNode = null;
         tupleBuffer = new ArrayList<>();
-        scanTable.initRead();
-        readComplete = scanTable.readTuples(20, tupleBuffer);
+        scanner = new Scanner(this.scanTable);
+        scanner.initRead();
+        readComplete = scanner.readTuples(20, tupleBuffer);
         this.initProjectionInfo();
 
     }
@@ -41,7 +44,7 @@ public class ScanNode extends BaseNode {
         while (1 == 1) {
             if (tupleBuffer.size() <= currentIndex) {
                 if (!readComplete) {
-                    readComplete = scanTable.readTuples(20, tupleBuffer);
+                    readComplete = scanner.readTuples(20, tupleBuffer);
                     currentIndex = 0;
                     continue;
                 } else
@@ -56,10 +59,10 @@ public class ScanNode extends BaseNode {
         currentIndex = 0;
         if (readComplete) {
             readComplete = false;
-            scanTable.initRead();
+            scanner.initRead();
             tupleBuffer.clear();
         } else {
-            this.scanTable.resetRead();
+            this.scanner.resetRead();
         }
     }
 
