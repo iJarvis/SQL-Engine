@@ -63,18 +63,14 @@ public class Tuple {
         int index;
         boolean found = false;
         int final_index = 0;
-        for (String col : projInfo) {
-            if ((col.equals(findStr)) || (col.equals(findStr1))) {
-                found = true;
-                break;
-            }
-            if (col.indexOf('.') >= 0)
-                col = col.split("\\.")[1];
-            if (col.equals(findStr1)) {
-                found = true;
-                break;
-            }
+        for( String col : projInfo) {
+            String col1 = (col.indexOf('.') > -1) ? col.split("\\.")[1] : col;
+            int index1 = findStr.indexOf('.');
+            if(col.equals(findStr) ||((index1< 0) &&(col1.equals(findStr1) )))  {
 
+                found = true;
+                break;
+            }
             final_index++;
         }
 
