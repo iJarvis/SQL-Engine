@@ -30,10 +30,11 @@ public class JoinNode extends BaseNode {
             this.outerNode.resetIterator();
             innerTuple = this.innerNode.getNextRow();
             outerTuple = this.outerNode.getNextRow();
-            if (innerTuple == null || outerTuple == null)
+            if (innerTuple == null || outerTuple == null) {
                 return null;
-            else
+            } else {
                 return new Tuple(innerTuple, outerTuple);
+            }
         }
     }
 
