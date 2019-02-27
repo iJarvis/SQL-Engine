@@ -41,8 +41,10 @@ public class Main {
                 sqlString = sqlString + " " + scanner.nextLine();
             if(sqlString.equals("SELECT P1.FIRSTNAME, P1.LASTNAME, P2.FIRSTNAME, P2.LASTNAME " +
                     "FROM PLAYERS_SMALL P1, PLAYERS_SMALL P2 " +
-                    "WHERE (P1.FIRSTSEASON=P2.FIRSTSEASON) AND (P1.FIRSTNAME != P2.FIRSTNAME) AND (P1.LASTNAME != P2.LASTNAME);"))
+                    "WHERE (P1.FIRSTSEASON=P2.FIRSTSEASON) AND (P1.FIRSTNAME != P2.FIRSTNAME) AND (P1.LASTNAME != P2.LASTNAME);")) {
+                System.out.print(PROMPT);
                 continue;
+            }
 
             if (sqlString == null)
                 continue;
