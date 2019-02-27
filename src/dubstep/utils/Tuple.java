@@ -69,7 +69,7 @@ public class Tuple {
         {
 
 
-            if(col.equals(findStr) ||((col.indexOf('.')< -1) &&(col.equals(findStr1) )))  {
+            if(col.equals(findStr) ||((col.indexOf('.')< 0) &&(col.equals(findStr1) )))  {
 
                 found = true;
                 break;
