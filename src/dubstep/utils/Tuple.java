@@ -82,5 +82,10 @@ public class Tuple {
     public PrimitiveValue getValue(Column column, ArrayList<String> projInfo) {
         return getValue(column.getWholeColumnName(), column.getColumnName(), projInfo);
     }
+
+    @Override
+    public String toString() {
+        return GetProjection();
+    }
 }
 

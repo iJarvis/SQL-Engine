@@ -36,9 +36,6 @@ public class ProjNode extends BaseNode {
         }
 
         initProjectionInfo();
-        for (String column: projectionInfo) {
-            Logger.logd(column);
-        }
     }
 
     @Override
