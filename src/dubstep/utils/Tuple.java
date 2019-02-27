@@ -69,19 +69,11 @@ public class Tuple {
         {
 
 
-            if((col.equals(findStr)) || (col.equals(findStr1) )) {
+            if(col.equals(findStr) ||((col.indexOf('.')< -1) &&(col.equals(findStr1) )))  {
 
                 found = true;
                 break;
             }
-            if(col.indexOf('.') >= 0 )
-                col = col.split("\\.")[1];
-            if(col.equals(findStr1))
-            {
-                found =true;
-                break;
-            }
-
             final_index++;
         }
         if(!found)

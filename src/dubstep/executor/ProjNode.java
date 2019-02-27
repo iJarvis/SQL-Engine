@@ -28,7 +28,6 @@ public class ProjNode extends BaseNode {
                 // case select * from table
                 if (item.toString().equals("*"))
                     this.isCompleteProjection = true;
-                    throw new UnsupportedOperationException("We don't support this column type yet");
             }
             // All other projection cases
             else {
