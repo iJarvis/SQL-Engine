@@ -1,7 +1,5 @@
 package dubstep.executor;
 
-import dubstep.planner.PlanTree;
-import dubstep.utils.Logger;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.PrimitiveValue;
@@ -47,7 +45,7 @@ public class ProjNode extends BaseNode {
         Eval eval = new Eval() {
             @Override
             public PrimitiveValue eval(Column column) {
-                return nextRow.getValue(column, projectionInfo);
+                return nextRow.getValue(column, innerNode.projectionInfo);
             }
         };
         for (SelectExpressionItem expression : this.selectExpressionItems) {
