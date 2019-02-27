@@ -67,9 +67,9 @@ public class Tuple {
         int final_index = 0;
         for( String col : projInfo)
         {
-
-
-            if(col.equals(findStr) ||((col.indexOf('.')< 0) &&(col.equals(findStr1) )))  {
+            String col1 = (col.indexOf('.') > -1) ? col.split("\\.")[1] : col;
+            int index1 = findStr.indexOf('.');
+            if(col.equals(findStr) ||((index1< 0) &&(col1.equals(findStr1) )))  {
 
                 found = true;
                 break;
