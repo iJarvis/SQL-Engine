@@ -5,7 +5,6 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class Tuple {
@@ -37,8 +36,8 @@ public class Tuple {
     }
 
     public Tuple(List<PrimitiveValue> tempvalueArray) {
-       this.tid = -1;
-       this.valueArray.addAll(tempvalueArray);
+        this.tid = -1;
+        this.valueArray.addAll(tempvalueArray);
     }
 
     public Tuple(Tuple innerTup, Tuple outerTuple) {
@@ -58,35 +57,34 @@ public class Tuple {
         return output;
     }
 
-    public PrimitiveValue GetValue(Column column,ArrayList<String> projInfo)
-    {
-        String findStr = column.getWholeColumnName();
-        String findStr1 = column.getColumnName();
+    public PrimitiveValue getValue(String columnName1, String columnName2, List<String> projInfo) {
+        String findStr = columnName1;
+        String findStr1 = columnName2;
         int index;
         boolean found = false;
         int final_index = 0;
-        for( String col : projInfo)
-        {
-
-
-            if((col.equals(findStr)) || (col.equals(findStr1) )) {
-
+        for (String col : projInfo) {
+            if ((col.equals(findStr)) || (col.equals(findStr1))) {
                 found = true;
                 break;
             }
-            if(col.indexOf('.') >= 0 )
+            if (col.indexOf('.') >= 0)
                 col = col.split("\\.")[1];
-            if(col.equals(findStr1))
-            {
-                found =true;
+            if (col.equals(findStr1)) {
+                found = true;
                 break;
             }
 
             final_index++;
         }
-        if(!found)
+
+        if (!found)
             throw new UnsupportedOperationException("column not found tuple.getvalue");
         return valueArray.get(final_index);
+    }
+
+    public PrimitiveValue getValue(Column column, ArrayList<String> projInfo) {
+        return getValue(column.getWholeColumnName(), column.getColumnName(), projInfo);
     }
 }
 

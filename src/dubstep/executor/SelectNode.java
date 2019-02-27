@@ -1,5 +1,6 @@
 package dubstep.executor;
 
+import dubstep.utils.Logger;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
@@ -21,7 +22,7 @@ public class SelectNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        while(1 == 1) {
+        while(true) {
             Tuple row = this.innerNode.getNextRow();
             if(row == null)
                 return  null;
@@ -30,14 +31,15 @@ public class SelectNode extends BaseNode {
             else {
                 Eval eval = new Eval() {
                     @Override
-                    public PrimitiveValue eval(Column column) throws SQLException {
-                        return row.GetValue(column, innerNode.projectionInfo);
+                    public PrimitiveValue eval(Column column) {
+                        return row.getValue(column, innerNode.projectionInfo);
                     }
                 };
                 try {
                     PrimitiveValue value = eval.eval(filter);
-                    if (value.toBool() == true)
+                    if (value.toBool()) {
                         return row;
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
