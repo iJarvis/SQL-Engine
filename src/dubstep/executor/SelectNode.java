@@ -10,7 +10,6 @@ import net.sf.jsqlparser.schema.Column;
 import java.sql.SQLException;
 
 public class SelectNode extends BaseNode {
-
     private Expression filter;
     Eval eval;
 

@@ -5,6 +5,7 @@ import dubstep.planner.PlanTree;
 import dubstep.storage.TableManager;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
+import dubstep.utils.Explainer;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
@@ -74,6 +75,9 @@ public class Main {
                 throw new java.sql.SQLException("I can't understand " + sqlString);
             }
             timer.stop();
+            if (EXPLAIN_MODE){
+
+            }
            if(DEBUG_MODE)
             System.out.println("Execution time = " + timer.getTotalTime());
             timer.reset();
