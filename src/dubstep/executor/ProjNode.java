@@ -39,7 +39,7 @@ public class ProjNode extends BaseNode {
     @Override
     Tuple getNextRow() {
         List<PrimitiveValue> values = new ArrayList<>();
-        Tuple nextRow = this.innerNode.getNextRow();
+        Tuple nextRow = this.innerNode.getNextTuple();
         if (nextRow == null)
             return null;
         Eval eval = new Eval() {

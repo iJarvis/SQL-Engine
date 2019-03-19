@@ -19,7 +19,7 @@ public class UnionNode extends BaseNode {
             Tuple tuple = innerNode.getNextTuple();
             if (tuple == null) {
                 innerDone = true;
-                return outerNode.getNextRow();
+                return outerNode.getNextTuple();
             }
             return tuple;
         } else {

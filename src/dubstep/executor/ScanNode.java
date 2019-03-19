@@ -36,7 +36,10 @@ public class ScanNode extends BaseNode {
         scanner.initRead();
         readComplete = scanner.readTuples(20, tupleBuffer);
         this.initProjectionInfo();
+    }
 
+    public String getScanTableName(){
+        return this.scanTable.GetTableName();
     }
 
     @Override

@@ -22,7 +22,7 @@ public class SelectNode extends BaseNode {
     @Override
     Tuple getNextRow() {
         while(true) {
-            Tuple row = this.innerNode.getNextRow();
+            Tuple row = this.innerNode.getNextTuple();
             if(row == null)
                 return  null;
             if (filter == null)

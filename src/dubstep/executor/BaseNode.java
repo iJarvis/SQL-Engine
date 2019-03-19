@@ -26,6 +26,14 @@ abstract public class BaseNode {
 
     abstract void initProjectionInfo();
 
+    public Integer getTupleCount(){
+        return this.tupleCount;
+    }
+
+    public Long getExecutionTime(){
+        return this.timer.getTotalTime();
+    }
+
     public Tuple getNextTuple() {
         if (EXPLAIN_MODE)
             timer.start();

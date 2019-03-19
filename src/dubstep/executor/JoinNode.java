@@ -18,18 +18,18 @@ public class JoinNode extends BaseNode {
     @Override
     Tuple getNextRow() {
         if (!initJoin) {
-            innerTuple = this.innerNode.getNextRow();
+            innerTuple = this.innerNode.getNextTuple();
             initJoin = true;
         }
         Tuple outerTuple;
-        outerTuple = this.outerNode.getNextRow();
+        outerTuple = this.outerNode.getNextTuple();
 
         if (outerTuple != null) {
             return new Tuple(innerTuple, outerTuple);
         } else {
             this.outerNode.resetIterator();
-            innerTuple = this.innerNode.getNextRow();
-            outerTuple = this.outerNode.getNextRow();
+            innerTuple = this.innerNode.getNextTuple();
+            outerTuple = this.outerNode.getNextTuple();
             if (innerTuple == null || outerTuple == null) {
                 return null;
             } else {
