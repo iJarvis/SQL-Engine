@@ -10,6 +10,7 @@ import java.util.HashMap;
 public class TableManager {
 
     HashMap<String, DubTable> tableDirectory = new HashMap<>();
+    private boolean inMem;
 
     public boolean createTable(CreateTable createTable) {
 
@@ -37,6 +38,10 @@ public class TableManager {
         if (getTable(fromTable.getName()) == null) {
             throw new IllegalStateException("Table " + fromTable.getName() + " not found");
         }
+    }
+
+    public void setInMem(boolean inMem){
+        this.inMem = inMem;
     }
 }
 

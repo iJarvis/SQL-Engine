@@ -29,6 +29,14 @@ public class Main {
     static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
 
     public static void main(String[] args) throws ParseException, SQLException {
+        //Get all command line arguments
+        for (int i = 0; i < args.length; i++){
+            if (args[i].equals("--in-mem"))
+                mySchema.setInMem(true);
+            if (args[i].equals("--on-disk"))
+                mySchema.setInMem(false);
+        }
+
         Scanner scanner = new Scanner(System.in);
         QueryTimer timer = new QueryTimer();
 
