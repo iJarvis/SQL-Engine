@@ -43,5 +43,9 @@ public class TableManager {
     public void setInMem(boolean inMem){
         this.inMem = inMem;
     }
+
+    public boolean getInMem(boolean inMem){
+        return inMem;
+    }
 }
 
