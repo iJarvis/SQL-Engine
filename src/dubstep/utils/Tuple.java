@@ -75,7 +75,8 @@ public class Tuple {
         }
 
         if (!found)
-            throw new UnsupportedOperationException("column not found tuple.getvalue");
+            return null;
+//            throw new UnsupportedOperationException("column not found tuple.getvalue");
         return valueArray.get(final_index);
     }
 

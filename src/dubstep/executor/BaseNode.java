@@ -53,6 +53,10 @@ abstract public class BaseNode {
     enum NodeType {
         SORT_NODE, PROJ_NODE, SELECT_NODE, SCAN_NODE
     }
+
+    enum DataType{
+        NONE, LONG, DOUBLE, DATE, STRING
+    }
 }
 
 

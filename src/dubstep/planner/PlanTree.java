@@ -5,7 +5,7 @@ import dubstep.storage.DubTable;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
-
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import java.util.List;
 
 import static dubstep.Main.mySchema;
@@ -34,20 +34,31 @@ public class PlanTree {
             if (joins != null) {
                 FromItem table2 = joins.get(0).getRightItem();
                 mySchema.checkTableExists(table2);
+                Expression joinFilter1 = joins.get(0).getOnExpression();
                 BaseNode scanNode2 = new ScanNode(table2, null, mySchema);
-                JoinNode joinNode = new JoinNode(scanNode,scanNode2);
-
+                BaseNode joinNode;
+                if(joinFilter1 != null && joinFilter1 instanceof EqualsTo){
+                    joinNode = new HashJoinNode(scanNode,scanNode2, joinFilter1);
+                }else {
+                    joinNode = new JoinNode(scanNode, scanNode2);
+                }
                 if (joins.size() == 1) {
                     scanRoot = joinNode;
                 } else {
                     //handle 3 table join
                     FromItem table3 = joins.get(1).getRightItem();
+                    Expression joinFilter2 = joins.get(1).getOnExpression();
                     if (mySchema.getTable(table3.toString()) == null) {
                         throw new IllegalStateException("Table not found");
                     }
                     BaseNode scanNode3 = new ScanNode(table3, null, mySchema);
-                    JoinNode joinNode2 = new JoinNode(scanNode3, joinNode);
-                    scanRoot = joinNode2;
+                    BaseNode joinNode2;
+                    if (joinFilter2 != null && joinFilter2 instanceof EqualsTo){
+                        joinNode2 = new HashJoinNode(scanNode3, joinNode, joinFilter2);
+                    }else {
+                        joinNode2 = new JoinNode(scanNode3, joinNode);
+                    }
+                        scanRoot = joinNode2;
                 }
             } else {
                 scanRoot = scanNode;
