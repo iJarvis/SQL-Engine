@@ -79,8 +79,8 @@ public class Main {
                     tuple = root.getNextTuple();
                 }
                 if (EXPLAIN_MODE){
-                    Explainer explainer = new Explainer(root);
-                    explainer.explain();
+//                    Explainer explainer = new Explainer(root);
+//                    explainer.explain();
                 }
             } else {
                 throw new java.sql.SQLException("I can't understand " + sqlString);
