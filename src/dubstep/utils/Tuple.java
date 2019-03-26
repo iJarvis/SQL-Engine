@@ -13,7 +13,7 @@ public class Tuple {
 
     public Tuple(String csv_string, int tid, List<ColumnDefinition> columnDefinitions) {
         String[] args = csv_string.split("\\|");
-        this.tid = tid;
+        tid = this.tid;
         for (int i = 0; i < args.length; i++) {
             String dataType = columnDefinitions.get(i).getColDataType().getDataType();
             if (dataType.equals("int"))

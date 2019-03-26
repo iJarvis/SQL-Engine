@@ -5,7 +5,6 @@ import dubstep.planner.PlanTree;
 import dubstep.storage.TableManager;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
-import dubstep.utils.Explainer;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;

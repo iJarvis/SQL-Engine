@@ -18,7 +18,7 @@ public class TableManager {
         if (tableDirectory.containsKey(tableName))
             return false;
         else
-            tableDirectory.put(tableName.toLowerCase(), new DubTable(createTable));
+            tableDirectory.put(tableName, new DubTable(createTable));
         return true;
     }
 
