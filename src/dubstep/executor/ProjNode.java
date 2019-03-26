@@ -22,6 +22,7 @@ public class ProjNode extends BaseNode {
         super();
         this.innerNode = InnerNode;
         this.selectItems = selectItems;
+        this.innerNode.parentNode = this;
 
         for (SelectItem item : selectItems) {
             if (item instanceof AllTableColumns) {

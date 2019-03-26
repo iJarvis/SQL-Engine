@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import static dubstep.Main.EXPLAIN_MODE;
 
 abstract public class BaseNode {
-    public BaseNode innerNode, outerNode;  //Inner node is used for every node - outer node is used for join
+    public BaseNode innerNode, outerNode, parentNode;  //Inner node is used for every node - outer node is used for join
+
     NodeType type;
     QueryTimer timer; //user for probing running time for every node
     Integer tupleCount;

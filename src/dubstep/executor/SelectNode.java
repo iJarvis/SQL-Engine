@@ -17,6 +17,7 @@ public class SelectNode extends BaseNode {
     public SelectNode(Expression filter, BaseNode InnerNode) {
         this.filter = filter;
         this.innerNode = InnerNode;
+        innerNode.parentNode = this;
         this.initProjectionInfo();
     }
 

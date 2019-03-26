@@ -26,7 +26,9 @@ public class HashJoinNode extends BaseNode {
     public HashJoinNode(BaseNode innerNode,BaseNode outerNode, Expression filter) {
 
         this.innerNode = innerNode;
+        this.innerNode.parentNode = this;
         this.outerNode = outerNode;
+        this.outerNode.parentNode = this;
         this.filter = filter;
         this.initProjectionInfo();
         this.initHashMap();

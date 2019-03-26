@@ -9,7 +9,9 @@ public class UnionNode extends BaseNode {
     public UnionNode(BaseNode innerNode, BaseNode outerNode) {
         super();
         this.innerNode = innerNode;
+        this.innerNode.parentNode = this;
         this.outerNode = outerNode;
+        this.outerNode.parentNode = this;
         this.initProjectionInfo();
     }
 
