@@ -58,15 +58,16 @@ public class Tuple {
     }
 
     public PrimitiveValue getValue(String columnName1, String columnName2, List<String> projInfo) {
+        //TODO: optimize it
         String findStr = columnName1;
         String findStr1 = columnName2;
         int index;
         boolean found = false;
         int final_index = 0;
-        for( String col : projInfo) {
+        for (String col : projInfo) {
             String col1 = (col.indexOf('.') > -1) ? col.split("\\.")[1] : col;
             int index1 = findStr.indexOf('.');
-            if(col.equals(findStr) ||((index1< 0) &&(col1.equals(findStr1) )))  {
+            if (col.equals(findStr) || ((index1 < 0) && (col1.equals(findStr1)))) {
 
                 found = true;
                 break;
@@ -74,13 +75,14 @@ public class Tuple {
             final_index++;
         }
 
-        if (!found)
+        if (!found) {
             return null;
+        }
 //            throw new UnsupportedOperationException("column not found tuple.getvalue");
         return valueArray.get(final_index);
     }
 
-    public PrimitiveValue getValue(Column column, ArrayList<String> projInfo) {
+    public PrimitiveValue getValue(Column column, List<String> projInfo) {
         return getValue(column.getWholeColumnName(), column.getColumnName(), projInfo);
     }
 
