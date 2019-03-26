@@ -11,7 +11,9 @@ public class JoinNode extends BaseNode {
 
     public JoinNode(BaseNode innerNode,BaseNode outerNode) {
         this.innerNode = innerNode;
+        innerNode.parentNode = this;
         this.outerNode = outerNode;
+        this.outerNode.parentNode = this;
         this.initProjectionInfo();
     }
 
