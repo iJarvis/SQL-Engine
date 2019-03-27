@@ -13,7 +13,7 @@ abstract public class BaseNode {
     NodeType type;
     QueryTimer timer; //user for probing running time for every node
     Integer tupleCount;
-    public ArrayList<String> projectionInfo;
+    ArrayList<String> projectionInfo;
 
     BaseNode() {
         timer = new QueryTimer();
