@@ -2,10 +2,14 @@ package dubstep.planner;
 
 import dubstep.executor.*;
 import dubstep.storage.DubTable;
+import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import static dubstep.Main.mySchema;
@@ -99,8 +103,66 @@ public class PlanTree {
         return root;
     }
 
-    public BaseNode optimizePlan(BaseNode generatedPlan) {
-        BaseNode optimizedPlan = null;
+    private static BaseNode GetResponsibleChild(BaseNode currentNode, List<String> columnList) {
+        if (currentNode instanceof UnionNode || currentNode instanceof ScanNode)
+            return currentNode;
+        if (currentNode.innerNode != null && currentNode instanceof JoinNode) {
+            boolean inner = false, outer = false;
+
+            for (String column : columnList) {
+                if (currentNode.innerNode.projectionInfo.contains(column))
+                    inner = true;
+                if (currentNode.outerNode.projectionInfo.contains(column))
+                    outer = true;
+            }
+
+            if (inner == true && outer == true)
+                return currentNode;
+            else if (inner == true)
+                return GetResponsibleChild(currentNode.innerNode, columnList);
+            else
+                return GetResponsibleChild(currentNode.outerNode, columnList);
+        } else
+            return GetResponsibleChild(currentNode.innerNode, columnList);
+
+    }
+
+    private static void SelectPushDown(SelectNode selectNode) {
+        Expression expression = selectNode.filter;
+        List<String> columnList = new ArrayList<>();
+        if (expression instanceof BinaryExpression) {
+            BinaryExpression bin = (BinaryExpression) expression;
+            if (bin.getRightExpression() instanceof Column)
+                columnList.add(((Column) bin.getRightExpression()).getWholeColumnName());
+
+            if (bin.getLeftExpression() instanceof Column)
+                columnList.add(((Column) bin.getLeftExpression()).getWholeColumnName());
+        }
+        BaseNode newNode = GetResponsibleChild(selectNode, columnList);
+        if (newNode == selectNode)
+            return;
+        else {
+            selectNode.parentNode.innerNode = selectNode.innerNode;
+            selectNode.parentNode = newNode.parentNode;
+            selectNode.innerNode = newNode;
+            selectNode.projectionInfo = newNode.projectionInfo;
+        }
+    }
+
+    public static BaseNode optimizePlan(BaseNode currentNode) {
+        BaseNode optimizedPlan = currentNode;
+        if (currentNode == null)
+            return optimizedPlan;
+
+        BaseNode inner = currentNode.innerNode;
+        BaseNode outer = currentNode.outerNode;
+
+        if (currentNode instanceof SelectNode) {
+            SelectPushDown((SelectNode) currentNode);
+        }
+        optimizePlan(inner);
+        optimizePlan(outer);
+
         return optimizedPlan;
     }
 }

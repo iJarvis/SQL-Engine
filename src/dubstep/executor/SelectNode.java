@@ -9,7 +9,7 @@ import java.sql.SQLException;
 
 public class SelectNode extends BaseNode {
 
-    private Expression filter;
+    public Expression filter;
     Evaluator eval ;
 
     public SelectNode(Expression filter, BaseNode InnerNode) {
