@@ -1,11 +1,9 @@
 package dubstep.executor;
 
-import dubstep.utils.Logger;
+import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
-import net.sf.jsqlparser.eval.*;
-import net.sf.jsqlparser.schema.Column;
 
 import java.sql.SQLException;
 
