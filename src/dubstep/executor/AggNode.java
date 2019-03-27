@@ -22,10 +22,10 @@ public class AggNode extends BaseNode {
     public AggNode(BaseNode innerNode, ArrayList<SelectExpressionItem> selectExpressionItems){
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
+        this.initProjectionInfo();
         this.evaluator = new Evaluator(this.projectionInfo);
         this.selectExpressionItems = selectExpressionItems;
         //this.selectExpressions = selectExpressions;
-        this.initProjectionInfo();
         this.done = false;
         this.aggObjects = new ArrayList<Aggregate>();
     }
