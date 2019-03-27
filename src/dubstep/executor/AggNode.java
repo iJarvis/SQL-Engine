@@ -14,6 +14,7 @@ import java.util.ArrayList;
 public class AggNode extends BaseNode {
     private Evaluator evaluator;
     private ArrayList<SelectExpressionItem> selectExpressionItems;
+    private ArrayList<Expression> selectExpressions;
     private ArrayList<Aggregate> aggObjects;
     private Boolean isInit = false;
     private Tuple next;
@@ -28,6 +29,22 @@ public class AggNode extends BaseNode {
         //this.selectExpressions = selectExpressions;
         this.done = false;
         this.aggObjects = new ArrayList<Aggregate>();
+        this.initAggNode();
+    }
+
+    private void initAggNode(){
+        ArrayList<Expression> selectExpressions = new ArrayList<>();
+
+        for (SelectExpressionItem expressionItems:selectExpressionItems){
+            selectExpressions.add(expressionItems.getExpression());
+        }
+
+        this.selectExpressionItems = selectExpressionItems;
+
+        for (Expression exp : selectExpressions){
+            Function func = (Function) exp;
+            aggObjects.add(Aggregate.getAggObject(func, evaluator));
+        }
     }
 
     @Override
@@ -36,18 +53,9 @@ public class AggNode extends BaseNode {
             this.resetIterator();
             return null;
         }
-        ArrayList<Expression> selectExpressions = new ArrayList<>();
 
-        for (SelectExpressionItem expressionItems:selectExpressionItems){
-            selectExpressions.add(expressionItems.getExpression());
-        }
 
         ArrayList <PrimitiveValue> rowValues = new ArrayList<PrimitiveValue>(selectExpressions.size());
-
-        for (Expression exp : selectExpressions){
-            Function func = (Function) exp;
-            aggObjects.add(Aggregate.getAggObject(func, evaluator));
-        }
 
         if (!isInit) {
             isInit = true;
@@ -63,12 +71,14 @@ public class AggNode extends BaseNode {
         }
 
         this.done = true;
+        this.aggObjects = null;
         return new Tuple(rowValues);
     }
 
     @Override
     void resetIterator() {
-        this.aggObjects = null;
+        this.done = false;
+        this.initAggNode();
         this.innerNode.resetIterator();
     }
 
