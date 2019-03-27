@@ -2,6 +2,7 @@ package dubstep.executor;
 
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 
@@ -9,8 +10,8 @@ import java.sql.SQLException;
 
 public class SelectNode extends BaseNode {
 
-    private Expression filter;
-    Evaluator eval ;
+    public Expression filter;
+     Evaluator eval;
 
     public SelectNode(Expression filter, BaseNode InnerNode) {
         this.filter = filter;

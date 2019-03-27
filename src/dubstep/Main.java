@@ -70,6 +70,7 @@ public class Main {
                 BaseNode root;
                 if (selectBody instanceof PlainSelect) {
                     root = PlanTree.generatePlan((PlainSelect) selectBody);
+                    root = (BaseNode) PlanTree.optimizePlan(root);
                 } else {
                     root = PlanTree.generateUnionPlan((Union) selectBody);
                 }
@@ -80,7 +81,7 @@ public class Main {
                 }
                 if (EXPLAIN_MODE){
 //                    Explainer explainer = new Explainer(root);
-//                    explainer.explain();
+////                    explainer.explain();
                 }
             } else {
                 throw new java.sql.SQLException("I can't understand " + sqlString);
