@@ -37,11 +37,12 @@ public class AggNode extends BaseNode {
             return null;
         }
         ArrayList<Expression> selectExpressions = new ArrayList<>();
-        ArrayList <PrimitiveValue> rowValues = new ArrayList<PrimitiveValue>();
 
         for (SelectExpressionItem expressionItems:selectExpressionItems){
             selectExpressions.add(expressionItems.getExpression());
         }
+
+        ArrayList <PrimitiveValue> rowValues = new ArrayList<PrimitiveValue>(selectExpressions.size());
 
         for (Expression exp : selectExpressions){
             Function func = (Function) exp;
