@@ -12,12 +12,13 @@ import java.sql.SQLException;
 public class SelectNode extends BaseNode {
 
     private Expression filter;
-    Eval eval;
+    Evaluator eval ;
 
     public SelectNode(Expression filter, BaseNode InnerNode) {
         this.filter = filter;
         this.innerNode = InnerNode;
         innerNode.parentNode = this;
+        eval = new Evaluator(this.innerNode.projectionInfo);
         this.initProjectionInfo();
     }
 
@@ -30,12 +31,7 @@ public class SelectNode extends BaseNode {
             if (filter == null)
                 return row;
             else {
-                Eval eval = new Eval() {
-                    @Override
-                    public PrimitiveValue eval(Column column) {
-                        return row.getValue(column, innerNode.projectionInfo);
-                    }
-                };
+                eval.setTuple(row);
                 try {
                     PrimitiveValue value = eval.eval(filter);
                     if (value.toBool()) {
