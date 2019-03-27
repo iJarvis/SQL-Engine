@@ -23,7 +23,7 @@ public class AggNode extends BaseNode {
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
         this.evaluator = new Evaluator(this.projectionInfo);
-        //this.selectExpressionItems = selectExpressionItems;
+        this.selectExpressionItems = selectExpressionItems;
         //this.selectExpressions = selectExpressions;
         this.initProjectionInfo();
         this.done = false;
