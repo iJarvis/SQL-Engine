@@ -44,7 +44,7 @@ public class TableManager {
         this.inMem = inMem;
     }
 
-    public boolean getInMem(boolean inMem){
+    public boolean isInMem() {
         return inMem;
     }
 }
