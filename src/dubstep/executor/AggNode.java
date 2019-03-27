@@ -6,22 +6,25 @@ import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.util.ArrayList;
 
 public class AggNode extends BaseNode {
     private Evaluator evaluator;
-    private ArrayList<Expression> selectExpressions;
+    private ArrayList<SelectExpressionItem> selectExpressionItems;
     private ArrayList<Aggregate> aggObjects;
     private Boolean isInit = false;
     private Tuple next;
     private Boolean done;
 
-    public AggNode(BaseNode innerNode, ArrayList<Expression> selectExpressions){
+    public AggNode(BaseNode innerNode, ArrayList<SelectExpressionItem> selectExpressionItems){
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
         this.evaluator = new Evaluator(this.projectionInfo);
-        this.selectExpressions = selectExpressions;
+        //this.selectExpressionItems = selectExpressionItems;
+        //this.selectExpressions = selectExpressions;
         this.initProjectionInfo();
         this.done = false;
         this.aggObjects = new ArrayList<Aggregate>();
@@ -33,7 +36,12 @@ public class AggNode extends BaseNode {
             this.resetIterator();
             return null;
         }
+        ArrayList<Expression> selectExpressions = new ArrayList<>();
         ArrayList <PrimitiveValue> rowValues = new ArrayList<PrimitiveValue>();
+
+        for (SelectExpressionItem expressionItems:selectExpressionItems){
+            selectExpressions.add(expressionItems.getExpression());
+        }
 
         for (Expression exp : selectExpressions){
             Function func = (Function) exp;
@@ -65,6 +73,15 @@ public class AggNode extends BaseNode {
 
     @Override
     void initProjectionInfo() {
-        this.projectionInfo = this.innerNode.projectionInfo;
+        projectionInfo = new ArrayList<>();
+        for (SelectItem selectItem : selectExpressionItems) {
+            String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
+            String alias = ((SelectExpressionItem) selectItem).getAlias();
+            if (alias == null) {
+                projectionInfo.add(columnName);
+            } else {
+                projectionInfo.add(alias);
+            }
+        }
     }
 }
