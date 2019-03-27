@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 public class SelectNode extends BaseNode {
 
-    private Expression filter;
+    public Expression filter;
     Eval eval;
 
     public SelectNode(Expression filter, BaseNode InnerNode) {
