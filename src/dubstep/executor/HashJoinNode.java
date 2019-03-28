@@ -112,7 +112,8 @@ public class HashJoinNode extends BaseNode {
         }
 
         if (outerTuple == null && leftTupleIterator == null) {
-            this.resetIterator();
+            this.hashJoinTable = null;
+            this.condType = NONE;
             return null;
         }
 
@@ -143,8 +144,7 @@ public class HashJoinNode extends BaseNode {
 
     @Override
     void resetIterator() {
-        this.hashJoinTable = null;
-        this.condType = NONE;
+        this.initHashMap();
         this.innerNode.resetIterator();
         this.outerNode.resetIterator();
     }
