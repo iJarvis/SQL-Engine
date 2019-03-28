@@ -75,7 +75,7 @@ public class Main {
                 }
                 Tuple tuple = root.getNextTuple();
                 while (tuple != null) {
-                    System.out.println(tuple.GetProjection());
+                    System.out.println(tuple.getProjection());
                     tuple = root.getNextTuple();
                 }
                 if (EXPLAIN_MODE){

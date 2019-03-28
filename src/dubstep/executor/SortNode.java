@@ -1,43 +1,103 @@
 package dubstep.executor;
 
 import dubstep.Main;
+import dubstep.utils.Pair;
 import dubstep.utils.Tuple;
+import dubstep.utils.Utils;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.PrimitiveType;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public class SortNode extends BaseNode {
 
-    private static final String filename = "%s_%s";
+    private static final String tempDir = "temp";
+    private static final int NUMBER_OF_TUPLES_IN_MEM = 100;
 
     private List<OrderByElement> elems;
     private boolean sortDone = false;
     private List<Tuple> sortBuffer = new ArrayList<>();
     private int idx = 0;
+    private TupleComparator comparator;
+    private PriorityQueue<Pair<Integer, Tuple>> queue = null;
+    private List<BufferedReader> brList = null;
+    private List<ColumnDefinition> columnDefinitions = null;
 
     public SortNode(List<OrderByElement> elems, BaseNode innerNode) {
         super();
         this.innerNode = innerNode;
         this.elems = elems;
+        comparator = new TupleComparator(elems);
     }
 
     private void performSort() {
         if (Main.mySchema.isInMem()) {
+            sortBuffer.clear();
             Tuple nextTuple = innerNode.getNextTuple();
             while (nextTuple != null) {
                 sortBuffer.add(nextTuple);
                 nextTuple = innerNode.getNextTuple();
             }
-            TupleComparator comparator = new TupleComparator(elems);
             sortBuffer.sort(comparator);
         } else {
-            throw new UnsupportedOperationException("External sort not supported yet");
+            performExternalSort();
         }
+    }
+
+    private void performExternalSort() {
+        File temp = new File(tempDir);
+        File currentSortDir = new File(temp, String.valueOf(Utils.getRandomNumber(0, 100)));
+        if (!currentSortDir.exists()) {
+            currentSortDir.mkdirs();
+        }
+        Tuple nextTuple = innerNode.getNextTuple();
+        if (nextTuple != null) {
+            columnDefinitions = nextTuple.getColumnDefinitions();
+        }
+        try {
+            int fileCount = 0;
+            while (nextTuple != null) {
+                sortBuffer.clear();
+                for (int i = 0; (i < NUMBER_OF_TUPLES_IN_MEM) && (nextTuple != null); ++i) {
+                    sortBuffer.add(nextTuple);
+                    nextTuple = innerNode.getNextTuple();
+                }
+                sortBuffer.sort(comparator);
+
+                File sortFile = new File(currentSortDir, String.valueOf(fileCount));
+                BufferedWriter writer = new BufferedWriter(new FileWriter(sortFile));
+
+                for (int i = 0; i < sortBuffer.size(); ++i) {
+                    writer.write(sortBuffer.get(i) + "\n");
+                }
+
+                writer.close();
+
+                ++fileCount;
+            }
+
+            brList = new ArrayList<>();
+            queue = new PriorityQueue<>(getPQComparator());
+
+            for (int i = 0; i < fileCount; ++i) {
+                File sortFile = new File(currentSortDir, String.valueOf(i));
+                BufferedReader br = new BufferedReader(new FileReader(sortFile));
+                Tuple tuple = new Tuple(br.readLine(), -1, columnDefinitions);
+                Pair<Integer, Tuple> pair = new Pair<>(i, tuple);
+                queue.add(pair);
+                brList.add(br);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -52,18 +112,46 @@ public class SortNode extends BaseNode {
             }
             return sortBuffer.get(idx++);
         } else {
-            throw new UnsupportedOperationException("External sort not supported yet");
+            if (queue.isEmpty()) {
+                return null;
+            }
+            try {
+                Pair<Integer, Tuple> pair = queue.poll();
+                String str = brList.get(pair.getElement0()).readLine();
+                if (str != null) {
+                    Tuple tuple = new Tuple(str, -1, columnDefinitions);
+                    Pair<Integer, Tuple> newPair = new Pair<>(pair.getElement0(), tuple);
+                    queue.add(newPair);
+                } else {
+                    brList.get(pair.getElement0()).close();
+                }
+                return pair.getElement1();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        return null;
     }
 
     @Override
     void resetIterator() {
-
+        if (Main.mySchema.isInMem()) {
+            idx = 0;
+        }
     }
 
     @Override
     void initProjectionInfo() {
         this.projectionInfo = this.innerNode.projectionInfo;
+    }
+
+    private Comparator<Pair<Integer, Tuple>> getPQComparator() {
+        return new Comparator<Pair<Integer, Tuple>>() {
+            @Override
+            public int compare(Pair<Integer, Tuple> left, Pair<Integer, Tuple> right) {
+                return comparator.compare(left.getElement1(), right.getElement1());
+            }
+        };
     }
 
     private class TupleComparator implements Comparator<Tuple> {

@@ -10,8 +10,10 @@ import java.util.List;
 public class Tuple {
     int tid;
     private ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
+    private List<ColumnDefinition> columnDefinitions;
 
     public Tuple(String csv_string, int tid, List<ColumnDefinition> columnDefinitions) {
+        this.columnDefinitions = columnDefinitions;
         String[] args = csv_string.split("\\|");
         tid = this.tid;
         for (int i = 0; i < args.length; i++) {
@@ -48,7 +50,7 @@ public class Tuple {
     }
 
 
-    public String GetProjection() {
+    public String getProjection() {
         String output = "";
         for (PrimitiveValue value : valueArray) {
             output = output + value.toString() + "|";
@@ -88,7 +90,11 @@ public class Tuple {
 
     @Override
     public String toString() {
-        return GetProjection();
+        return getProjection();
+    }
+
+    public List<ColumnDefinition> getColumnDefinitions() {
+        return columnDefinitions;
     }
 }
 
