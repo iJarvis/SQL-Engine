@@ -4,10 +4,10 @@ import dubstep.executor.*;
 import dubstep.storage.DubTable;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class PlanTree {
             if (table == null) {
                 throw new IllegalStateException("Table " + tableName + " not found in our schema");
             }
-            BaseNode scanNode = new ScanNode((Table)fromItem, null, mySchema);
+            BaseNode scanNode = new ScanNode(fromItem, null, mySchema);
             List<Join> joins = plainSelect.getJoins();
             if (joins != null) {
                 FromItem table2 = joins.get(0).getRightItem();
@@ -41,9 +41,9 @@ public class PlanTree {
                 Expression joinFilter1 = joins.get(0).getOnExpression();
                 BaseNode scanNode2 = new ScanNode(table2, null, mySchema);
                 BaseNode joinNode;
-                if(joinFilter1 != null && joinFilter1 instanceof EqualsTo){
-                    joinNode = new HashJoinNode(scanNode,scanNode2, joinFilter1);
-                }else {
+                if (joinFilter1 != null && joinFilter1 instanceof EqualsTo) {
+                    joinNode = new HashJoinNode(scanNode, scanNode2, joinFilter1);
+                } else {
                     joinNode = new JoinNode(scanNode, scanNode2);
                 }
                 if (joins.size() == 1) {
@@ -57,12 +57,12 @@ public class PlanTree {
                     }
                     BaseNode scanNode3 = new ScanNode(table3, null, mySchema);
                     BaseNode joinNode2;
-                    if (joinFilter2 != null && joinFilter2 instanceof EqualsTo){
+                    if (joinFilter2 != null && joinFilter2 instanceof EqualsTo) {
                         joinNode2 = new HashJoinNode(scanNode3, joinNode, joinFilter2);
-                    }else {
+                    } else {
                         joinNode2 = new JoinNode(scanNode3, joinNode);
                     }
-                        scanRoot = joinNode2;
+                    scanRoot = joinNode2;
                 }
             } else {
                 scanRoot = scanNode;
@@ -74,11 +74,17 @@ public class PlanTree {
         //assuming there will always be a select node over our scan node
         Expression filter = plainSelect.getWhere();
         BaseNode selectNode = new SelectNode(filter, scanRoot);
-        selectNode.innerNode = scanRoot;
+
+        BaseNode projInnderNode = selectNode;
+        //handle order by
+        if (plainSelect.getOrderByElements() != null) {
+            SortNode sortNode = new SortNode(plainSelect.getOrderByElements(), selectNode);
+            projInnderNode = sortNode;
+        }
 
         //handle projection
         List<SelectItem> selectItems = plainSelect.getSelectItems();
-        BaseNode projNode = new ProjNode(selectItems, selectNode);
+        BaseNode projNode = new ProjNode(selectItems, projInnderNode);
 
         return projNode;
     }

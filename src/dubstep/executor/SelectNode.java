@@ -13,6 +13,7 @@ public class SelectNode extends BaseNode {
     Evaluator eval ;
 
     public SelectNode(Expression filter, BaseNode InnerNode) {
+        super();
         this.filter = filter;
         this.innerNode = InnerNode;
         innerNode.parentNode = this;
