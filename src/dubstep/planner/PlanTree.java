@@ -103,7 +103,7 @@ public class PlanTree {
         return root;
     }
 
-    private static BaseNode GetResponsibleChild(BaseNode currentNode, List<String> columnList) {
+    private static BaseNode getResponsibleChild(BaseNode currentNode, List<String> columnList) {
         if (currentNode instanceof UnionNode || currentNode instanceof ScanNode)
             return currentNode;
         if (currentNode.innerNode != null && currentNode instanceof JoinNode) {
@@ -119,15 +119,15 @@ public class PlanTree {
             if (inner == true && outer == true)
                 return currentNode;
             else if (inner == true)
-                return GetResponsibleChild(currentNode.innerNode, columnList);
+                return getResponsibleChild(currentNode.innerNode, columnList);
             else
-                return GetResponsibleChild(currentNode.outerNode, columnList);
+                return getResponsibleChild(currentNode.outerNode, columnList);
         } else
-            return GetResponsibleChild(currentNode.innerNode, columnList);
+            return getResponsibleChild(currentNode.innerNode, columnList);
 
     }
 
-    private static void SelectPushDown(SelectNode selectNode) {
+    private static void selectPushDown(SelectNode selectNode) {
         Expression expression = selectNode.filter;
         List<String> columnList = new ArrayList<>();
         if (expression instanceof BinaryExpression) {
@@ -138,7 +138,7 @@ public class PlanTree {
             if (bin.getLeftExpression() instanceof Column)
                 columnList.add(((Column) bin.getLeftExpression()).getWholeColumnName());
         }
-        BaseNode newNode = GetResponsibleChild(selectNode, columnList);
+        BaseNode newNode = getResponsibleChild(selectNode, columnList);
         if (newNode == selectNode)
             return;
         else {
@@ -158,7 +158,7 @@ public class PlanTree {
         BaseNode outer = currentNode.outerNode;
 
         if (currentNode instanceof SelectNode) {
-            SelectPushDown((SelectNode) currentNode);
+            selectPushDown((SelectNode) currentNode);
         }
         optimizePlan(inner);
         optimizePlan(outer);
