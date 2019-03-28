@@ -35,6 +35,7 @@ public class SortNode extends BaseNode {
         this.innerNode = innerNode;
         this.elems = elems;
         comparator = new TupleComparator(elems);
+        initProjectionInfo();
     }
 
     private void performSort() {
