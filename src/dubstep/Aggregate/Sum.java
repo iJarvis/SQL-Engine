@@ -1,5 +1,7 @@
-package dubstep.utils;
+package dubstep.Aggregate;
 
+import dubstep.utils.Evaluator;
+import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -8,8 +10,8 @@ import net.sf.jsqlparser.expression.PrimitiveValue;
 import java.sql.SQLException;
 
 public class Sum extends Aggregate {
-    public LongValue longValue;
-    public DoubleValue doubleValue;
+    public LongValue longValue = new LongValue(0);
+    public DoubleValue doubleValue = new DoubleValue(0);
     public Boolean isLong = null;
 
     public Sum(Expression expression, Evaluator evaluator){

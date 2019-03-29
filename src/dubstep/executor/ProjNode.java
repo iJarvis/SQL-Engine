@@ -18,6 +18,7 @@ public class ProjNode extends BaseNode {
     private List<SelectItem> selectItems; //used for building of projection info
     private ArrayList<SelectExpressionItem> selectExpressionItems = new ArrayList<>();
     private List<String> completeProjectionTables = new ArrayList<>();
+    //private BaseNode resNode;
     //private ArrayList<Expression> expressions = new ArrayList<Expression>();
 
     public ProjNode(List<SelectItem> selectItems, BaseNode InnerNode) {

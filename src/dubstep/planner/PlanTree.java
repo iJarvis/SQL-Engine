@@ -2,6 +2,7 @@ package dubstep.planner;
 
 import dubstep.executor.*;
 import dubstep.storage.DubTable;
+import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -89,7 +90,8 @@ public class PlanTree {
 
         //handle projection
         List<SelectItem> selectItems = plainSelect.getSelectItems();
-        BaseNode projNode = new ProjNode(selectItems, projInnerNode);
+        GenerateAggregateNode genAgg = new GenerateAggregateNode(selectItems, projInnerNode);
+        BaseNode projNode = genAgg.getAggregateNode();
 
         return projNode;
     }

@@ -1,6 +1,7 @@
-package dubstep.utils;
+package dubstep.Aggregate;
 
-import net.sf.jsqlparser.eval.Eval;
+import dubstep.utils.Evaluator;
+import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
@@ -11,6 +12,7 @@ public class Average extends Sum {
 
     public Average(Expression expression, Evaluator evaluator){
         super(expression, evaluator);
+        counter = new Count(expression, evaluator);
     }
 
     public PrimitiveValue yield(Tuple tuple){

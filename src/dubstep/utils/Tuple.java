@@ -4,8 +4,10 @@ import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Tuple {
     int tid;
@@ -42,6 +44,13 @@ public class Tuple {
         this.valueArray.addAll(tempvalueArray);
     }
 
+    public Tuple(PrimitiveValue[] tempvalueArray) {
+        this.tid = -1;
+        for (PrimitiveValue val : tempvalueArray){
+            this.valueArray.add(val);
+        }
+    }
+
     public Tuple(Tuple innerTup, Tuple outerTuple) {
 
         this.tid = -1;
@@ -52,11 +61,14 @@ public class Tuple {
 
     public String getProjection() {
         String output = "";
-        for (PrimitiveValue value : valueArray) {
+        for (PrimitiveValue value : valueArray)
             output = output + value.toString() + "|";
-        }
         output = output.substring(0, output.length() - 1);
         return output;
+    }
+
+    public  void setValue(int index, PrimitiveValue value){
+        valueArray.set(index, value);
     }
 
     public PrimitiveValue getValue(String columnName1, String columnName2, List<String> projInfo) {

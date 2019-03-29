@@ -1,6 +1,6 @@
 package dubstep.executor;
 
-import dubstep.utils.Aggregate;
+import dubstep.Aggregate.Aggregate;
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GroupByNode extends BaseNode{
-    private HashMap<ArrayList<PrimitiveValue>, ArrayList<AggregateMap>> buffer;
+    private HashMap<Object, ArrayList<AggregateMap>> buffer;
     private Evaluator evaluator;
     private ArrayList<SelectExpressionItem> selectExpressionItems;
     //private ArrayList<Aggregate> aggObjects;
@@ -27,31 +27,35 @@ public class GroupByNode extends BaseNode{
         this.innerNode = innernode;
         this.selectExpressionItems = selectExpressionItems;
         this.initProjectionInfo();
-        this.evaluator = new Evaluator(this.projectionInfo);
+        this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
-        buffer = new HashMap<ArrayList<PrimitiveValue>, ArrayList<AggregateMap>>();
         this.fillBuffer();
     }
 
     public Tuple getNextRow(){
-        if (this.buffer == null)
-            return null;
-        if(this.buffer.isEmpty()){
+
+        if (this.buffer == null) {
             return null;
         }
-
-        ArrayList<PrimitiveValue> result = buffer.keySet().iterator().next();
+        if (this.buffer.isEmpty()) {
+            this.buffer = null;
+            return null;
+        }
+        Tuple result = (Tuple) buffer.keySet().iterator().next();
         ArrayList<AggregateMap> mapList = buffer.get(result);
         buffer.remove(result);
 
         for(AggregateMap map: mapList){
-            result.set(map.index, map.aggregate.getCurrentResult());
+            result.setValue(map.index, map.aggregate.getCurrentResult());
         }
 
-        return new Tuple(result);
+        return (result);
     }
 
-    private void fillBuffer(){
+    private void fillBuffer() {
+
+        this.buffer = new HashMap<Object, ArrayList<AggregateMap>>();
+
         if (!this.isInit){
             next = this.innerNode.getNextTuple();
             this.isInit = true;
@@ -63,17 +67,18 @@ public class GroupByNode extends BaseNode{
             selectExpressions.add(expressionItems.getExpression());
         }
 
-        ArrayList <PrimitiveValue> rowValues = new ArrayList<PrimitiveValue>(selectExpressions.size());
+        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
+        Tuple keyRow = new Tuple(rowValues);
 
         while(next != null){
             this.evaluator.setTuple(next);
             ArrayList<Integer> indices = new ArrayList<Integer>();
 
-            for(int i = 0; i < selectExpressions.size(); i++){
-                if(selectExpressions.get(i) instanceof Column){
-                    try{
-                        rowValues.set(i, evaluator.eval(selectExpressions.get(i)));
-                    }catch(SQLException e){
+            for(int i = 0; i < selectExpressions.size(); i++) {
+                if(selectExpressions.get(i) instanceof Column) {
+                    try {
+                        keyRow.setValue(i,evaluator.eval(selectExpressions.get(i)));
+                    }catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }else {
@@ -81,24 +86,25 @@ public class GroupByNode extends BaseNode{
                 }
             }
 
-            if(buffer.containsKey(rowValues)){
-                for (AggregateMap pair : buffer.get(rowValues)){
+            if(buffer.containsKey(keyRow)) {
+                for (AggregateMap pair : buffer.get(keyRow)) {
                     pair.aggregate.yield(next);
                 }
+                next = this.innerNode.getNextTuple();
                 continue;
             }
 
             ArrayList<AggregateMap> mapList = new ArrayList<AggregateMap>();
             Aggregate aggregate;
 
-            for (int i : indices){
+            for (int i : indices) {
                 aggregate = Aggregate.getAggObject((Function) selectExpressions.get(i), evaluator);
                 aggregate.yield(next);
                 AggregateMap map = new AggregateMap(i, aggregate);
                 mapList.add(map);
             }
-
-            buffer.put(rowValues, mapList);
+            buffer.put(keyRow, mapList);
+            next = this.innerNode.getNextTuple();
         }
     }
 
