@@ -30,9 +30,9 @@ public class Scanner {
             this.tableReader = new BufferedReader(new FileReader(scanTable.dataFile));
             this.currentMaxTid = 0;
         } catch (FileNotFoundException e) {
-            System.out.println("datafile not found : " + scanTable.dataFile);
             Path path = FileSystems.getDefault().getPath(".");
             System.out.println("Current working directory : " + path.toAbsolutePath());
+            throw new IllegalStateException("datafile not found : " + scanTable.dataFile);
         }
         return (tableReader == null);
 
