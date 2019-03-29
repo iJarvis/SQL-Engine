@@ -11,15 +11,14 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class SortNode extends BaseNode {
 
     private static final String tempDir = "temp";
-    private static final int NUMBER_OF_TUPLES_IN_MEM = 100;
+    private static final int NUMBER_OF_TUPLES_IN_MEM = 5;
 
     private List<OrderByElement> elems;
     private boolean sortDone = false;
@@ -29,6 +28,7 @@ public class SortNode extends BaseNode {
     private PriorityQueue<Pair<Integer, Tuple>> queue = null;
     private List<BufferedReader> brList = null;
     private List<ColumnDefinition> columnDefinitions = null;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public SortNode(List<OrderByElement> elems, BaseNode innerNode) {
         super();
@@ -185,9 +185,17 @@ public class SortNode extends BaseNode {
                         } else if (leftPV.toLong() > righPV.toLong()) {
                             return isAsc? 1: -1;
                         }
+                    } else if (leftPV.getType() == PrimitiveType.DATE) {
+                        Date leftDate = dateFormat.parse(leftPV.toRawString());
+                        Date rightDate = dateFormat.parse(righPV.toRawString());
+                        if (isAsc) {
+                            return leftDate.compareTo(rightDate);
+                        } else {
+                            return rightDate.compareTo(leftDate);
+                        }
                     }
                 }
-            } catch (PrimitiveValue.InvalidPrimitive e) {
+            } catch (PrimitiveValue.InvalidPrimitive | ParseException e) {
                 e.printStackTrace();
             }
             return 0;
