@@ -89,9 +89,38 @@ public class PlanTree {
 
         //handle projection
         List<SelectItem> selectItems = plainSelect.getSelectItems();
-        BaseNode projNode = new ProjNode(selectItems, projInnerNode);
 
-        return projNode;
+        boolean table_row = false;
+        boolean expression_row = false;
+
+        for(SelectItem  selectItem : selectItems)
+        {
+            if( selectItem instanceof SelectExpressionItem )
+                expression_row = true;
+            if(selectItem instanceof AllTableColumns)
+                table_row = true;
+
+        }
+        BaseNode rootNode;
+        if(expression_row)
+        {
+            if(table_row)
+              //  rootNode = new GroupByNode(projInnerNode,plainSelect.getSelectItems());
+            {
+                rootNode = null;
+            }
+            else
+            {
+                rootNode = new AggNode(projInnerNode,plainSelect.getSelectItems());
+            }
+
+
+
+        }
+        else
+            rootNode = new ProjNode(selectItems, projInnerNode);
+
+        return rootNode;
     }
 
     public static BaseNode generateUnionPlan(Union union) {

@@ -10,22 +10,23 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class AggNode extends BaseNode {
     private Evaluator evaluator;
-    private ArrayList<SelectExpressionItem> selectExpressionItems;
-    private ArrayList<Expression> selectExpressions;
+    private List<SelectItem> selectItems;
     private ArrayList<Aggregate> aggObjects;
     private Boolean isInit = false;
     private Tuple next;
     private Boolean done;
 
-    public AggNode(BaseNode innerNode, ArrayList<SelectExpressionItem> selectExpressionItems){
+    public AggNode(BaseNode innerNode, List<SelectItem> selectItems){
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
+        this.selectItems = selectItems;
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.projectionInfo);
-        this.selectExpressionItems = selectExpressionItems;
+
         //this.selectExpressions = selectExpressions;
         this.done = false;
         this.aggObjects = new ArrayList<Aggregate>();
@@ -35,11 +36,16 @@ public class AggNode extends BaseNode {
     private void initAggNode(){
         ArrayList<Expression> selectExpressions = new ArrayList<>();
 
-        for (SelectExpressionItem expressionItems:selectExpressionItems){
-            selectExpressions.add(expressionItems.getExpression());
+        for (SelectItem expressionItem:selectItems){
+            if(expressionItem instanceof SelectExpressionItem) {
+                SelectExpressionItem expr = (SelectExpressionItem) expressionItem;
+                selectExpressions.add(expr.getExpression());
+            }
+            else
+            {
+                throw new UnsupportedOperationException("Plain aggregate only expression is expected");
+            }
         }
-
-        this.selectExpressionItems = selectExpressionItems;
 
         for (Expression exp : selectExpressions){
             Function func = (Function) exp;
@@ -55,7 +61,7 @@ public class AggNode extends BaseNode {
         }
 
 
-        ArrayList <PrimitiveValue> rowValues = new ArrayList<PrimitiveValue>(selectExpressions.size());
+        ArrayList <PrimitiveValue> rowValues = new ArrayList<PrimitiveValue>(this.selectItems.size());
 
         if (!isInit) {
             isInit = true;
@@ -63,9 +69,9 @@ public class AggNode extends BaseNode {
         }
 
         int i = 0;
-        while (next != null); {
+        while (next != null){
             next = innerNode.getNextTuple();
-            for (i = 0; i < selectExpressions.size(); i++){
+            for (i = 0; i < this.selectItems.size(); i++){
                 rowValues.set(i, aggObjects.get(i).yield(next)) ;
             }
         }
@@ -85,7 +91,7 @@ public class AggNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = new ArrayList<>();
-        for (SelectItem selectItem : selectExpressionItems) {
+        for (SelectItem selectItem : selectItems) {
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
             String alias = ((SelectExpressionItem) selectItem).getAlias();
             if (alias == null) {
