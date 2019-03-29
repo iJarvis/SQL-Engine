@@ -20,16 +20,16 @@ public class Tuple {
         tid = this.tid;
         for (int i = 0; i < args.length; i++) {
             String dataType = columnDefinitions.get(i).getColDataType().getDataType().toLowerCase();
-            if (dataType.equals("int"))
+            if (dataType.equalsIgnoreCase("int"))
                 valueArray.add(new LongValue(args[i]));
 
-            else if (dataType.equals("string") || dataType.equals("varchar") || dataType.equals("char"))
+            else if (dataType.equalsIgnoreCase("string") || dataType.equalsIgnoreCase("varchar") || dataType.equalsIgnoreCase("char"))
                 valueArray.add(new StringValue(args[i]));
 
-            else if (dataType.equals("decimal"))
+            else if (dataType.equalsIgnoreCase("decimal"))
                 valueArray.add(new DoubleValue(args[i]));
 
-            else if (dataType.equals("date"))
+            else if (dataType.equalsIgnoreCase("date"))
                 valueArray.add(new DateValue(args[i]));
 
             else {
