@@ -73,18 +73,23 @@ public class PlanTree {
 
         //assuming there will always be a select node over our scan node
         Expression filter = plainSelect.getWhere();
-        BaseNode selectNode = new SelectNode(filter, scanRoot);
+        BaseNode projInnerNode;
+        if(filter != null) {
+            BaseNode selectNode = new SelectNode(filter, scanRoot);
 
-        BaseNode projInnderNode = selectNode;
+            projInnerNode = selectNode;
+        }
+        else
+            projInnerNode = scanRoot;
         //handle order by
         if (plainSelect.getOrderByElements() != null) {
-            SortNode sortNode = new SortNode(plainSelect.getOrderByElements(), selectNode);
-            projInnderNode = sortNode;
+            SortNode sortNode = new SortNode(plainSelect.getOrderByElements(), projInnerNode);
+            projInnerNode = sortNode;
         }
 
         //handle projection
         List<SelectItem> selectItems = plainSelect.getSelectItems();
-        BaseNode projNode = new ProjNode(selectItems, projInnderNode);
+        BaseNode projNode = new ProjNode(selectItems, projInnerNode);
 
         return projNode;
     }
