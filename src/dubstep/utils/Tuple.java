@@ -17,7 +17,7 @@ public class Tuple {
         String[] args = csv_string.split("\\|");
         tid = this.tid;
         for (int i = 0; i < args.length; i++) {
-            String dataType = columnDefinitions.get(i).getColDataType().getDataType();
+            String dataType = columnDefinitions.get(i).getColDataType().getDataType().toLowerCase();
             if (dataType.equals("int"))
                 valueArray.add(new LongValue(args[i]));
 
@@ -31,7 +31,7 @@ public class Tuple {
                 valueArray.add(new DateValue(args[i]));
 
             else {
-                System.err.println("data type " + dataType + "not found");
+                System.err.println("data type " + dataType + " not found");
                 break;
             }
         }
