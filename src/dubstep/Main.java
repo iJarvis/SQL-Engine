@@ -42,10 +42,10 @@ public class Main {
         System.out.print(PROMPT);
         while (scanner.hasNext()) {
 
-            String sqlString = scanner.nextLine();
+            String sqlString = scanner.nextLine().toLowerCase();
 
             while(sqlString.indexOf(';') < 0)
-                sqlString = sqlString + " " + scanner.nextLine();
+                sqlString = sqlString + " " + scanner.nextLine().toLowerCase();
 
             if (sqlString == null)
                 continue;
