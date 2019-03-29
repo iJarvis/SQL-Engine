@@ -144,9 +144,9 @@ public class HashJoinNode extends BaseNode {
 
     @Override
     void resetIterator() {
-        this.initHashMap();
         this.innerNode.resetIterator();
         this.outerNode.resetIterator();
+        this.initHashMap();
     }
 
     void initProjectionInfo() {
