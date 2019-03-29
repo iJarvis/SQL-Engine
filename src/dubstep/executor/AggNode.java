@@ -3,9 +3,9 @@ package dubstep.executor;
 import dubstep.utils.Aggregate;
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
@@ -20,7 +20,7 @@ public class AggNode extends BaseNode {
     private Tuple next;
     private Boolean done;
 
-    public AggNode(BaseNode innerNode, ArrayList<SelectExpressionItem> selectExpressionItems){
+    public AggNode(BaseNode innerNode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
         this.initProjectionInfo();
@@ -32,16 +32,16 @@ public class AggNode extends BaseNode {
         this.initAggNode();
     }
 
-    private void initAggNode(){
+    private void initAggNode() {
         ArrayList<Expression> selectExpressions = new ArrayList<>();
 
-        for (SelectExpressionItem expressionItems:selectExpressionItems){
+        for (SelectExpressionItem expressionItems : selectExpressionItems) {
             selectExpressions.add(expressionItems.getExpression());
         }
 
         this.selectExpressionItems = selectExpressionItems;
 
-        for (Expression exp : selectExpressions){
+        for (Expression exp : selectExpressions) {
             Function func = (Function) exp;
             aggObjects.add(Aggregate.getAggObject(func, evaluator));
         }
@@ -49,13 +49,13 @@ public class AggNode extends BaseNode {
 
     @Override
     public Tuple getNextRow() {
-        if(this.done == true){
+        if (this.done == true) {
             this.resetIterator();
             return null;
         }
 
 
-        ArrayList <PrimitiveValue> rowValues = new ArrayList<PrimitiveValue>(selectExpressions.size());
+        ArrayList<PrimitiveValue> rowValues = new ArrayList<PrimitiveValue>(selectExpressions.size());
 
         if (!isInit) {
             isInit = true;
@@ -63,10 +63,11 @@ public class AggNode extends BaseNode {
         }
 
         int i = 0;
-        while (next != null); {
+        while (next != null)
+        {
             next = innerNode.getNextTuple();
-            for (i = 0; i < selectExpressions.size(); i++){
-                rowValues.set(i, aggObjects.get(i).yield(next)) ;
+            for (i = 0; i < selectExpressions.size(); i++) {
+                rowValues.set(i, aggObjects.get(i).yield(next));
             }
         }
 
