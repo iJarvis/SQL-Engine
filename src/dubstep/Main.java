@@ -70,7 +70,7 @@ public class Main {
                 BaseNode root;
                 if (selectBody instanceof PlainSelect) {
                     root = PlanTree.generatePlan((PlainSelect) selectBody);
-                    root = (BaseNode) PlanTree.optimizePlan(root);
+                    root = PlanTree.optimizePlan(root);
                 } else {
                     root = PlanTree.generateUnionPlan((Union) selectBody);
                 }
