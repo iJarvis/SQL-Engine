@@ -3,6 +3,7 @@ package dubstep.executor;
 import dubstep.Main;
 import dubstep.utils.Pair;
 import dubstep.utils.Tuple;
+import dubstep.utils.TupleComparator;
 import dubstep.utils.Utils;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
@@ -24,17 +25,16 @@ public class SortNode extends BaseNode {
     private boolean sortDone = false;
     private List<Tuple> sortBuffer = new ArrayList<>();
     private int idx = 0;
-    private TupleComparator comparator;
+    private TupleOrderByComparator comparator;
     private PriorityQueue<Pair<Integer, Tuple>> queue = null;
     private List<BufferedReader> brList = null;
     private List<ColumnDefinition> columnDefinitions = null;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public SortNode(List<OrderByElement> elems, BaseNode innerNode) {
         super();
         this.innerNode = innerNode;
         this.elems = elems;
-        comparator = new TupleComparator(elems);
+        comparator = new TupleOrderByComparator(elems);
         initProjectionInfo();
     }
 
@@ -155,48 +155,24 @@ public class SortNode extends BaseNode {
         };
     }
 
-    private class TupleComparator implements Comparator<Tuple> {
+    private class TupleOrderByComparator implements Comparator<Tuple> {
 
         private List<OrderByElement> elems;
 
-        public TupleComparator(List<OrderByElement> elems) {
+        public TupleOrderByComparator(List<OrderByElement> elems) {
             this.elems = elems;
         }
 
         @Override
         public int compare(Tuple left, Tuple right) {
-            try {
-                for (int i = 0; i < elems.size(); ++i) {
-                    boolean isAsc = elems.get(i).isAsc();
-                    if (! (elems.get(i).getExpression() instanceof Column)) {
-                        throw new UnsupportedOperationException("Column isn't of type Column");
-                    }
-                    PrimitiveValue leftPV = left.getValue((Column) elems.get(i).getExpression(), projectionInfo);
-                    PrimitiveValue righPV = right.getValue((Column) elems.get(i).getExpression(), projectionInfo);
-                    if (leftPV.getType() == PrimitiveType.DOUBLE) {
-                        if (leftPV.toDouble() < righPV.toDouble()) {
-                            return isAsc? -1: 1;
-                        } else if (leftPV.toDouble() > righPV.toDouble()) {
-                            return isAsc? 1: -1;
-                        }
-                    } else if (leftPV.getType() == PrimitiveType.LONG) {
-                        if (leftPV.toLong() < righPV.toLong()) {
-                            return isAsc? -1: 1;
-                        } else if (leftPV.toLong() > righPV.toLong()) {
-                            return isAsc? 1: -1;
-                        }
-                    } else if (leftPV.getType() == PrimitiveType.DATE) {
-                        Date leftDate = dateFormat.parse(leftPV.toRawString());
-                        Date rightDate = dateFormat.parse(righPV.toRawString());
-                        if (isAsc) {
-                            return leftDate.compareTo(rightDate);
-                        } else {
-                            return rightDate.compareTo(leftDate);
-                        }
-                    }
+            for (int i = 0; i < elems.size(); ++i) {
+                boolean isAsc = elems.get(i).isAsc();
+                if (! (elems.get(i).getExpression() instanceof Column)) {
+                    throw new UnsupportedOperationException("Column isn't of type Column");
                 }
-            } catch (PrimitiveValue.InvalidPrimitive | ParseException e) {
-                e.printStackTrace();
+                PrimitiveValue leftPV = left.getValue((Column) elems.get(i).getExpression(), projectionInfo);
+                PrimitiveValue righPV = right.getValue((Column) elems.get(i).getExpression(), projectionInfo);
+                return TupleComparator.compare(leftPV, righPV, isAsc);
             }
             return 0;
         }
