@@ -18,43 +18,7 @@ import static dubstep.Main.mySchema;
 
 public class PlanTree {
 
-<<<<<<< Updated upstream
     private static final int ON_DISK_JOIN_THRESHOLD = 100;
-=======
-    private static BaseNode generateSelect(BaseNode lowerNode, Expression filter)
-    {
-        if(filter instanceof AndExpression)
-        {
-            BinaryExpression andFilter = (BinaryExpression) filter;
-            lowerNode = generateSelect(lowerNode,andFilter.getLeftExpression());
-            lowerNode = generateSelect(lowerNode,andFilter.getRightExpression());
-        }
-        else
-            lowerNode = new SelectNode(filter,lowerNode);
-        return lowerNode;
-    }
-
-    private static BaseNode generateJoin(BaseNode lowerNode, List<Join> Joins, TableManager mySchema)
-    {
-
-        if(Joins == null)
-            return  lowerNode;
-        for(Join join : Joins)
-        {
-            BaseNode rightNode;
-            if( join.getRightItem() instanceof  Table )
-            {
-                rightNode = new ScanNode(join.getRightItem(),null,mySchema);
-                lowerNode = new JoinNode(lowerNode,rightNode);
-            }
-            else
-            {
-                throw  new IllegalStateException("Error in join - we expect only tables");
-            }
-        }
-        return lowerNode;
-    }
->>>>>>> Stashed changes
 
     public static BaseNode generatePlan(PlainSelect plainSelect) {
         //Handle lowermost node
