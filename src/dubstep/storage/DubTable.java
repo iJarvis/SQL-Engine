@@ -1,21 +1,18 @@
 package dubstep.storage;
 
-import dubstep.utils.Tuple;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DubTable {
 
     private String tableName;
-    private List<ColumnDefinition> columnDefinitions;
-    private String dataFile;
+    List<ColumnDefinition> columnDefinitions;
+    String dataFile;
     private int rowCount = -1;
 
     public DubTable(CreateTable createTable) {
@@ -32,7 +29,7 @@ public class DubTable {
         }
         int lines = 0;
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("file.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader(dataFile));
             while (reader.readLine() != null) lines++;
             reader.close();
         } catch (IOException e) {

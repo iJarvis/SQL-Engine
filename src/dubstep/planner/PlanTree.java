@@ -18,37 +18,7 @@ import static dubstep.Main.mySchema;
 
 public class PlanTree {
 
-    private static BaseNode generateSelect(BaseNode lowerNode, Expression filter)
-    {
-        if(filter instanceof AndExpression)
-        {
-            BinaryExpression andFilter = (BinaryExpression) filter;
-            lowerNode = generateSelect(lowerNode,andFilter.getLeftExpression());
-            lowerNode = generateSelect(lowerNode,andFilter.getRightExpression());
-        }
-        else
-            lowerNode = new SelectNode(filter,lowerNode);
-        return lowerNode;
-    }
-
-    private static BaseNode generateJoin(BaseNode lowerNode, List<Join> Joins, TableManager mySchema)
-    {
-
-        for(Join join : Joins)
-        {
-            BaseNode rightNode;
-            if( join.getRightItem() instanceof  Table )
-            {
-                rightNode = new ScanNode(join.getRightItem(),null,mySchema);
-                lowerNode = new JoinNode(lowerNode,rightNode);
-            }
-            else
-            {
-                throw  new IllegalStateException("Error in join - we expect only tables");
-            }
-        }
-        return lowerNode;
-    }
+    private static final int ON_DISK_JOIN_THRESHOLD = 100;
 
     public static BaseNode generatePlan(PlainSelect plainSelect) {
         //Handle lowermost node
@@ -69,7 +39,7 @@ public class PlanTree {
             }
             BaseNode scanNode = new ScanNode(fromItem, null, mySchema);
             List<Join> joins = plainSelect.getJoins();
-            scanRoot = generateJoin(scanNode,joins,mySchema);
+            scanRoot = generateJoin(scanNode, joins, mySchema);
         } else {
             throw new UnsupportedOperationException("We don't support this FROM clause");
         }
@@ -77,12 +47,10 @@ public class PlanTree {
         //assuming there will always be a select node over our scan node
         Expression filter = plainSelect.getWhere();
         BaseNode projInnerNode;
-        if(filter != null) {
-            BaseNode selectNode = generateSelect(scanRoot,filter);
-
+        if (filter != null) {
+            BaseNode selectNode = generateSelect(scanRoot, filter);
             projInnerNode = selectNode;
-        }
-        else
+        } else
             projInnerNode = scanRoot;
         //handle order by
         if (plainSelect.getOrderByElements() != null) {
@@ -96,6 +64,29 @@ public class PlanTree {
         BaseNode projNode = genAgg.getAggregateNode();
 
         return projNode;
+    }
+
+    private static BaseNode generateSelect(BaseNode lowerNode, Expression filter) {
+        if (filter instanceof AndExpression) {
+            BinaryExpression andFilter = (BinaryExpression) filter;
+            lowerNode = generateSelect(lowerNode, andFilter.getLeftExpression());
+            lowerNode = generateSelect(lowerNode, andFilter.getRightExpression());
+        } else
+            lowerNode = new SelectNode(filter, lowerNode);
+        return lowerNode;
+    }
+
+    private static BaseNode generateJoin(BaseNode lowerNode, List<Join> Joins, TableManager mySchema) {
+        for (Join join : Joins) {
+            BaseNode rightNode;
+            if (join.getRightItem() instanceof Table) {
+                rightNode = new ScanNode(join.getRightItem(), null, mySchema);
+                lowerNode = new JoinNode(lowerNode, rightNode);
+            } else {
+                throw new IllegalStateException("Error in join - we expect only tables");
+            }
+        }
+        return lowerNode;
     }
 
     public static BaseNode generateUnionPlan(Union union) {
@@ -118,16 +109,16 @@ public class PlanTree {
         return root;
     }
 
-    private static BaseNode getResponsibleChild(BaseNode currentNode, List<String> columnList) {
+    private static BaseNode getResponsibleChild(BaseNode currentNode, List<Column> columnList) {
         if (currentNode instanceof UnionNode || currentNode instanceof ScanNode)
             return currentNode;
         if (currentNode.innerNode != null && currentNode instanceof JoinNode) {
             boolean inner = false, outer = false;
 
-            for (String column : columnList) {
-                if (currentNode.innerNode.projectionInfo.contains(column))
+            for (Column column : columnList) {
+                if (currentNode.innerNode.projectionInfo.contains(column.getWholeColumnName()))
                     inner = true;
-                if (currentNode.outerNode.projectionInfo.contains(column))
+                if (currentNode.outerNode.projectionInfo.contains(column.getWholeColumnName()))
                     outer = true;
             }
 
@@ -139,20 +130,23 @@ public class PlanTree {
                 return getResponsibleChild(currentNode.outerNode, columnList);
         } else
             return getResponsibleChild(currentNode.innerNode, columnList);
-
     }
 
-    private static void selectPushDown(SelectNode selectNode) {
-        Expression expression = selectNode.filter;
-        List<String> columnList = new ArrayList<>();
+    private static List<Column> getSelectExprColumnList(Expression expression) {
+        List<Column> columnList = new ArrayList<>();
         if (expression instanceof BinaryExpression) {
             BinaryExpression bin = (BinaryExpression) expression;
             if (bin.getRightExpression() instanceof Column)
-                columnList.add(((Column) bin.getRightExpression()).getWholeColumnName());
+                columnList.add((Column) bin.getRightExpression());
 
             if (bin.getLeftExpression() instanceof Column)
-                columnList.add(((Column) bin.getLeftExpression()).getWholeColumnName());
+                columnList.add((Column) bin.getLeftExpression());
         }
+        return columnList;
+    }
+
+    private static void selectPushDown(SelectNode selectNode) {
+        List<Column> columnList = getSelectExprColumnList(selectNode.filter);
         BaseNode newNode = getResponsibleChild(selectNode, columnList);
         if (newNode == selectNode)
             return;
@@ -168,7 +162,60 @@ public class PlanTree {
             selectNode.innerNode = newNode;
             newNode.parentNode = selectNode;
             selectNode.projectionInfo = selectNode.innerNode.projectionInfo;
+        }
+    }
 
+    private static BaseNode getResponsibleJoinChild(BaseNode currentNode, List<Column> columnList) {
+        if (currentNode instanceof JoinNode || currentNode instanceof HashJoinNode || currentNode instanceof SortMergeJoinNode) {
+            boolean inner = false, outer = false;
+            for (Column column : columnList) {
+                if (currentNode.innerNode.projectionInfo.contains(column.getWholeColumnName()))
+                    inner = true;
+                if (currentNode.outerNode.projectionInfo.contains(column.getWholeColumnName()))
+                    outer = true;
+            }
+            if (inner == true && outer == true) {
+                //current node is a possible candidate for join conversion but we will still recur for children
+                BaseNode leftChild = getResponsibleJoinChild(currentNode.innerNode, columnList);
+                BaseNode rightChild = getResponsibleJoinChild(currentNode.outerNode, columnList);
+                if (leftChild != null) {
+                    return leftChild;
+                }
+                if (rightChild != null) {
+                    return rightChild;
+                }
+                return currentNode;
+            }
+        } else if (currentNode instanceof SelectNode) {
+            return getResponsibleChild(currentNode.innerNode, columnList);
+        }
+        return null;
+    }
+
+    private static void convertJoins(SelectNode selectNode) {
+        List<Column> columnList = getSelectExprColumnList(selectNode.filter);
+        if (columnList.size() != 2) {
+            return;
+        }
+        BaseNode joinNode = getResponsibleJoinChild(selectNode, columnList);
+        if (joinNode != null) {
+            BaseNode selectParent = selectNode.parentNode;
+            BaseNode selectChild = selectNode.innerNode;
+            selectParent.innerNode = selectChild;
+            selectChild.parentNode = selectParent;
+
+            BaseNode joinParent = joinNode.parentNode;
+            BaseNode joinInnerChild = joinNode.innerNode;
+            BaseNode joinOuterChild = joinNode.outerNode;
+
+            BaseNode newJoinNode;
+            if (joinInnerChild.projectionInfo.contains(columnList.get(0).getWholeColumnName())) {
+                //TODO: create appropriate join node
+                newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, columnList.get(0), columnList.get(1));
+            } else {
+                newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, columnList.get(0), columnList.get(1));
+            }
+            newJoinNode.parentNode = joinParent;
         }
     }
 
@@ -181,7 +228,8 @@ public class PlanTree {
         BaseNode outer = currentNode.outerNode;
 
         if (currentNode instanceof SelectNode) {
-            selectPushDown((SelectNode) currentNode);
+//            convertJoins((SelectNode) currentNode);
+//            selectPushDown((SelectNode) currentNode);
         }
         optimizePlan(inner);
         optimizePlan(outer);
