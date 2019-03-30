@@ -1,7 +1,9 @@
 package dubstep.planner;
 
+import com.sun.xml.internal.rngom.parse.host.Base;
 import dubstep.executor.*;
 import dubstep.storage.DubTable;
+import dubstep.storage.TableManager;
 import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -31,6 +33,25 @@ public class PlanTree {
         return lowerNode;
     }
 
+    private static BaseNode generateJoin(BaseNode lowerNode, List<Join> Joins, TableManager mySchema)
+    {
+
+        for(Join join : Joins)
+        {
+            BaseNode rightNode;
+            if( join.getRightItem() instanceof  Table )
+            {
+                rightNode = new ScanNode(join.getRightItem(),null,mySchema);
+                lowerNode = new JoinNode(lowerNode,rightNode);
+            }
+            else
+            {
+                throw  new IllegalStateException("Error in join - we expect only tables");
+            }
+        }
+        return lowerNode;
+    }
+
     public static BaseNode generatePlan(PlainSelect plainSelect) {
         //Handle lowermost node
         FromItem fromItem = plainSelect.getFromItem();
@@ -50,38 +71,7 @@ public class PlanTree {
             }
             BaseNode scanNode = new ScanNode(fromItem, null, mySchema);
             List<Join> joins = plainSelect.getJoins();
-            if (joins != null) {
-                FromItem table2 = joins.get(0).getRightItem();
-                mySchema.checkTableExists(table2);
-                Expression joinFilter1 = joins.get(0).getOnExpression();
-                BaseNode scanNode2 = new ScanNode(table2, null, mySchema);
-                BaseNode joinNode;
-                if (joinFilter1 != null && joinFilter1 instanceof EqualsTo) {
-                    joinNode = new HashJoinNode(scanNode, scanNode2, joinFilter1);
-                } else {
-                    joinNode = new JoinNode(scanNode, scanNode2);
-                }
-                if (joins.size() == 1) {
-                    scanRoot = joinNode;
-                } else {
-                    //handle 3 table join
-                    FromItem table3 = joins.get(1).getRightItem();
-                    Expression joinFilter2 = joins.get(1).getOnExpression();
-                    if (mySchema.getTable(table3.toString()) == null) {
-                        throw new IllegalStateException("Table not found");
-                    }
-                    BaseNode scanNode3 = new ScanNode(table3, null, mySchema);
-                    BaseNode joinNode2;
-                    if (joinFilter2 != null && joinFilter2 instanceof EqualsTo) {
-                        joinNode2 = new HashJoinNode(scanNode3, joinNode, joinFilter2);
-                    } else {
-                        joinNode2 = new JoinNode(scanNode3, joinNode);
-                    }
-                    scanRoot = joinNode2;
-                }
-            } else {
-                scanRoot = scanNode;
-            }
+            scanRoot = generateJoin(scanNode,joins,mySchema);
         } else {
             throw new UnsupportedOperationException("We don't support this FROM clause");
         }
