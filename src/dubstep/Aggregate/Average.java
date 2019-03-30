@@ -3,37 +3,37 @@ package dubstep.Aggregate;
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
-import net.sf.jsqlparser.expression.Expression;
 
 public class Average extends Sum {
     private Count counter;
 
-    public Average(Expression expression, Evaluator evaluator){
+    public Average(Expression expression, Evaluator evaluator) {
         super(expression, evaluator);
         counter = new Count(expression, evaluator);
     }
 
-    public PrimitiveValue yield(Tuple tuple){
+    public PrimitiveValue yield(Tuple tuple) {
         super.yield(tuple);
 
         long count = 1;
 
-        try{
+        try {
             count = counter.yield(tuple).toLong();
-        }catch (PrimitiveValue.InvalidPrimitive e){
+        } catch (PrimitiveValue.InvalidPrimitive e) {
             e.printStackTrace();
         }
 
-        if(isLong) {
+        if (isLong) {
             LongValue result = new LongValue(longValue.getValue());
-            result.setValue(result.getValue()/count);
+            result.setValue(result.getValue() / count);
             this.result = result;
             return result;
-        }else {
+        } else {
             DoubleValue result = new DoubleValue(longValue.getValue());
-            result.setValue(result.getValue()/count);
+            result.setValue(result.getValue() / count);
             this.result = result;
             return result;
         }

@@ -4,24 +4,24 @@ import dubstep.executor.AggNode;
 import dubstep.executor.BaseNode;
 import dubstep.executor.GroupByNode;
 import dubstep.executor.ProjNode;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.expression.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
 
 // Returns ProjNode/AggNode/GroupByNode based on requirements
 public class GenerateAggregateNode {
+    BaseNode inner;
     private List<SelectItem> selectItems;
     private ArrayList<SelectExpressionItem> selectExpressionItems = new ArrayList<>();
     private List<String> completeProjectionTables = new ArrayList<>();
-    BaseNode inner;
 
-    public GenerateAggregateNode(List<SelectItem> selectItems, BaseNode innerNode){
+    public GenerateAggregateNode(List<SelectItem> selectItems, BaseNode innerNode) {
         this.inner = innerNode;
         this.selectItems = selectItems;
         this.inner = null;
@@ -38,7 +38,7 @@ public class GenerateAggregateNode {
 
         ArrayList<Expression> selectExpressions = new ArrayList<>();
 
-        for (SelectExpressionItem expressionItems:selectExpressionItems){
+        for (SelectExpressionItem expressionItems : selectExpressionItems) {
             selectExpressions.add(expressionItems.getExpression());
         }
 
@@ -60,7 +60,7 @@ public class GenerateAggregateNode {
             inner = new ProjNode(selectItems, innerNode);
     }
 
-    public BaseNode getAggregateNode(){
+    public BaseNode getAggregateNode() {
         return this.inner;
     }
 }

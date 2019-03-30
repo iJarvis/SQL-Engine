@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class GroupByNode extends BaseNode{
+public class GroupByNode extends BaseNode {
     private HashMap<Object, ArrayList<AggregateMap>> buffer;
     private Evaluator evaluator;
     private ArrayList<SelectExpressionItem> selectExpressionItems;
@@ -23,7 +23,7 @@ public class GroupByNode extends BaseNode{
     private Tuple next;
     //private Boolean done;
 
-    public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems){
+    public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innernode;
         this.selectExpressionItems = selectExpressionItems;
         this.initProjectionInfo();
@@ -32,7 +32,7 @@ public class GroupByNode extends BaseNode{
         this.fillBuffer();
     }
 
-    public Tuple getNextRow(){
+    public Tuple getNextRow() {
 
         if (this.buffer == null) {
             return null;
@@ -45,7 +45,7 @@ public class GroupByNode extends BaseNode{
         ArrayList<AggregateMap> mapList = buffer.get(result);
         buffer.remove(result);
 
-        for(AggregateMap map: mapList){
+        for (AggregateMap map : mapList) {
             result.setValue(map.index, map.aggregate.getCurrentResult());
         }
 
@@ -56,37 +56,37 @@ public class GroupByNode extends BaseNode{
 
         this.buffer = new HashMap<Object, ArrayList<AggregateMap>>();
 
-        if (!this.isInit){
+        if (!this.isInit) {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
         }
 
         ArrayList<Expression> selectExpressions = new ArrayList<>();
 
-        for (SelectExpressionItem expressionItems:selectExpressionItems){
+        for (SelectExpressionItem expressionItems : selectExpressionItems) {
             selectExpressions.add(expressionItems.getExpression());
         }
 
         PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
         Tuple keyRow = new Tuple(rowValues);
 
-        while(next != null){
+        while (next != null) {
             this.evaluator.setTuple(next);
             ArrayList<Integer> indices = new ArrayList<Integer>();
 
-            for(int i = 0; i < selectExpressions.size(); i++) {
-                if(selectExpressions.get(i) instanceof Column) {
+            for (int i = 0; i < selectExpressions.size(); i++) {
+                if (selectExpressions.get(i) instanceof Column) {
                     try {
-                        keyRow.setValue(i,evaluator.eval(selectExpressions.get(i)));
-                    }catch (SQLException e) {
+                        keyRow.setValue(i, evaluator.eval(selectExpressions.get(i)));
+                    } catch (SQLException e) {
                         e.printStackTrace();
                     }
-                }else {
+                } else {
                     indices.add(i);
                 }
             }
 
-            if(buffer.containsKey(keyRow)) {
+            if (buffer.containsKey(keyRow)) {
                 for (AggregateMap pair : buffer.get(keyRow)) {
                     pair.aggregate.yield(next);
                 }
@@ -123,16 +123,16 @@ public class GroupByNode extends BaseNode{
     }
 
     @Override
-    void resetIterator(){
+    void resetIterator() {
         this.innerNode.resetIterator();
         this.fillBuffer();
     }
 
-    private class AggregateMap{
+    private class AggregateMap {
         private int index;
         private Aggregate aggregate;
 
-        private AggregateMap(int index, Aggregate aggregate){
+        private AggregateMap(int index, Aggregate aggregate) {
             this.index = index;
             this.aggregate = aggregate;
         }

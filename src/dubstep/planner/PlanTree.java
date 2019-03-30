@@ -1,6 +1,5 @@
 package dubstep.planner;
 
-import com.sun.xml.internal.rngom.parse.host.Base;
 import dubstep.executor.*;
 import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
@@ -8,7 +7,6 @@ import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
