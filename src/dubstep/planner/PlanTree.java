@@ -77,6 +77,8 @@ public class PlanTree {
     }
 
     private static BaseNode generateJoin(BaseNode lowerNode, List<Join> Joins, TableManager mySchema) {
+        if(Joins == null)
+            return lowerNode;
         for (Join join : Joins) {
             BaseNode rightNode;
             if (join.getRightItem() instanceof Table) {
