@@ -5,6 +5,7 @@ import dubstep.storage.DubTable;
 import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -16,6 +17,19 @@ import java.util.List;
 import static dubstep.Main.mySchema;
 
 public class PlanTree {
+
+    private static BaseNode generateSelect(BaseNode lowerNode, Expression filter)
+    {
+        if(filter instanceof AndExpression)
+        {
+            BinaryExpression andFilter = (BinaryExpression) filter;
+            lowerNode = generateSelect(lowerNode,andFilter.getLeftExpression());
+            lowerNode = generateSelect(lowerNode,andFilter.getRightExpression());
+        }
+        else
+            lowerNode = new SelectNode(filter,lowerNode);
+        return lowerNode;
+    }
 
     public static BaseNode generatePlan(PlainSelect plainSelect) {
         //Handle lowermost node
@@ -76,7 +90,7 @@ public class PlanTree {
         Expression filter = plainSelect.getWhere();
         BaseNode projInnerNode;
         if(filter != null) {
-            BaseNode selectNode = new SelectNode(filter, scanRoot);
+            BaseNode selectNode = generateSelect(scanRoot,filter);
 
             projInnerNode = selectNode;
         }
@@ -155,10 +169,18 @@ public class PlanTree {
         if (newNode == selectNode)
             return;
         else {
-            selectNode.parentNode.innerNode = selectNode.innerNode;
-            selectNode.parentNode = newNode.parentNode;
+            BaseNode parent = selectNode.parentNode;
+            BaseNode child = selectNode.innerNode;
+            parent.innerNode = child;
+            child.parentNode = parent;
+
+            BaseNode newParent = newNode.parentNode;
+            newParent.innerNode = selectNode;
+            selectNode.parentNode = newParent;
             selectNode.innerNode = newNode;
-            selectNode.projectionInfo = newNode.projectionInfo;
+            newNode.parentNode = selectNode;
+            selectNode.projectionInfo = selectNode.innerNode.projectionInfo;
+
         }
     }
 

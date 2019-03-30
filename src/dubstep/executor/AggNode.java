@@ -24,7 +24,6 @@ public class AggNode extends BaseNode {
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
         this.selectExpressionItems = selectExpressionItems;
-        //this.selectExpressions = selectExpressions;
         this.done = false;
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
@@ -38,8 +37,6 @@ public class AggNode extends BaseNode {
         for (SelectExpressionItem expressionItems:selectExpressionItems){
             selectExpressions.add(expressionItems.getExpression());
         }
-
-        //this.selectExpressionItems = selectExpressionItems;
 
         for (Expression exp : selectExpressions){
             Function func = (Function) exp;

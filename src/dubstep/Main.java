@@ -3,6 +3,7 @@ package dubstep;
 import dubstep.executor.BaseNode;
 import dubstep.planner.PlanTree;
 import dubstep.storage.TableManager;
+import dubstep.utils.Explainer;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.parser.CCJSqlParser;
@@ -29,7 +30,7 @@ public class Main {
 
     public static void main(String[] args) throws ParseException, SQLException {
         //Get all command line arguments
-        for (int i = 0; i < args.length; i++){
+        for (int i = 0; i < args.length; i++) {
             if (args[i].equals("--in-mem"))
                 mySchema.setInMem(true);
             if (args[i].equals("--on-disk"))
@@ -40,11 +41,13 @@ public class Main {
         QueryTimer timer = new QueryTimer();
 
         System.out.print(PROMPT);
+        executeQuery("create table R(id int,id1 int);");
+        executeQuery("create table S(id int,id1 int);");
         while (scanner.hasNext()) {
 
             String sqlString = scanner.nextLine();
 
-            while(sqlString.indexOf(';') < 0)
+            while (sqlString.indexOf(';') < 0)
                 sqlString = sqlString + " " + scanner.nextLine();
 
             if (sqlString == null)
@@ -52,47 +55,54 @@ public class Main {
 
             if (sqlString.equals("\\q") || sqlString.equals("quit") || sqlString.equals("exit"))
                 break;
+            executeQuery(sqlString);
 
-            CCJSqlParser parser = new CCJSqlParser(new StringReader(sqlString));
-            Statement query = parser.Statement();
-
-            timer.reset();
-            timer.start();
-
-            if (query instanceof CreateTable) {
-                CreateTable createQuery = (CreateTable) query;
-                if (!mySchema.createTable(createQuery)) {
-                    System.out.println("Unable to create DubTable - DubTable already exists");
-                }
-            } else if (query instanceof Select) {
-                Select selectQuery = (Select) query;
-                SelectBody selectBody = selectQuery.getSelectBody();
-                BaseNode root;
-                if (selectBody instanceof PlainSelect) {
-                    root = PlanTree.generatePlan((PlainSelect) selectBody);
-                    root = PlanTree.optimizePlan(root);
-                } else {
-                    root = PlanTree.generateUnionPlan((Union) selectBody);
-                }
-                Tuple tuple = root.getNextTuple();
-                while (tuple != null) {
-                    System.out.println(tuple.getProjection());
-                    tuple = root.getNextTuple();
-                }
-                if (EXPLAIN_MODE){
-//                    Explainer explainer = new Explainer(root);
-//                    explainer.explain();
-                }
-            } else {
-                throw new java.sql.SQLException("I can't understand " + sqlString);
-            }
-            timer.stop();
-           if(DEBUG_MODE)
-            System.out.println("Execution time = " + timer.getTotalTime());
-            timer.reset();
-
-            System.out.print(PROMPT);
         }
+    }
+
+    private static void executeQuery(String sqlString) throws ParseException, SQLException
+    {
+
+        QueryTimer timer = new QueryTimer();
+        CCJSqlParser parser = new CCJSqlParser(new StringReader(sqlString));
+        Statement query = parser.Statement();
+
+        timer.reset();
+        timer.start();
+
+        if (query instanceof CreateTable) {
+            CreateTable createQuery = (CreateTable) query;
+            if (!mySchema.createTable(createQuery)) {
+                System.out.println("Unable to create DubTable - DubTable already exists");
+            }
+        } else if (query instanceof Select) {
+            Select selectQuery = (Select) query;
+            SelectBody selectBody = selectQuery.getSelectBody();
+            BaseNode root;
+            if (selectBody instanceof PlainSelect) {
+                root = PlanTree.generatePlan((PlainSelect) selectBody);
+              //  root = PlanTree.optimizePlan(root);
+            } else {
+                root = PlanTree.generateUnionPlan((Union) selectBody);
+            }
+            Tuple tuple = root.getNextTuple();
+            while (tuple != null) {
+                System.out.println(tuple.getProjection());
+                tuple = root.getNextTuple();
+            }
+            if (EXPLAIN_MODE){
+                Explainer explainer = new Explainer(root);
+                explainer.explain();
+            }
+        } else {
+            throw new java.sql.SQLException("I can't understand " + sqlString);
+        }
+        timer.stop();
+        if(DEBUG_MODE)
+            System.out.println("Execution time = " + timer.getTotalTime());
+        timer.reset();
+
+        System.out.print(PROMPT);
     }
 
 }
