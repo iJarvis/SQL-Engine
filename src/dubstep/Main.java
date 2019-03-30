@@ -41,8 +41,8 @@ public class Main {
         QueryTimer timer = new QueryTimer();
 
         System.out.print(PROMPT);
-        executeQuery("create table R(id int,id1 int);");
-        executeQuery("create table S(id int,id1 int);");
+//        executeQuery("create table R(id int,id1 int);");
+//        executeQuery("create table S(id int,id1 int);");
         while (scanner.hasNext()) {
 
             String sqlString = scanner.nextLine();
