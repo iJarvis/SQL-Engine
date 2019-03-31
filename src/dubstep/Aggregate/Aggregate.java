@@ -36,6 +36,8 @@ public abstract class Aggregate {
         if (funcName.equals("count")) return new Count(expression, evaluator);
         else if (funcName.equals("sum")) return new Sum(expression, evaluator);
         else if (funcName.equals("avg")) return new Average(expression, evaluator);
-        else return null;
+        else if (funcName.equals("min")) return new MinMax(expression, evaluator, true);
+        else if (funcName.equals("max")) return new MinMax(expression, evaluator, false);
+        else throw new UnsupportedOperationException("This aggregate funtion is not supported");
     }
 }

@@ -24,7 +24,7 @@ public class GroupByNode extends BaseNode {
     private Evaluator evaluator;
     private ArrayList<SelectExpressionItem> selectExpressionItems;
     private ArrayList<Expression> selectExpressions;
-    private ArrayList<Aggregate> aggObjects;
+    private Aggregate[] aggObjects;
     private Boolean isInit = false;
     private Tuple next;
     private List<ColumnDefinition> colDefs;
@@ -68,7 +68,6 @@ public class GroupByNode extends BaseNode {
 
         while(next != null) {
 
-            Iterator aggIter = aggObjects.listIterator();
             PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
             this.evaluator.setTuple(next);
             for (int i = 0; i < selectExpressions.size(); i++) {
@@ -79,7 +78,7 @@ public class GroupByNode extends BaseNode {
                         e.printStackTrace();
                     }
                 }else {
-                    //rowValues[i] = aggIter.next().yield(next);
+                    rowValues[i] = aggObjects[i].yield(next);
                 }
             }
         }
@@ -90,6 +89,10 @@ public class GroupByNode extends BaseNode {
 
     public void initAggObjects() {
 
+        aggObjects = new Aggregate[selectExpressionItems.size()];
+        for(int i:aggIndices) {
+            aggObjects[i] = Aggregate.getAggObject((Function) selectExpressions.get(i), evaluator);
+        }
     }
 
     public Tuple inMemNextRow(){
@@ -212,6 +215,7 @@ public class GroupByNode extends BaseNode {
     @Override
     void resetIterator() {
         this.innerNode.resetIterator();
+        this.aggObjects = null;
         this.isInit = false;
         this.fillBuffer();
     }

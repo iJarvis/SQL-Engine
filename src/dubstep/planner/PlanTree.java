@@ -66,7 +66,12 @@ public class PlanTree {
 
         if(plainSelect.getLimit() != null)
         {
-            projNode = new LimitNode(plainSelect.getLimit().getRowCount(),projNode);
+            projNode = new LimitNode(plainSelect.getLimit().getRowCount(), projNode);
+        }
+
+        List<SelectExpressionItem> distinctItems = plainSelect.getDistinct().getOnSelectItems();
+        if (distinctItems != null) {
+            projNode = new DistinctNode(distinctItems, projNode);
         }
 
         return projNode;
