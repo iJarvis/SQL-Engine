@@ -58,6 +58,7 @@ public class PlanTree {
 
         //handle projection
         List<SelectItem> selectItems = plainSelect.getSelectItems();
+        List<Column> groupColumns = plainSelect.getGroupByColumnReferences();
         GenerateAggregateNode genAgg = new GenerateAggregateNode(selectItems, projInnerNode);
         BaseNode projNode = genAgg.getAggregateNode();
 

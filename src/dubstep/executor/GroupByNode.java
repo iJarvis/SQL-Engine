@@ -28,20 +28,26 @@ public class GroupByNode extends BaseNode {
     private Boolean isInitColDef = false;
     private Tuple next;
     private List<ColumnDefinition> colDefs = new ArrayList<>();
-
+    private List<Column> groupbyCols;
     private ArrayList<Integer> aggIndices;
     private Column groupByCol;
     private String refCol;
     //private Boolean done;
 
-    public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
+    public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems, List<Column> groupbyCols) {
         this.innerNode = innernode;
+        this.groupbyCols = groupbyCols;
+        this.aggIndices = new ArrayList<>();
         this.selectExpressionItems = selectExpressionItems;
         for (SelectExpressionItem expressionItems : selectExpressionItems) {
             this.selectExpressions.add(expressionItems.getExpression());
         }
+        for (int i = 0; i < selectExpressions.size(); i++) {
+            if (!(selectExpressions.get(i) instanceof Column)) {
+                this.aggIndices.add(i);
+            }
+        }
         this.aggObjects = null;
-        this.aggIndices = new ArrayList<>();
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
@@ -149,17 +155,6 @@ public class GroupByNode extends BaseNode {
 
         if (next == null)
             return;
-        ArrayList<Expression> selectExpressions = new ArrayList<>();
-
-        for (SelectExpressionItem expressionItems : selectExpressionItems) {
-            selectExpressions.add(expressionItems.getExpression());
-        }
-
-        for (int i = 0; i < selectExpressions.size(); i++) {
-            if (!(selectExpressions.get(i) instanceof Column)) {
-                this.aggIndices.add(i);
-            }
-        }
 
         while (next != null) {
             this.evaluator.setTuple(next);
