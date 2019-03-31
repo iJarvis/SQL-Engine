@@ -70,7 +70,7 @@ public class AggNode extends BaseNode {
         done = true;
         aggObjects = null;
         if (rowValues.size() != 0) {
-            return new Tuple(rowValues);
+           return new Tuple(rowValues);
         }
         return null;
     }

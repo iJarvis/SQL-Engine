@@ -38,13 +38,19 @@ public class Tuple {
             }
         }
     }
-
-    public Tuple(List<PrimitiveValue> tempvalueArray) {
+    public Tuple(List<PrimitiveValue> values)
+    {
         this.tid = -1;
-        this.valueArray.addAll(tempvalueArray);
+        this.valueArray.addAll(values);
     }
 
-    public Tuple(PrimitiveValue[] tempvalueArray) {
+    public Tuple(List<PrimitiveValue> tempvalueArray, List<ColumnDefinition> definition) {
+        this.tid = -1;
+        this.valueArray.addAll(tempvalueArray);
+        this.columnDefinitions = definition;
+    }
+
+    public Tuple(PrimitiveValue[] tempvalueArray , ColumnDefinition definition) {
         this.tid = -1;
         for (PrimitiveValue val : tempvalueArray){
             this.valueArray.add(val);
@@ -70,18 +76,25 @@ public class Tuple {
                 output = output + "null" + "|";
                 continue;
             }
-            if (value instanceof DateValue){
-                output = output + value.toString().substring(1,value.toString().length()-1) + "|";
-                continue;
-            }
             output = output + value.toString() + "|";
         }
         output = output.substring(0, output.length() - 1);
         return output;
     }
 
-    public  void setValue(int index, PrimitiveValue value){
+    public void setValue(int index, PrimitiveValue value){
         valueArray.set(index, value);
+    }
+
+    public ColumnDefinition getColDef(String columnName,List<String> projInfo)
+    {
+        int index = 0;
+        for(String col : projInfo) {
+            if (col.equals(columnName))
+               break;
+            index++;
+        }
+        return columnDefinitions.get(index);
     }
 
     public PrimitiveValue getValue(String columnName1, String columnName2, List<String> projInfo) {
