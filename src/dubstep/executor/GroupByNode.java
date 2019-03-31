@@ -16,7 +16,6 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 public class GroupByNode extends BaseNode {
@@ -30,37 +29,35 @@ public class GroupByNode extends BaseNode {
     private List<ColumnDefinition> colDefs;
 
     private ArrayList<Integer> aggIndices;
-    private boolean bufferStatus;
+    private Column groupByCol;
+    private String refCol;
     //private Boolean done;
 
     public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innernode;
-        this.innerNode.parentNode = this;
         this.selectExpressionItems = selectExpressionItems;
-        this.selectExpressions = null;
+        for (SelectExpressionItem expressionItems : selectExpressionItems) {
+            selectExpressions.add(expressionItems.getExpression());
+        }
         this.aggObjects = null;
         this.aggIndices = new ArrayList<>();
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
-        bufferStatus = false;
-        if (Main.mySchema.isInMem())
-        {}
-        else {
-            this.generateSortNode();
-        }
+        this.refCol = "";
+       // if (Main.mySchema.isInMem())
+            this.fillBuffer();
+        //else {
+         //   this.generateSortNode();
+        //}
     }
 
     public Tuple getNextRow() {
-        if (Main.mySchema.isInMem() && this.bufferStatus == false) {
-            this.fillBuffer();
-            bufferStatus = true;
-        }
 
         //if (Main.mySchema.isInMem())
             return inMemNextRow();
         //else
-        //    return onDiskNextRow();
+         //   return onDiskNextRow();
 
     }
 
@@ -72,11 +69,26 @@ public class GroupByNode extends BaseNode {
         if (!this.isInit) {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
+
+            if (next != null)
+                this.refCol = this.refCol + next.getValue(groupByCol, this.projectionInfo);
         }
+
+        String curCol = "";
+        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
 
         while(next != null) {
 
-            PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
+            curCol = curCol + next.getValue(groupByCol, this.projectionInfo);
+
+            if (!(curCol.equals(refCol))) {
+                for(int i:aggIndices) {
+                    aggObjects[i].resetCurrentResult();
+                }
+                refCol = curCol;
+                return new Tuple(rowValues);
+            }
+
             this.evaluator.setTuple(next);
             for (int i = 0; i < selectExpressions.size(); i++) {
                 if (selectExpressions.get(i) instanceof Column) {
@@ -97,7 +109,7 @@ public class GroupByNode extends BaseNode {
 
     public void initAggObjects() {
 
-        aggObjects = new Aggregate[selectExpressionItems.size()];
+        aggObjects = new Aggregate[selectExpressions.size()];
         for(int i:aggIndices) {
             aggObjects[i] = Aggregate.getAggObject((Function) selectExpressions.get(i), evaluator);
         }
@@ -132,16 +144,9 @@ public class GroupByNode extends BaseNode {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
         }
-        if (next == null)
-            return;
         this.colDefs = next.getColumnDefinitions();
-        ArrayList<Expression> selectExpressions = new ArrayList<>();
 
-        for (SelectExpressionItem expressionItems : selectExpressionItems) {
-            selectExpressions.add(expressionItems.getExpression());
-        }
-
-        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
+        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
         Tuple keyRow = new Tuple(rowValues);
 
         for (int i = 0; i < selectExpressions.size(); i++) {
@@ -189,18 +194,14 @@ public class GroupByNode extends BaseNode {
 
     public void generateSortNode() {
 
-        Expression selectExpression;
-        Column sortColumn = null;
         OrderByElement sortElement = new OrderByElement();
 
-        for (SelectExpressionItem expressionItem : selectExpressionItems) {
-            selectExpression = (expressionItem.getExpression());
-            this.selectExpressions.add(selectExpression);
+        for (Expression selectExpression : selectExpressions) {
             if (selectExpression instanceof Column)
-                sortColumn = (Column) selectExpression;
+                this.groupByCol = (Column) selectExpression;
         }
 
-        sortElement.setExpression(sortColumn);
+        sortElement.setExpression(this.groupByCol);
 
         List<OrderByElement> elems = new ArrayList<>();
         elems.add(sortElement);

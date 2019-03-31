@@ -17,7 +17,8 @@ public class Average extends Sum {
 
     @Override
     public void resetCurrentResult() {
-
+        this.counter.resetCurrentResult();
+        super.resetCurrentResult();
     }
 
     @Override
