@@ -8,9 +8,6 @@ import java.sql.SQLException;
 
 public class Min extends Aggregate {
 
-    private boolean isMin;
-    private PrimitiveValue result;
-
     public Min (Expression expression, Evaluator evaluator) {
         super(expression, evaluator);
         this.result = null;
