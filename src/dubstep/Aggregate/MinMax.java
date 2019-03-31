@@ -2,10 +2,7 @@ package dubstep.Aggregate;
 
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.*;
 
 import java.sql.SQLException;
 
@@ -21,6 +18,7 @@ public class MinMax extends Aggregate {
 
     @Override
     public void resetCurrentResult() {
+        result = null;
     }
 
     @Override
@@ -37,6 +35,22 @@ public class MinMax extends Aggregate {
                     if (curResult.toLong() < result.toLong()) result = curResult;
                 } else if (curResult instanceof DoubleValue) {
                     if (curResult.toDouble() < result.toDouble()) result = curResult;
+                } else if (curResult instanceof StringValue) {
+                    if (result.toString().compareTo(curResult.toString()) > 0) result = curResult;
+                } else if (curResult instanceof DateValue) {
+                    if (((DateValue) result).getValue().getTime() > ((DateValue) curResult).getValue().getTime()) result = curResult;
+                }
+            }else {
+                if (result == null) {
+                    result = curResult;
+                } else if (curResult instanceof LongValue) {
+                    if (curResult.toLong() > result.toLong()) result = curResult;
+                } else if (curResult instanceof DoubleValue) {
+                    if (curResult.toDouble() > result.toDouble()) result = curResult;
+                } else if (curResult instanceof StringValue) {
+                    if (result.toString().compareTo(curResult.toString()) < 0) result = curResult;
+                } else if (curResult instanceof DateValue) {
+                    if (((DateValue) result).getValue().getTime() < ((DateValue) curResult).getValue().getTime()) result = curResult;
                 }
             }
         }catch (SQLException e) {

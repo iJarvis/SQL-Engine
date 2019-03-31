@@ -10,11 +10,11 @@ import java.util.HashSet;
 import java.util.List;
 
 public class DistinctNode extends BaseNode {
-    private List<SelectItem> distinctItems = new ArrayList<>();
+    private List<SelectExpressionItem> distinctItems = new ArrayList<>();
     private HashSet<String> tuples;
     private Tuple tuple;
 
-    public DistinctNode(List<SelectItem> distinctItems, BaseNode innerNode) {
+    public DistinctNode(List<SelectExpressionItem> distinctItems, BaseNode innerNode) {
         this.innerNode = innerNode;
         this.distinctItems = distinctItems;
         tuples = new HashSet<>();
