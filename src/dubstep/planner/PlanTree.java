@@ -3,10 +3,12 @@ package dubstep.planner;
 import dubstep.executor.*;
 import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
+import dubstep.utils.Evaluator;
 import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
@@ -170,11 +172,21 @@ public class PlanTree {
             child.parentNode = parent;
 
             BaseNode newParent = newNode.parentNode;
-            newParent.innerNode = selectNode;
+            if(newNode.isInner) {
+                newParent.innerNode = selectNode;
+                selectNode.isInner = true;
+            }
+            else {
+                newParent.outerNode = selectNode;
+                selectNode.isInner = false;
+            }
+
             selectNode.parentNode = newParent;
             selectNode.innerNode = newNode;
+            newNode.isInner = true;
             newNode.parentNode = selectNode;
             selectNode.projectionInfo = selectNode.innerNode.projectionInfo;
+            selectNode.eval = new Evaluator(selectNode.projectionInfo);
         }
     }
 
@@ -231,12 +243,26 @@ public class PlanTree {
                 column2 = columnList.get(0);
                 column1 = columnList.get(1);
             }
-            newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, column1, column2);
+            if(mySchema.isInMem()) {
+                EqualsTo filter = new EqualsTo();
+                filter.setLeftExpression(column1);
+                filter.setRightExpression(column2);
+                newJoinNode = new HashJoinNode(joinInnerChild,joinOuterChild,filter);
+            }
+            else
+                newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, column1, column2);
             newJoinNode.parentNode = joinParent;
             if (joinParent.innerNode == joinNode) {
                 joinParent.innerNode = newJoinNode;
             } else {
                 joinParent.outerNode = newJoinNode;
+            }
+
+            if(mySchema.isInMem())
+            {
+                newJoinNode.innerNode = joinInnerChild;
+                newJoinNode.outerNode = joinOuterChild;
+                return;
             }
 
             //add sort nodes
@@ -263,9 +289,11 @@ public class PlanTree {
         BaseNode inner = currentNode.innerNode;
         BaseNode outer = currentNode.outerNode;
 
-        if (currentNode instanceof SelectNode) {
+        if (currentNode instanceof SelectNode &&((SelectNode)(SelectNode) currentNode).isOptimized == false ) {
+            selectPushDown((SelectNode) currentNode);
+            ((SelectNode)(SelectNode) currentNode).isOptimized = true;
             convertJoins((SelectNode) currentNode);
-//            selectPushDown((SelectNode) currentNode);
+
         }
         optimizePlan(inner);
         optimizePlan(outer);

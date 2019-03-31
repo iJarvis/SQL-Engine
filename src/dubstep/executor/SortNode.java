@@ -30,6 +30,7 @@ public class SortNode extends BaseNode {
     public SortNode(List<OrderByElement> elems, BaseNode innerNode) {
         super();
         this.innerNode = innerNode;
+        this.innerNode.parentNode = this;
         this.elems = elems;
         comparator = new TupleOrderByComparator(elems);
         initProjectionInfo();

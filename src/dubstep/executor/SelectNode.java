@@ -10,7 +10,8 @@ import java.sql.SQLException;
 public class SelectNode extends BaseNode {
 
     public Expression filter;
-    private Evaluator eval;
+    public Evaluator eval;
+    public boolean isOptimized = false;
 
     public SelectNode(Expression filter, BaseNode InnerNode) {
         super();
@@ -33,7 +34,7 @@ public class SelectNode extends BaseNode {
                 eval.setTuple(row);
                 try {
                     PrimitiveValue value = eval.eval(filter);
-                    if (value.toBool()) {
+                    if (value!= null && value.toBool()) {
                         return row;
                     }
                 } catch (SQLException e) {
