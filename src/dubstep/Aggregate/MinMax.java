@@ -56,6 +56,6 @@ public class MinMax extends Aggregate {
         }catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return result;
     }
 }
