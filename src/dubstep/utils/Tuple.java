@@ -138,5 +138,9 @@ public class Tuple {
     public List<ColumnDefinition> getColumnDefinitions() {
         return columnDefinitions;
     }
+
+    public void addValueItem(PrimitiveValue primitiveValue) {
+        valueArray.add(primitiveValue);
+    }
 }
 

@@ -14,6 +14,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -79,7 +80,15 @@ public class GroupByNode extends BaseNode {
 
         while (next != null) {
 
+            curCol = curCol + next.getValue(groupByCol, this.projectionInfo);
 
+            if (!(curCol.equals(refCol))) {
+                for (int i : aggIndices) {
+                    aggObjects[i].resetCurrentResult();
+                }
+                refCol = curCol;
+                return new Tuple(Arrays.asList(rowValues));
+            }
 
             this.evaluator.setTuple(next);
             for (int i = 0; i < selectExpressions.size(); i++) {
@@ -118,11 +127,12 @@ public class GroupByNode extends BaseNode {
         }
         String resString = buffer.keySet().iterator().next();
         Tuple result = new Tuple(resString, -1, this.colDefs);
+
         ArrayList<AggregateMap> mapList = buffer.get(resString);
         buffer.remove(resString);
 
         for (AggregateMap map : mapList) {
-            result.setValue(map.index, map.aggregate.getCurrentResult());
+            result.addValueItem(map.aggregate.getCurrentResult());
         }
 
         return (result);
@@ -130,13 +140,12 @@ public class GroupByNode extends BaseNode {
 
     private void fillBuffer() {
 
-        this.buffer = new HashMap<String, ArrayList<AggregateMap>>();
+        this.buffer = new HashMap<>();
 
         if (!this.isInit) {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
         }
-
 
         if (next == null)
             return;
@@ -145,8 +154,6 @@ public class GroupByNode extends BaseNode {
         for (SelectExpressionItem expressionItems : selectExpressionItems) {
             selectExpressions.add(expressionItems.getExpression());
         }
-
-
 
         for (int i = 0; i < selectExpressions.size(); i++) {
             if (!(selectExpressions.get(i) instanceof Column)) {
@@ -159,11 +166,12 @@ public class GroupByNode extends BaseNode {
             List<PrimitiveValue> rowValues = new ArrayList<>();
 
             for (int i = 0; i < selectExpressions.size(); i++) {
-                if (selectExpressions.get(i) instanceof Column) {
+                Expression selectExpression = selectExpressions.get(i);
+                if (selectExpression instanceof Column) {
                     try {
-                        rowValues.add(evaluator.eval(selectExpressions.get(i)));
-                         if(this.isInitColDef == false) {
-                             ColumnDefinition def = next.getColDef(selectExpressions.get(i).toString(), this.innerNode.projectionInfo);
+                         rowValues.add(evaluator.eval(selectExpression));
+                         if (!this.isInitColDef) {
+                             ColumnDefinition def = next.getColDef(((Column) selectExpression).getWholeColumnName(), innerNode.projectionInfo);
                              this.colDefs.add(def);
                          }
                     } catch (SQLException e) {
@@ -172,7 +180,7 @@ public class GroupByNode extends BaseNode {
                 }
             }
 
-            Tuple keyRow = new Tuple(rowValues,this.colDefs);
+            Tuple keyRow = new Tuple(rowValues, this.colDefs);
             this.isInitColDef = true;
 
             String keyString = keyRow.toString();
@@ -218,14 +226,15 @@ public class GroupByNode extends BaseNode {
 
     @Override
     void initProjectionInfo() {
-        projectionInfo = new ArrayList<>();
-        for (SelectItem selectItem : selectExpressionItems) {
+        projectionInfo = new HashMap<>();
+        for (int i = 0; i < selectExpressionItems.size(); ++i) {
+            SelectItem selectItem = selectExpressionItems.get(i);
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
             String alias = ((SelectExpressionItem) selectItem).getAlias();
             if (alias == null) {
-                projectionInfo.add(columnName);
+                projectionInfo.put(columnName, i);
             } else {
-                projectionInfo.add(alias);
+                projectionInfo.put(alias, i);
             }
         }
     }
