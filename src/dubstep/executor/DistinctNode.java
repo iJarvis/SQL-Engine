@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class DistinctNode extends BaseNode {
-    private List<SelectExpressionItem> distinctItems = new ArrayList<>();
+    private List<SelectExpressionItem> distinctItems;
     private HashSet<String> tuples;
     private Tuple tuple;
 
@@ -27,7 +27,7 @@ public class DistinctNode extends BaseNode {
         if(tuple == null) return null;
         String tupleString = "";
         for (SelectItem column : distinctItems) {
-            tupleString = tupleString + tuple.getValue((Column)(((SelectExpressionItem) column).getExpression()), this.projectionInfo).toString();
+            tupleString = tupleString + tuple.getValue((Column)(((SelectExpressionItem) column).getExpression()), projectionInfo).toString();
         }
         while (tuples.contains(tupleString)) {
             tuple = this.innerNode.getNextTuple();
@@ -43,6 +43,6 @@ public class DistinctNode extends BaseNode {
     }
 
     public void initProjectionInfo() {
-        this.projectionInfo = this.innerNode.projectionInfo;
+        projectionInfo = innerNode.projectionInfo;
     }
 }

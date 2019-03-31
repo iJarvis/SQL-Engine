@@ -5,7 +5,9 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Tuple {
     int tid;
@@ -38,36 +40,34 @@ public class Tuple {
             }
         }
     }
-    public Tuple(List<PrimitiveValue> values)
-    {
-        this.tid = -1;
-        this.valueArray.addAll(values);
+
+//    public Tuple(List<PrimitiveValue> tempvalueArray) {
+    public Tuple(List<PrimitiveValue> values) {
+        tid = -1;
+        valueArray.addAll(values);
     }
 
     public Tuple(List<PrimitiveValue> tempvalueArray, List<ColumnDefinition> definition) {
-        this.tid = -1;
-        this.valueArray.addAll(tempvalueArray);
-        this.columnDefinitions = definition;
+        tid = -1;
+        valueArray.addAll(tempvalueArray);
+        columnDefinitions = definition;
     }
 
     public Tuple(PrimitiveValue[] tempvalueArray , ColumnDefinition definition) {
-        this.tid = -1;
-        for (PrimitiveValue val : tempvalueArray){
-            this.valueArray.add(val);
+        tid = -1;
+        for (PrimitiveValue val : tempvalueArray) {
+            valueArray.add(val);
         }
     }
 
     public Tuple(Tuple innerTup, Tuple outerTuple) {
-
-        this.tid = -1;
-        this.valueArray.addAll(innerTup.valueArray);
-        this.valueArray.addAll(outerTuple.valueArray);
-        this.columnDefinitions = new ArrayList<>();
-        this.columnDefinitions.addAll(innerTup.columnDefinitions);
-        this.columnDefinitions.addAll(outerTuple.columnDefinitions);
-
+        tid = -1;
+        valueArray.addAll(innerTup.valueArray);
+        valueArray.addAll(outerTuple.valueArray);
+        columnDefinitions = new ArrayList<>();
+        columnDefinitions.addAll(innerTup.columnDefinitions);
+        columnDefinitions.addAll(outerTuple.columnDefinitions);
     }
-
 
     public String getProjection() {
         String output = "";
@@ -76,39 +76,35 @@ public class Tuple {
                 output = output + "null" + "|";
                 continue;
             }
+            if (value instanceof DateValue) {
+                output = output + value.toString().substring(1, value.toString().length() - 1) + "|";
+                continue;
+            }
             output = output + value.toString() + "|";
         }
         output = output.substring(0, output.length() - 1);
         return output;
     }
 
-    public void setValue(int index, PrimitiveValue value){
+    public void setValue(int index, PrimitiveValue value) {
         valueArray.set(index, value);
     }
 
-    public ColumnDefinition getColDef(String columnName,List<String> projInfo)
-    {
-        int index = 0;
-        for(String col : projInfo) {
-            if (col.equals(columnName))
-               break;
-            index++;
-        }
-        return columnDefinitions.get(index);
+    public ColumnDefinition getColDef(String columnName, Map<String, Integer> projInfo) {
+        return columnDefinitions.get(projInfo.get(columnName));
     }
 
-    public PrimitiveValue getValue(String columnName1, String columnName2, List<String> projInfo) {
+    public PrimitiveValue getValue(String columnName1, String columnName2, Map<String, Integer> projInfo) {
         //TODO: optimize it
+        /*
         String findStr = columnName1;
         String findStr1 = columnName2;
-        int index;
         boolean found = false;
         int final_index = 0;
         for (String col : projInfo) {
             String col1 = (col.indexOf('.') > -1) ? col.split("\\.")[1] : col;
             int index1 = findStr.indexOf('.');
             if (col.equals(findStr) || ((index1 < 0) && (col1.equals(findStr1)))) {
-
                 found = true;
                 break;
             }
@@ -119,10 +115,18 @@ public class Tuple {
             return null;
         }
 //            throw new UnsupportedOperationException("column not found tuple.getvalue");
-        return valueArray.get(final_index);
+        return valueArray.get(final_index);*/
+        //optimized version
+        if (projInfo.containsKey(columnName1)) {
+            return valueArray.get(projInfo.get(columnName1));
+        }
+        if (projInfo.containsKey(columnName2)) {
+            return valueArray.get(projInfo.get(columnName2));
+        }
+        return null;
     }
 
-    public PrimitiveValue getValue(Column column, List<String> projInfo) {
+    public PrimitiveValue getValue(Column column, Map<String, Integer> projInfo) {
         return getValue(column.getWholeColumnName(), column.getColumnName(), projInfo);
     }
 

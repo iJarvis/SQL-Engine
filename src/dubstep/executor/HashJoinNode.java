@@ -1,6 +1,7 @@
 package dubstep.executor;
 
 import dubstep.utils.Tuple;
+import dubstep.utils.Utils;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.expression.PrimitiveValue;
@@ -156,13 +157,13 @@ public class HashJoinNode extends BaseNode {
 
     @Override
     void resetIterator() {
-        this.innerNode.resetIterator();
-        this.outerNode.resetIterator();
-        this.initHashMap();
+        innerNode.resetIterator();
+        outerNode.resetIterator();
+        initHashMap();
     }
 
     void initProjectionInfo() {
-        this.projectionInfo = new ArrayList<>(this.innerNode.projectionInfo);
-        this.projectionInfo.addAll(this.outerNode.projectionInfo);
+        projectionInfo = new HashMap<>(innerNode.projectionInfo);
+        Utils.mapPutAll(outerNode.projectionInfo, projectionInfo);
     }
 }

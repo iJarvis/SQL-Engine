@@ -71,6 +71,6 @@ public class ScanNode extends BaseNode {
 
     @Override
     void initProjectionInfo() {
-        this.projectionInfo = scanTable.GetColumnList(fromTable);
+        projectionInfo = scanTable.getColumnList(fromTable);
     }
 }

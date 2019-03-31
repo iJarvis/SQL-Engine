@@ -1,7 +1,6 @@
 package dubstep.executor;
 
 import dubstep.Aggregate.Aggregate;
-import dubstep.Main;
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
@@ -16,14 +15,13 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 public class GroupByNode extends BaseNode {
     private HashMap<String, ArrayList<AggregateMap>> buffer;
     private Evaluator evaluator;
     private ArrayList<SelectExpressionItem> selectExpressionItems;
-    private ArrayList<Expression> selectExpressions;
+    private ArrayList<Expression> selectExpressions = new ArrayList<>();
     private Aggregate[] aggObjects;
     private Boolean isInit = false;
     private Boolean isInitColDef = false;
@@ -31,35 +29,33 @@ public class GroupByNode extends BaseNode {
     private List<ColumnDefinition> colDefs = new ArrayList<>();
 
     private ArrayList<Integer> aggIndices;
-    private boolean bufferStatus;
+    private Column groupByCol;
+    private String refCol;
     //private Boolean done;
 
     public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innernode;
-        this.innerNode.parentNode = this;
         this.selectExpressionItems = selectExpressionItems;
-        this.selectExpressions = null;
+        for (SelectExpressionItem expressionItems : selectExpressionItems) {
+            this.selectExpressions.add(expressionItems.getExpression());
+        }
         this.aggObjects = null;
         this.aggIndices = new ArrayList<>();
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
-        bufferStatus = false;
-        if (Main.mySchema.isInMem())
-        {}
-        else {
-            this.generateSortNode();
-        }
+        this.refCol = "";
+        // if (Main.mySchema.isInMem())
+        this.fillBuffer();
+        //else {
+        //   this.generateSortNode();
+        //}
     }
 
     public Tuple getNextRow() {
-        if (Main.mySchema.isInMem() && this.bufferStatus == false) {
-            this.fillBuffer();
-            bufferStatus = true;
-        }
 
         //if (Main.mySchema.isInMem())
-            return inMemNextRow();
+        return inMemNextRow();
         //else
         //    return onDiskNextRow();
 
@@ -67,17 +63,24 @@ public class GroupByNode extends BaseNode {
 
     public Tuple onDiskNextRow() {
 
-        if (this.aggObjects == null){
+        if (this.aggObjects == null) {
             this.initAggObjects();
         }
         if (!this.isInit) {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
+
+            if (next != null)
+                this.refCol = this.refCol + next.getValue(groupByCol, this.projectionInfo);
         }
 
-        while(next != null) {
+        String curCol = "";
+        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
 
-            PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
+        while (next != null) {
+
+
+
             this.evaluator.setTuple(next);
             for (int i = 0; i < selectExpressions.size(); i++) {
                 if (selectExpressions.get(i) instanceof Column) {
@@ -86,7 +89,7 @@ public class GroupByNode extends BaseNode {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
-                }else {
+                } else {
                     rowValues[i] = aggObjects[i].yield(next);
                 }
             }
@@ -98,13 +101,13 @@ public class GroupByNode extends BaseNode {
 
     public void initAggObjects() {
 
-        aggObjects = new Aggregate[selectExpressionItems.size()];
-        for(int i:aggIndices) {
+        aggObjects = new Aggregate[selectExpressions.size()];
+        for (int i : aggIndices) {
             aggObjects[i] = Aggregate.getAggObject((Function) selectExpressions.get(i), evaluator);
         }
     }
 
-    public Tuple inMemNextRow(){
+    public Tuple inMemNextRow() {
 
         if (this.buffer == null) {
             return null;
@@ -113,7 +116,7 @@ public class GroupByNode extends BaseNode {
             this.buffer = null;
             return null;
         }
-        String resString =  buffer.keySet().iterator().next();
+        String resString = buffer.keySet().iterator().next();
         Tuple result = new Tuple(resString, -1, this.colDefs);
         ArrayList<AggregateMap> mapList = buffer.get(resString);
         buffer.remove(resString);
@@ -133,6 +136,8 @@ public class GroupByNode extends BaseNode {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
         }
+
+
         if (next == null)
             return;
         ArrayList<Expression> selectExpressions = new ArrayList<>();
@@ -142,8 +147,9 @@ public class GroupByNode extends BaseNode {
         }
 
 
+
         for (int i = 0; i < selectExpressions.size(); i++) {
-            if (! (selectExpressions.get(i) instanceof Column)) {
+            if (!(selectExpressions.get(i) instanceof Column)) {
                 this.aggIndices.add(i);
             }
         }
@@ -195,18 +201,14 @@ public class GroupByNode extends BaseNode {
 
     public void generateSortNode() {
 
-        Expression selectExpression;
-        Column sortColumn = null;
         OrderByElement sortElement = new OrderByElement();
 
-        for (SelectExpressionItem expressionItem : selectExpressionItems) {
-            selectExpression = (expressionItem.getExpression());
-            this.selectExpressions.add(selectExpression);
+        for (Expression selectExpression : selectExpressions) {
             if (selectExpression instanceof Column)
-                sortColumn = (Column) selectExpression;
+                this.groupByCol = (Column) selectExpression;
         }
 
-        sortElement.setExpression(sortColumn);
+        sortElement.setExpression(this.groupByCol);
 
         List<OrderByElement> elems = new ArrayList<>();
         elems.add(sortElement);

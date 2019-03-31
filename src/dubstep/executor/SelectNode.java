@@ -46,11 +46,11 @@ public class SelectNode extends BaseNode {
 
     @Override
     void resetIterator() {
-        this.innerNode.resetIterator();
+        innerNode.resetIterator();
     }
 
     @Override
     void initProjectionInfo() {
-        this.projectionInfo = this.innerNode.projectionInfo;
+        projectionInfo = innerNode.projectionInfo;
     }
 }

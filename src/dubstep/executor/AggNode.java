@@ -10,6 +10,7 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class AggNode extends BaseNode {
@@ -85,14 +86,15 @@ public class AggNode extends BaseNode {
 
     @Override
     void initProjectionInfo() {
-        this.projectionInfo = new ArrayList<>();
-        for (SelectItem selectItem : selectExpressionItems) {
+        this.projectionInfo = new HashMap<>();
+        for (int i = 0; i < selectExpressionItems.size(); ++i) {
+            SelectItem selectItem = selectExpressionItems.get(i);
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
             String alias = ((SelectExpressionItem) selectItem).getAlias();
             if (alias == null) {
-                this.projectionInfo.add(columnName);
+                projectionInfo.put(columnName, i);
             } else {
-                this.projectionInfo.add(alias);
+                projectionInfo.put(alias, i);
             }
         }
     }

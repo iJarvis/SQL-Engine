@@ -2,10 +2,12 @@ package dubstep.executor;
 
 import dubstep.utils.Tuple;
 import dubstep.utils.TupleComparator;
+import dubstep.utils.Utils;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SortMergeJoinNode extends BaseNode {
@@ -91,11 +93,15 @@ public class SortMergeJoinNode extends BaseNode {
         innerNode.resetIterator();
         outerNode.resetIterator();
         innerTuple = null;
+        outerTuple = null;
+        outerRangeIdx = 0;
+        currentOuterRange.clear();
+        initDone = false;
     }
 
     @Override
     void initProjectionInfo() {
-        this.projectionInfo = new ArrayList<>(innerNode.projectionInfo);
-        this.projectionInfo.addAll(outerNode.projectionInfo);
+        projectionInfo = new HashMap<>(innerNode.projectionInfo);
+        Utils.mapPutAll(outerNode.projectionInfo, projectionInfo);
     }
 }
