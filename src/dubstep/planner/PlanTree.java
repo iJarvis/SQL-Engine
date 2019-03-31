@@ -12,6 +12,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static dubstep.Main.mySchema;
@@ -174,20 +175,20 @@ public class PlanTree {
                 if (currentNode.outerNode.projectionInfo.contains(column.getWholeColumnName()))
                     outer = true;
             }
-            if (inner == true && outer == true) {
-                //current node is a possible candidate for join conversion but we will still recur for children
+            if (inner && outer) {
+                return currentNode;
+            } else {
                 BaseNode leftChild = getResponsibleJoinChild(currentNode.innerNode, columnList);
-                BaseNode rightChild = getResponsibleJoinChild(currentNode.outerNode, columnList);
                 if (leftChild != null) {
                     return leftChild;
                 }
+                BaseNode rightChild = getResponsibleJoinChild(currentNode.outerNode, columnList);
                 if (rightChild != null) {
                     return rightChild;
                 }
-                return currentNode;
             }
         } else if (currentNode instanceof SelectNode) {
-            return getResponsibleChild(currentNode.innerNode, columnList);
+            return getResponsibleJoinChild(currentNode.innerNode, columnList);
         }
         return null;
     }
@@ -209,13 +210,36 @@ public class PlanTree {
             BaseNode joinOuterChild = joinNode.outerNode;
 
             BaseNode newJoinNode;
+            Column column1, column2;
             if (joinInnerChild.projectionInfo.contains(columnList.get(0).getWholeColumnName())) {
                 //TODO: create appropriate join node
-                newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, columnList.get(0), columnList.get(1));
+                column1 = columnList.get(0);
+                column2 = columnList.get(1);
             } else {
-                newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, columnList.get(0), columnList.get(1));
+                column2 = columnList.get(0);
+                column1 = columnList.get(1);
             }
+            newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, column1, column2);
             newJoinNode.parentNode = joinParent;
+            if (joinParent.innerNode == joinNode) {
+                joinParent.innerNode = newJoinNode;
+            } else {
+                joinParent.outerNode = newJoinNode;
+            }
+
+            //add sort nodes
+            OrderByElement innerOrderByElement = new OrderByElement();
+            innerOrderByElement.setAsc(true);
+            innerOrderByElement.setExpression(column1);
+            BaseNode innerSortNode = new SortNode(new ArrayList<>(Arrays.asList(innerOrderByElement)), joinInnerChild);
+
+            OrderByElement outerOrderByElement = new OrderByElement();
+            outerOrderByElement.setAsc(true);
+            outerOrderByElement.setExpression(column2);
+            BaseNode outerSortNode = new SortNode(new ArrayList<>(Arrays.asList(outerOrderByElement)), joinOuterChild);
+
+            newJoinNode.innerNode = innerSortNode;
+            newJoinNode.outerNode = outerSortNode;
         }
     }
 
@@ -228,7 +252,7 @@ public class PlanTree {
         BaseNode outer = currentNode.outerNode;
 
         if (currentNode instanceof SelectNode) {
-//            convertJoins((SelectNode) currentNode);
+            convertJoins((SelectNode) currentNode);
 //            selectPushDown((SelectNode) currentNode);
         }
         optimizePlan(inner);

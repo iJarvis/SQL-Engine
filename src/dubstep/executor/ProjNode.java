@@ -2,7 +2,6 @@ package dubstep.executor;
 
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.eval.Eval;
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllTableColumns;

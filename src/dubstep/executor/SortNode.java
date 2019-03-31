@@ -7,13 +7,10 @@ import dubstep.utils.TupleComparator;
 import dubstep.utils.Utils;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.PrimitiveType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 import java.io.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class SortNode extends BaseNode {

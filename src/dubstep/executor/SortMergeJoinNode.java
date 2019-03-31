@@ -20,6 +20,7 @@ public class SortMergeJoinNode extends BaseNode {
         this.outerNode = outerNode;
         this.innerColumn = innerColumn;
         this.outerColumn = outerColumn;
+        initProjectionInfo();
     }
 
     @Override

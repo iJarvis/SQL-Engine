@@ -36,15 +36,15 @@ public class HashJoinNode extends BaseNode {
 
     public void initHashMap(){
 
-        this.hashJoinTable = new HashMap<Object, LinkedList<Tuple>>();
+        this.hashJoinTable = new HashMap<>();
         this.condType = NONE; //Check BaseNode for definition
 
-        BinaryExpression binaryExpression = (BinaryExpression) this.filter;
+        BinaryExpression binaryExpression = (BinaryExpression) filter;
         Column leftColumn = (Column) binaryExpression.getLeftExpression();
         Column rightColumn = (Column) binaryExpression.getRightExpression();
         Column tempColumn;
         Tuple innerTuple = innerNode.getNextTuple();
-        PrimitiveValue innerTupleValue = innerTuple.getValue(leftColumn, this.innerNode.projectionInfo);
+        PrimitiveValue innerTupleValue = innerTuple.getValue(leftColumn, innerNode.projectionInfo);
 
         if (innerTupleValue == null){       // if column is not found in one of the two children, swap left and right columns.
             tempColumn = rightColumn;
