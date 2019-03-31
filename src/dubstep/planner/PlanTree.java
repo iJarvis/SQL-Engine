@@ -63,6 +63,11 @@ public class PlanTree {
         GenerateAggregateNode genAgg = new GenerateAggregateNode(selectItems, projInnerNode);
         BaseNode projNode = genAgg.getAggregateNode();
 
+        if(plainSelect.getLimit() != null)
+        {
+            projNode = new LimitNode(plainSelect.getLimit().getRowCount(),projNode);
+        }
+
         return projNode;
     }
 
