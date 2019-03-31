@@ -40,19 +40,19 @@ public class GroupByNode extends BaseNode {
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
-        if (Main.mySchema.isInMem())
+       // if (Main.mySchema.isInMem())
             this.fillBuffer();
-        else {
-            this.generateSortNode();
-        }
+        //else {
+        //    this.generateSortNode();
+        //}
     }
 
     public Tuple getNextRow() {
 
-        if (Main.mySchema.isInMem())
+        //if (Main.mySchema.isInMem())
             return inMemNextRow();
-        else
-            return onDiskNextRow();
+        //else
+        //    return onDiskNextRow();
 
     }
 
