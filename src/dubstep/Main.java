@@ -90,8 +90,8 @@ public class Main {
             SelectBody selectBody = selectQuery.getSelectBody();
             BaseNode root;
             if (selectBody instanceof PlainSelect) {
-               if(EXPLAIN_MODE) {
-                   root = PlanTree.generatePlan((PlainSelect) selectBody);
+                root = PlanTree.generatePlan((PlainSelect) selectBody);
+                if(EXPLAIN_MODE) {
                    Explainer e1 = new Explainer(root);
                    e1.explain();
                }
