@@ -34,9 +34,8 @@ public class GroupByNode extends BaseNode {
     private String refCol;
     //private Boolean done;
 
-    public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems, List<Column> groupbyCols) {
+    public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innernode;
-        this.groupbyCols = groupbyCols;
         this.aggIndices = new ArrayList<>();
         this.selectExpressionItems = selectExpressionItems;
         for (SelectExpressionItem expressionItems : selectExpressionItems) {
