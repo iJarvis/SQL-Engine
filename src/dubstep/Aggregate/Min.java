@@ -13,6 +13,7 @@ public class Min extends Aggregate {
 
     public Min (Expression expression, Evaluator evaluator) {
         super(expression, evaluator);
+        this.result = null;
     }
 
     @Override

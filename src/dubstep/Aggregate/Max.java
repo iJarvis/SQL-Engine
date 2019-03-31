@@ -12,6 +12,7 @@ public class Max extends Aggregate {
 
     public Max (Expression expression, Evaluator evaluator) {
         super(expression, evaluator);
+        this.result = null;
     }
 
     @Override
@@ -22,12 +23,14 @@ public class Max extends Aggregate {
     @Override
     public PrimitiveValue yield (Tuple tuple) {
         this.evaluator.setTuple(tuple);
-        PrimitiveValue curResult = null;
+        PrimitiveValue curResult;
 
         try {
             curResult = evaluator.eval(expression);
+
             if (result == null) {
                 result = curResult;
+                System.out.println("BOOM");
             } else if (curResult instanceof LongValue) {
                 if (curResult.toLong() > result.toLong()) result = curResult;
             } else if (curResult instanceof DoubleValue) {
