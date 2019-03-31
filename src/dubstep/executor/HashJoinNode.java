@@ -22,6 +22,8 @@ public class HashJoinNode extends BaseNode {
     private HashMap<Object, LinkedList<Tuple>> hashJoinTable;
     private boolean initJoin = false;
     private Tuple outerTuple;
+    private  boolean isInit = false;
+    private boolean isEmpty = false;
 
     public HashJoinNode(BaseNode innerNode,BaseNode outerNode, Expression filter) {
 
@@ -31,7 +33,6 @@ public class HashJoinNode extends BaseNode {
         this.outerNode.parentNode = this;
         this.filter = filter;
         this.initProjectionInfo();
-        this.initHashMap();
     }
 
     public void initHashMap(){
@@ -44,6 +45,10 @@ public class HashJoinNode extends BaseNode {
         Column rightColumn = (Column) binaryExpression.getRightExpression();
         Column tempColumn;
         Tuple innerTuple = innerNode.getNextTuple();
+        if(innerTuple == null) {
+            isEmpty = true;
+            return;
+        }
         PrimitiveValue innerTupleValue = innerTuple.getValue(leftColumn, innerNode.projectionInfo);
 
         if (innerTupleValue == null){       // if column is not found in one of the two children, swap left and right columns.
@@ -102,6 +107,13 @@ public class HashJoinNode extends BaseNode {
     }
 
     Tuple getNextRow(){
+        if(isInit == false)
+        {
+            isInit = true;
+            this.initHashMap();
+            if(isEmpty)
+                return null;
+        }
 
         if (hashJoinTable == null)
             return null;

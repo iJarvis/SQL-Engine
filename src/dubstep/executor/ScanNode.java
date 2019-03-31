@@ -47,7 +47,7 @@ public class ScanNode extends BaseNode {
         while (1 == 1) {
             if (tupleBuffer.size() <= currentIndex) {
                 if (!readComplete) {
-                    readComplete = scanner.readTuples(20, tupleBuffer);
+                    readComplete = scanner.readTuples(3000, tupleBuffer);
                     currentIndex = 0;
                     continue;
                 } else

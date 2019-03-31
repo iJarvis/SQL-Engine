@@ -8,6 +8,7 @@ import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
@@ -242,12 +243,26 @@ public class PlanTree {
                 column2 = columnList.get(0);
                 column1 = columnList.get(1);
             }
-            newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, column1, column2);
+            if(mySchema.isInMem()) {
+                EqualsTo filter = new EqualsTo();
+                filter.setLeftExpression(column1);
+                filter.setRightExpression(column2);
+                newJoinNode = new HashJoinNode(joinInnerChild,joinOuterChild,filter);
+            }
+            else
+                newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, column1, column2);
             newJoinNode.parentNode = joinParent;
             if (joinParent.innerNode == joinNode) {
                 joinParent.innerNode = newJoinNode;
             } else {
                 joinParent.outerNode = newJoinNode;
+            }
+
+            if(mySchema.isInMem())
+            {
+                newJoinNode.innerNode = joinInnerChild;
+                newJoinNode.outerNode = joinOuterChild;
+                return;
             }
 
             //add sort nodes
