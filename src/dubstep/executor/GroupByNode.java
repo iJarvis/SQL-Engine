@@ -127,11 +127,12 @@ public class GroupByNode extends BaseNode {
         }
         String resString = buffer.keySet().iterator().next();
         Tuple result = new Tuple(resString, -1, this.colDefs);
+
         ArrayList<AggregateMap> mapList = buffer.get(resString);
         buffer.remove(resString);
 
         for (AggregateMap map : mapList) {
-            result.setValue(map.index, map.aggregate.getCurrentResult());
+            result.addValueItem(map.aggregate.getCurrentResult());
         }
 
         return (result);
@@ -165,11 +166,12 @@ public class GroupByNode extends BaseNode {
             List<PrimitiveValue> rowValues = new ArrayList<>();
 
             for (int i = 0; i < selectExpressions.size(); i++) {
-                if (selectExpressions.get(i) instanceof Column) {
+                Expression selectExpression = selectExpressions.get(i);
+                if (selectExpression instanceof Column) {
                     try {
-                        rowValues.add(evaluator.eval(selectExpressions.get(i)));
-                         if(this.isInitColDef == false) {
-                             ColumnDefinition def = next.getColDef(selectExpressions.get(i).toString(), innerNode.projectionInfo);
+                         rowValues.add(evaluator.eval(selectExpression));
+                         if (!this.isInitColDef) {
+                             ColumnDefinition def = next.getColDef(((Column) selectExpression).getWholeColumnName(), innerNode.projectionInfo);
                              this.colDefs.add(def);
                          }
                     } catch (SQLException e) {
@@ -178,7 +180,7 @@ public class GroupByNode extends BaseNode {
                 }
             }
 
-            Tuple keyRow = new Tuple(rowValues,this.colDefs);
+            Tuple keyRow = new Tuple(rowValues, this.colDefs);
             this.isInitColDef = true;
 
             String keyString = keyRow.toString();
