@@ -14,6 +14,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,8 +25,9 @@ public class GroupByNode extends BaseNode {
     private ArrayList<Expression> selectExpressions = new ArrayList<>();
     private Aggregate[] aggObjects;
     private Boolean isInit = false;
+    private Boolean isInitColDef = false;
     private Tuple next;
-    private List<ColumnDefinition> colDefs;
+    private List<ColumnDefinition> colDefs = new ArrayList<>();
 
     private ArrayList<Integer> aggIndices;
     private Column groupByCol;
@@ -85,7 +87,7 @@ public class GroupByNode extends BaseNode {
                     aggObjects[i].resetCurrentResult();
                 }
                 refCol = curCol;
-                return new Tuple(rowValues);
+                return new Tuple(Arrays.asList(rowValues));
             }
 
             this.evaluator.setTuple(next);
@@ -143,10 +145,14 @@ public class GroupByNode extends BaseNode {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
         }
-        this.colDefs = next.getColumnDefinitions();
 
-        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
-        Tuple keyRow = new Tuple(rowValues);
+        if (next == null)
+            return;
+        ArrayList<Expression> selectExpressions = new ArrayList<>();
+
+        for (SelectExpressionItem expressionItems : selectExpressionItems) {
+            selectExpressions.add(expressionItems.getExpression());
+        }
 
         for (int i = 0; i < selectExpressions.size(); i++) {
             if (!(selectExpressions.get(i) instanceof Column)) {
@@ -156,16 +162,24 @@ public class GroupByNode extends BaseNode {
 
         while (next != null) {
             this.evaluator.setTuple(next);
+            List<PrimitiveValue> rowValues = new ArrayList<>();
 
             for (int i = 0; i < selectExpressions.size(); i++) {
                 if (selectExpressions.get(i) instanceof Column) {
                     try {
-                        keyRow.setValue(i, evaluator.eval(selectExpressions.get(i)));
+                        rowValues.add(evaluator.eval(selectExpressions.get(i)));
+                         if(this.isInitColDef == false) {
+                             ColumnDefinition def = next.getColDef(selectExpressions.get(i).toString(), innerNode.projectionInfo);
+                             this.colDefs.add(def);
+                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
             }
+
+            Tuple keyRow = new Tuple(rowValues,this.colDefs);
+            this.isInitColDef = true;
 
             String keyString = keyRow.toString();
 

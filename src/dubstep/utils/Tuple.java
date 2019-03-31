@@ -41,25 +41,32 @@ public class Tuple {
         }
     }
 
-    public Tuple(List<PrimitiveValue> tempvalueArray) {
-        this.tid = -1;
-        this.valueArray.addAll(tempvalueArray);
+//    public Tuple(List<PrimitiveValue> tempvalueArray) {
+    public Tuple(List<PrimitiveValue> values) {
+        tid = -1;
+        valueArray.addAll(values);
     }
 
-    public Tuple(PrimitiveValue[] tempvalueArray) {
-        this.tid = -1;
+    public Tuple(List<PrimitiveValue> tempvalueArray, List<ColumnDefinition> definition) {
+        tid = -1;
+        valueArray.addAll(tempvalueArray);
+        columnDefinitions = definition;
+    }
+
+    public Tuple(PrimitiveValue[] tempvalueArray , ColumnDefinition definition) {
+        tid = -1;
         for (PrimitiveValue val : tempvalueArray) {
-            this.valueArray.add(val);
+            valueArray.add(val);
         }
     }
 
     public Tuple(Tuple innerTup, Tuple outerTuple) {
-        this.tid = -1;
-        this.valueArray.addAll(innerTup.valueArray);
-        this.valueArray.addAll(outerTuple.valueArray);
-        this.columnDefinitions = new ArrayList<>();
-        this.columnDefinitions.addAll(innerTup.columnDefinitions);
-        this.columnDefinitions.addAll(outerTuple.columnDefinitions);
+        tid = -1;
+        valueArray.addAll(innerTup.valueArray);
+        valueArray.addAll(outerTuple.valueArray);
+        columnDefinitions = new ArrayList<>();
+        columnDefinitions.addAll(innerTup.columnDefinitions);
+        columnDefinitions.addAll(outerTuple.columnDefinitions);
     }
 
     public String getProjection() {
@@ -81,6 +88,10 @@ public class Tuple {
 
     public void setValue(int index, PrimitiveValue value) {
         valueArray.set(index, value);
+    }
+
+    public ColumnDefinition getColDef(String columnName, Map<String, Integer> projInfo) {
+        return columnDefinitions.get(projInfo.get(columnName));
     }
 
     public PrimitiveValue getValue(String columnName1, String columnName2, Map<String, Integer> projInfo) {

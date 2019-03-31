@@ -4,6 +4,7 @@ import dubstep.utils.Tuple;
 import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
@@ -46,6 +47,7 @@ public class ProjNode extends BaseNode {
     @Override
     Tuple getNextRow() {
         List<PrimitiveValue> values = new ArrayList<>();
+        List<ColumnDefinition> colDefs = new ArrayList<>();
         Tuple nextRow = this.innerNode.getNextTuple();
         if (nextRow == null)
             return null;
@@ -68,11 +70,13 @@ public class ProjNode extends BaseNode {
         if (completeProjectionTables.size() != 0) {
             for (String column: projectionInfo) {
                 PrimitiveValue value = nextRow.getValue(column, column, projectionInfo);
+                colDefs.add(nextRow.getColDef(column,projectionInfo) );
+
                 values.add(value);
             }
         }*/
 
-        return new Tuple(values);
+        return new Tuple(values,colDefs);
     }
 
     @Override
