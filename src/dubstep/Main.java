@@ -25,7 +25,7 @@ public class Main {
     // Globals used across project
     static public int maxThread = 1;
     static public boolean DEBUG_MODE = false; // will print out logs - all logs should be routed through this flag
-    static public boolean EXPLAIN_MODE = true; // will print statistics of the code
+    static public boolean EXPLAIN_MODE = false; // will print statistics of the code
     static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
 
     public static void main(String[] args) throws ParseException, SQLException {
