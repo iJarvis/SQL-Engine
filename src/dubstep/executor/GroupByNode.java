@@ -22,7 +22,7 @@ public class GroupByNode extends BaseNode {
     private HashMap<String, ArrayList<AggregateMap>> buffer;
     private Evaluator evaluator;
     private ArrayList<SelectExpressionItem> selectExpressionItems;
-    private ArrayList<Expression> selectExpressions;
+    private ArrayList<Expression> selectExpressions = new ArrayList<>();
     private Aggregate[] aggObjects;
     private Boolean isInit = false;
     private Tuple next;
@@ -37,7 +37,7 @@ public class GroupByNode extends BaseNode {
         this.innerNode = innernode;
         this.selectExpressionItems = selectExpressionItems;
         for (SelectExpressionItem expressionItems : selectExpressionItems) {
-            selectExpressions.add(expressionItems.getExpression());
+            this.selectExpressions.add(expressionItems.getExpression());
         }
         this.aggObjects = null;
         this.aggIndices = new ArrayList<>();
