@@ -39,8 +39,4 @@ public class TupleComparator {
         }
         return 0;
     }
-
-    public static int compare(PrimitiveValue leftPV, PrimitiveValue rightPV) {
-        return compare(leftPV, rightPV, true);
-    }
 }
