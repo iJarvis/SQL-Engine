@@ -25,9 +25,9 @@ public class GroupByNode extends BaseNode {
     private ArrayList<Expression> selectExpressions = new ArrayList<>();
     private Aggregate[] aggObjects;
     private Boolean isInit = false;
-    private Boolean resetAgg = false;
     private Tuple next;
     private List<ColumnDefinition> colDefs;
+
     private ArrayList<Integer> aggIndices;
     private Column groupByCol;
     private String refCol;
@@ -35,34 +35,29 @@ public class GroupByNode extends BaseNode {
 
     public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innernode;
-        this.aggIndices = new ArrayList<>();
         this.selectExpressionItems = selectExpressionItems;
         for (SelectExpressionItem expressionItems : selectExpressionItems) {
             this.selectExpressions.add(expressionItems.getExpression());
         }
-        for (int i = 0; i < selectExpressions.size(); i++) {
-            if (! (selectExpressions.get(i) instanceof Column)) {
-                this.aggIndices.add(i);
-            }
-        }
         this.aggObjects = null;
+        this.aggIndices = new ArrayList<>();
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
         this.refCol = "";
-        if (Main.mySchema.isInMem())
+       // if (Main.mySchema.isInMem())
             this.fillBuffer();
-        else {
-            this.generateSortNode();
-        }
+        //else {
+         //   this.generateSortNode();
+        //}
     }
 
     public Tuple getNextRow() {
 
-        if (Main.mySchema.isInMem())
+        //if (Main.mySchema.isInMem())
             return inMemNextRow();
-        else
-            return onDiskNextRow();
+        //else
+        //    return onDiskNextRow();
 
     }
 
@@ -74,16 +69,9 @@ public class GroupByNode extends BaseNode {
         if (!this.isInit) {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
-            if (next != null) {
-                this.refCol = next.getValue(groupByCol, this.projectionInfo).toString();
-            }
-        }
 
-        if (this.resetAgg) {
-            for(int i:aggIndices) {
-                aggObjects[i].resetCurrentResult();
-            }
-            this.resetAgg =false;
+            if (next != null)
+                this.refCol = this.refCol + next.getValue(groupByCol, this.projectionInfo);
         }
 
         String curCol = "";
@@ -91,16 +79,17 @@ public class GroupByNode extends BaseNode {
 
         while(next != null) {
 
-            this.evaluator.setTuple(next);
-            curCol = next.getValue(groupByCol, this.projectionInfo).toString();
+            curCol = curCol + next.getValue(groupByCol, this.projectionInfo);
 
             if (!(curCol.equals(refCol))) {
-                Tuple res = new Tuple(rowValues);
-                this.resetAgg = true;
+                for(int i:aggIndices) {
+                    aggObjects[i].resetCurrentResult();
+                }
                 refCol = curCol;
-                return res;
+                return new Tuple(rowValues);
             }
 
+            this.evaluator.setTuple(next);
             for (int i = 0; i < selectExpressions.size(); i++) {
                 if (selectExpressions.get(i) instanceof Column) {
                     try {
@@ -112,12 +101,9 @@ public class GroupByNode extends BaseNode {
                     rowValues[i] = aggObjects[i].yield(next);
                 }
             }
-
-            next = this.innerNode.getNextTuple();
         }
 
-        if (rowValues[0] != null)
-            return new Tuple(rowValues);
+        next = this.innerNode.getNextTuple();
         return null;
     }
 
@@ -163,6 +149,12 @@ public class GroupByNode extends BaseNode {
         PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
         Tuple keyRow = new Tuple(rowValues);
 
+        for (int i = 0; i < selectExpressions.size(); i++) {
+            if (! (selectExpressions.get(i) instanceof Column)) {
+                this.aggIndices.add(i);
+            }
+        }
+
         while (next != null) {
             this.evaluator.setTuple(next);
 
@@ -205,16 +197,15 @@ public class GroupByNode extends BaseNode {
         OrderByElement sortElement = new OrderByElement();
 
         for (Expression selectExpression : selectExpressions) {
-            if (selectExpression instanceof Column) {
+            if (selectExpression instanceof Column)
                 this.groupByCol = (Column) selectExpression;
-                break;
-            }
         }
 
         sortElement.setExpression(this.groupByCol);
 
         List<OrderByElement> elems = new ArrayList<>();
         elems.add(sortElement);
+
         this.innerNode = new SortNode(elems, this.innerNode);
     }
 
@@ -236,10 +227,8 @@ public class GroupByNode extends BaseNode {
     void resetIterator() {
         this.innerNode.resetIterator();
         this.aggObjects = null;
-        this.resetAgg = true;
         this.isInit = false;
-        if (Main.mySchema.isInMem())
-            this.fillBuffer();
+        this.fillBuffer();
     }
 
     private class AggregateMap {
