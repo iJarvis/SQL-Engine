@@ -30,17 +30,13 @@ public class Tuple {
                 valueArray.add(new DoubleValue(args[i]));
 
             else if (dataType.equalsIgnoreCase("date"))
-                valueArray.add(new DateValue(args[i]));
+                valueArray.add(new DateValue(args[i].substring(1,args[i].length()-1)));
 
             else {
                 System.err.println("data type " + dataType + " not found");
                 break;
             }
         }
-    }
-
-    public Tuple(String tupleSting) {
-
     }
 
     public Tuple(List<PrimitiveValue> tempvalueArray) {
