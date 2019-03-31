@@ -30,7 +30,7 @@ public class Tuple {
                 valueArray.add(new DoubleValue(args[i]));
 
             else if (dataType.equalsIgnoreCase("date"))
-                valueArray.add(new DateValue(args[i].substring(1,args[i].length()-1)));
+                valueArray.add(new DateValue(args[i]));
 
             else {
                 System.err.println("data type " + dataType + " not found");
@@ -68,6 +68,10 @@ public class Tuple {
         for (PrimitiveValue value : valueArray) {
             if (value == null) {
                 output = output + "null" + "|";
+                continue;
+            }
+            if (value instanceof DateValue){
+                output = output + value.toString().substring(1,value.toString().length()-1) + "|";
                 continue;
             }
             output = output + value.toString() + "|";
