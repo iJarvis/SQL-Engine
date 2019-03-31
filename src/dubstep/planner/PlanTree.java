@@ -64,6 +64,11 @@ public class PlanTree {
         GenerateAggregateNode genAgg = new GenerateAggregateNode(selectItems, projInnerNode);
         BaseNode projNode = genAgg.getAggregateNode();
 
+        if(plainSelect.getLimit() != null)
+        {
+            projNode = new LimitNode(plainSelect.getLimit().getRowCount(),projNode);
+        }
+
         return projNode;
     }
 
@@ -78,6 +83,8 @@ public class PlanTree {
     }
 
     private static BaseNode generateJoin(BaseNode lowerNode, List<Join> Joins, TableManager mySchema) {
+        if(Joins == null)
+            return lowerNode;
         for (Join join : Joins) {
             BaseNode rightNode;
             if (join.getRightItem() instanceof Table) {

@@ -18,6 +18,14 @@ public class Sum extends Aggregate {
         super(expression, evaluator);
     }
 
+    @Override
+    public void resetCurrentResult() {
+        this.longValue.setValue(0);
+        this.doubleValue.setValue(0);
+        this.isLong = null;
+    }
+
+    @Override
     public PrimitiveValue yield(Tuple tuple){
         PrimitiveValue result = null;
         evaluator.setTuple(tuple);

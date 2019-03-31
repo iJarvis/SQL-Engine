@@ -20,7 +20,9 @@ public class Tuple {
         tid = this.tid;
         for (int i = 0; i < args.length; i++) {
             String dataType = columnDefinitions.get(i).getColDataType().getDataType().toLowerCase();
-            if (dataType.equalsIgnoreCase("int"))
+            if (args[i].equals("null"))
+                valueArray.add(null);
+            else if (dataType.equalsIgnoreCase("int"))
                 valueArray.add(new LongValue(args[i]));
 
             else if (dataType.equalsIgnoreCase("string") || dataType.equalsIgnoreCase("varchar") || dataType.equalsIgnoreCase("char"))
@@ -37,6 +39,10 @@ public class Tuple {
                 break;
             }
         }
+    }
+
+    public Tuple(String tupleSting) {
+
     }
 
     public Tuple(List<PrimitiveValue> tempvalueArray) {
@@ -61,8 +67,13 @@ public class Tuple {
 
     public String getProjection() {
         String output = "";
-        for (PrimitiveValue value : valueArray)
+        for (PrimitiveValue value : valueArray) {
+            if (value == null) {
+                output = output + "null" + "|";
+                continue;
+            }
             output = output + value.toString() + "|";
+        }
         output = output.substring(0, output.length() - 1);
         return output;
     }

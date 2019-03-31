@@ -13,6 +13,12 @@ public class Count extends Aggregate{
         super(exp,eval);
     }
 
+    @Override
+    public void resetCurrentResult() {
+        this.count.setValue(0);
+    }
+
+    @Override
     public PrimitiveValue yield(Tuple tuple){
         if(tuple == null)return null;
         count.setValue(count.getValue()+1);

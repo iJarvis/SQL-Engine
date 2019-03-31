@@ -18,6 +18,8 @@ public abstract class Aggregate {
 
     public abstract PrimitiveValue yield(Tuple tuple);
 
+    public abstract void resetCurrentResult();
+
     public PrimitiveValue getCurrentResult() {
         return result;
     }
