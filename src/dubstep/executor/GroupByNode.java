@@ -55,9 +55,9 @@ public class GroupByNode extends BaseNode {
     public Tuple getNextRow() {
 
         //if (Main.mySchema.isInMem())
-         //   return inMemNextRow();
+            return inMemNextRow();
         //else
-            return onDiskNextRow();
+        //    return onDiskNextRow();
 
     }
 
