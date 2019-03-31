@@ -3,13 +3,14 @@ package dubstep.executor;
 import dubstep.Aggregate.Aggregate;
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class AggNode extends BaseNode {
     private Evaluator evaluator;
@@ -20,7 +21,7 @@ public class AggNode extends BaseNode {
     private Tuple next;
     private Boolean done;
 
-    public AggNode(BaseNode innerNode, ArrayList<SelectExpressionItem> selectExpressionItems){
+    public AggNode(BaseNode innerNode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
         this.selectExpressionItems = selectExpressionItems;
@@ -30,15 +31,15 @@ public class AggNode extends BaseNode {
         this.initAggNode();
     }
 
-    private void initAggNode(){
+    private void initAggNode() {
         this.aggObjects = new ArrayList<Aggregate>();
         ArrayList<Expression> selectExpressions = new ArrayList<>();
 
-        for (SelectExpressionItem expressionItems:selectExpressionItems){
+        for (SelectExpressionItem expressionItems : selectExpressionItems) {
             selectExpressions.add(expressionItems.getExpression());
         }
 
-        for (Expression exp : selectExpressions){
+        for (Expression exp : selectExpressions) {
             Function func = (Function) exp;
             aggObjects.add(Aggregate.getAggObject(func, this.evaluator));
         }
@@ -46,37 +47,40 @@ public class AggNode extends BaseNode {
 
     @Override
     public Tuple getNextRow() {
-        if(this.done){
-            this.resetIterator();
+        if (done) {
+            resetIterator();
             return null;
         }
 
-        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
+        List<PrimitiveValue> rowValues = new ArrayList<>();
 
-        if (!this.isInit) {
-            this.isInit = true;
-            this.next = innerNode.getNextTuple();
+        if (!isInit) {
+            isInit = true;
+            next = innerNode.getNextTuple();
         }
 
         int i = 0;
-        while (this.next != null) {
-            for (i = 0; i < selectExpressionItems.size(); i++){
-                rowValues[i] =  aggObjects.get(i).yield(this.next);
+        while (next != null) {
+            for (i = 0; i < selectExpressionItems.size(); i++) {
+                rowValues.add(aggObjects.get(i).yield(next));
             }
-            this.next = innerNode.getNextTuple();
+            next = innerNode.getNextTuple();
         }
 
-        this.done = true;
-        this.aggObjects = null;
-        return new Tuple(rowValues);
+        done = true;
+        aggObjects = null;
+        if (rowValues.size() != 0) {
+            return new Tuple(rowValues);
+        }
+        return null;
     }
 
     @Override
     void resetIterator() {
-        this.done = false;
-        this.aggObjects = null;
-        this.innerNode.resetIterator();
-        this.initAggNode();
+        done = false;
+        aggObjects = null;
+        innerNode.resetIterator();
+        initAggNode();
     }
 
     @Override
