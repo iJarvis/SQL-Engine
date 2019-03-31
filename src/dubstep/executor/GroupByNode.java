@@ -137,7 +137,7 @@ public class GroupByNode extends BaseNode {
 
     private void fillBuffer() {
 
-        this.buffer = new HashMap<String, ArrayList<AggregateMap>>();
+        this.buffer = new HashMap<>();
 
         if (!this.isInit) {
             next = this.innerNode.getNextTuple();
@@ -210,14 +210,15 @@ public class GroupByNode extends BaseNode {
 
     @Override
     void initProjectionInfo() {
-        projectionInfo = new ArrayList<>();
-        for (SelectItem selectItem : selectExpressionItems) {
+        projectionInfo = new HashMap<>();
+        for (int i = 0; i < selectExpressionItems.size(); ++i) {
+            SelectItem selectItem = selectExpressionItems.get(i);
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
             String alias = ((SelectExpressionItem) selectItem).getAlias();
             if (alias == null) {
-                projectionInfo.add(columnName);
+                projectionInfo.put(columnName, i);
             } else {
-                projectionInfo.add(alias);
+                projectionInfo.put(alias, i);
             }
         }
     }

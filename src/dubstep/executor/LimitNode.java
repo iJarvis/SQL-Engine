@@ -2,27 +2,23 @@ package dubstep.executor;
 
 import dubstep.utils.Tuple;
 
-public class LimitNode extends BaseNode
-{
+public class LimitNode extends BaseNode {
     Long currentRowNo;
     Long maxRowNo;
-    public LimitNode(Long limitValue,BaseNode innerNode)
-    {
+
+    public LimitNode(Long limitValue, BaseNode innerNode) {
         currentRowNo = 0L;
         maxRowNo = limitValue;
         this.innerNode = innerNode;
         initProjectionInfo();
-
-
     }
 
     @Override
     Tuple getNextRow() {
-        if(currentRowNo < maxRowNo ) {
+        if (currentRowNo < maxRowNo) {
             currentRowNo++;
             return this.innerNode.getNextRow();
-        }
-        else
+        } else
             return null;
     }
 
@@ -36,9 +32,4 @@ public class LimitNode extends BaseNode
         this.currentRowNo = 0L;
         this.innerNode.resetIterator();
     }
-
-
-
-
-
 }

@@ -1,8 +1,9 @@
 package dubstep.executor;
 
 import dubstep.utils.Tuple;
+import dubstep.utils.Utils;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class JoinNode extends BaseNode {
 
@@ -15,26 +16,26 @@ public class JoinNode extends BaseNode {
         this.outerNode = outerNode;
         this.outerNode.parentNode = this;
         this.outerNode.isInner = false;
-        this.initProjectionInfo();
+        initProjectionInfo();
     }
 
     @Override
     Tuple getNextRow() {
         if (!initJoin) {
-            innerTuple = this.innerNode.getNextTuple();
+            innerTuple = innerNode.getNextTuple();
             initJoin = true;
         }
         if(innerTuple == null)
             return null;
         Tuple outerTuple;
-        outerTuple = this.outerNode.getNextTuple();
+        outerTuple = outerNode.getNextTuple();
 
         if (outerTuple != null) {
             return new Tuple(innerTuple, outerTuple);
         } else {
             this.outerNode.resetIterator();
-            innerTuple = this.innerNode.getNextTuple();
-            outerTuple = this.outerNode.getNextTuple();
+            innerTuple = innerNode.getNextTuple();
+            outerTuple = outerNode.getNextTuple();
             if (innerTuple == null || outerTuple == null) {
                 return null;
             } else {
@@ -45,15 +46,15 @@ public class JoinNode extends BaseNode {
 
     @Override
     void resetIterator() {
-        this.innerTuple = null;
-        this.initJoin = false;
-        this.innerNode.resetIterator();
-        this.outerNode.resetIterator();
+        innerTuple = null;
+        initJoin = false;
+        innerNode.resetIterator();
+        outerNode.resetIterator();
     }
 
     @Override
     void initProjectionInfo() {
-        this.projectionInfo = new ArrayList<>(this.innerNode.projectionInfo);
-        this.projectionInfo.addAll(this.outerNode.projectionInfo);
+        projectionInfo = new HashMap<>(innerNode.projectionInfo);
+        Utils.mapPutAll(outerNode.projectionInfo, projectionInfo);
     }
 }

@@ -5,7 +5,9 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Tuple {
     int tid;
@@ -46,22 +48,19 @@ public class Tuple {
 
     public Tuple(PrimitiveValue[] tempvalueArray) {
         this.tid = -1;
-        for (PrimitiveValue val : tempvalueArray){
+        for (PrimitiveValue val : tempvalueArray) {
             this.valueArray.add(val);
         }
     }
 
     public Tuple(Tuple innerTup, Tuple outerTuple) {
-
         this.tid = -1;
         this.valueArray.addAll(innerTup.valueArray);
         this.valueArray.addAll(outerTuple.valueArray);
         this.columnDefinitions = new ArrayList<>();
         this.columnDefinitions.addAll(innerTup.columnDefinitions);
         this.columnDefinitions.addAll(outerTuple.columnDefinitions);
-
     }
-
 
     public String getProjection() {
         String output = "";
@@ -70,8 +69,8 @@ public class Tuple {
                 output = output + "null" + "|";
                 continue;
             }
-            if (value instanceof DateValue){
-                output = output + value.toString().substring(1,value.toString().length()-1) + "|";
+            if (value instanceof DateValue) {
+                output = output + value.toString().substring(1, value.toString().length() - 1) + "|";
                 continue;
             }
             output = output + value.toString() + "|";
@@ -80,22 +79,21 @@ public class Tuple {
         return output;
     }
 
-    public  void setValue(int index, PrimitiveValue value){
+    public void setValue(int index, PrimitiveValue value) {
         valueArray.set(index, value);
     }
 
-    public PrimitiveValue getValue(String columnName1, String columnName2, List<String> projInfo) {
+    public PrimitiveValue getValue(String columnName1, String columnName2, Map<String, Integer> projInfo) {
         //TODO: optimize it
+        /*
         String findStr = columnName1;
         String findStr1 = columnName2;
-        int index;
         boolean found = false;
         int final_index = 0;
         for (String col : projInfo) {
             String col1 = (col.indexOf('.') > -1) ? col.split("\\.")[1] : col;
             int index1 = findStr.indexOf('.');
             if (col.equals(findStr) || ((index1 < 0) && (col1.equals(findStr1)))) {
-
                 found = true;
                 break;
             }
@@ -106,10 +104,18 @@ public class Tuple {
             return null;
         }
 //            throw new UnsupportedOperationException("column not found tuple.getvalue");
-        return valueArray.get(final_index);
+        return valueArray.get(final_index);*/
+        //optimized version
+        if (projInfo.containsKey(columnName1)) {
+            return valueArray.get(projInfo.get(columnName1));
+        }
+        if (projInfo.containsKey(columnName2)) {
+            return valueArray.get(projInfo.get(columnName2));
+        }
+        return null;
     }
 
-    public PrimitiveValue getValue(Column column, List<String> projInfo) {
+    public PrimitiveValue getValue(Column column, Map<String, Integer> projInfo) {
         return getValue(column.getWholeColumnName(), column.getColumnName(), projInfo);
     }
 

@@ -3,7 +3,7 @@ package dubstep.executor;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
 
-import java.util.ArrayList;
+import java.util.Map;
 
 import static dubstep.Main.EXPLAIN_MODE;
 
@@ -13,10 +13,10 @@ abstract public class BaseNode {
     NodeType type;
     QueryTimer timer; //user for probing running time for every node
     Integer tupleCount;
-    public ArrayList<String> projectionInfo;
+    public Map<String, Integer> projectionInfo;
     public Boolean isInner;
 
-    BaseNode() {
+    public BaseNode() {
         timer = new QueryTimer();
         timer.reset();
         tupleCount = 0;
@@ -43,14 +43,12 @@ abstract public class BaseNode {
 
         Tuple nextRow = this.getNextRow();
 
-
         if (EXPLAIN_MODE) {
             tupleCount++;
             timer.stop();
         }
 
         return nextRow;
-
     }
 
     enum NodeType {

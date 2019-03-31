@@ -132,9 +132,9 @@ public class PlanTree {
             boolean inner = false, outer = false;
 
             for (Column column : columnList) {
-                if (currentNode.innerNode.projectionInfo.contains(column.getWholeColumnName()))
+                if (currentNode.innerNode.projectionInfo.containsKey(column.getWholeColumnName()))
                     inner = true;
-                if (currentNode.outerNode.projectionInfo.contains(column.getWholeColumnName()))
+                if (currentNode.outerNode.projectionInfo.containsKey(column.getWholeColumnName()))
                     outer = true;
             }
 
@@ -195,9 +195,9 @@ public class PlanTree {
         if (currentNode instanceof JoinNode || currentNode instanceof HashJoinNode || currentNode instanceof SortMergeJoinNode) {
             boolean inner = false, outer = false;
             for (Column column : columnList) {
-                if (currentNode.innerNode.projectionInfo.contains(column.getWholeColumnName()))
+                if (currentNode.innerNode.projectionInfo.containsKey(column.getWholeColumnName()))
                     inner = true;
-                if (currentNode.outerNode.projectionInfo.contains(column.getWholeColumnName()))
+                if (currentNode.outerNode.projectionInfo.containsKey(column.getWholeColumnName()))
                     outer = true;
             }
             if (inner && outer) {
@@ -236,7 +236,7 @@ public class PlanTree {
 
             BaseNode newJoinNode;
             Column column1, column2;
-            if (joinInnerChild.projectionInfo.contains(columnList.get(0).getWholeColumnName())) {
+            if (joinInnerChild.projectionInfo.containsKey(columnList.get(0).getWholeColumnName())) {
                 //TODO: create appropriate join node
                 column1 = columnList.get(0);
                 column2 = columnList.get(1);

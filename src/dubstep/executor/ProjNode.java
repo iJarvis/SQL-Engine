@@ -10,6 +10,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ProjNode extends BaseNode {
@@ -63,12 +64,13 @@ public class ProjNode extends BaseNode {
             }
         }
         //hack for now. hate me.
+        /*
         if (completeProjectionTables.size() != 0) {
             for (String column: projectionInfo) {
                 PrimitiveValue value = nextRow.getValue(column, column, projectionInfo);
                 values.add(value);
             }
-        }
+        }*/
 
         return new Tuple(values);
     }
@@ -80,16 +82,18 @@ public class ProjNode extends BaseNode {
 
     @Override
     void initProjectionInfo() {
-        projectionInfo = new ArrayList<>();
-        for (SelectItem selectItem : selectExpressionItems) {
+        projectionInfo = new HashMap<>();
+        for (int i = 0; i < selectExpressionItems.size(); ++i) {
+            SelectItem selectItem = selectExpressionItems.get(i);
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
             String alias = ((SelectExpressionItem) selectItem).getAlias();
             if (alias == null) {
-                projectionInfo.add(columnName);
+                projectionInfo.put(columnName, i);
             } else {
-                projectionInfo.add(alias);
+                projectionInfo.put(alias, i);
             }
         }
+        /*
         if (completeProjectionTables.size() != 0) {
             for (String column : innerNode.projectionInfo) {
                 for (String table: completeProjectionTables) {
@@ -98,6 +102,6 @@ public class ProjNode extends BaseNode {
                     }
                 }
             }
-        }
+        }*/
     }
 }

@@ -6,7 +6,9 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DubTable {
 
@@ -42,14 +44,14 @@ public class DubTable {
         return this.tableName;
     }
 
-    public ArrayList<String> GetColumnList(Table fromItem) {
+    public Map<String, Integer> getColumnList(Table fromItem) {
         String alias = fromItem.getAlias();
         String fromName = alias == null ? this.tableName : alias;
-        ArrayList<String> columnList = new ArrayList<>();
-        for (ColumnDefinition columnDefinition : this.columnDefinitions) {
-            columnList.add(fromName + "." + columnDefinition.getColumnName());
+        Map<String, Integer> columns = new HashMap<>();
+        for (int i = 0; i < columnDefinitions.size(); ++i) {
+            columns.put(fromName + "." + columnDefinitions.get(i).getColumnName(), i);
         }
-        return columnList;
+        return columns;
     }
 
     public int getRowCount() {

@@ -141,7 +141,7 @@ public class SortNode extends BaseNode {
 
     @Override
     void initProjectionInfo() {
-        this.projectionInfo = this.innerNode.projectionInfo;
+        projectionInfo = innerNode.projectionInfo;
     }
 
     private Comparator<Pair<Integer, Tuple>> getPQComparator() {
