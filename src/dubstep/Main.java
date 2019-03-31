@@ -53,7 +53,7 @@ public class Main {
             if (sqlString == null)
                 continue;
 
-            if (sqlString.equals("\\q") || sqlString.equals("quit") || sqlString.equals("exit"))
+            if (sqlString.equals("\\q;") || sqlString.equals("quit;") || sqlString.equals("exit;"))
                 break;
             executeQuery(sqlString);
 

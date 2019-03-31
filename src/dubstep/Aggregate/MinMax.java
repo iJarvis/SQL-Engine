@@ -20,6 +20,10 @@ public class MinMax extends Aggregate {
     }
 
     @Override
+    public void resetCurrentResult() {
+    }
+
+    @Override
     public PrimitiveValue yield (Tuple tuple) {
         this.evaluator.setTuple(tuple);
         PrimitiveValue curResult = null;

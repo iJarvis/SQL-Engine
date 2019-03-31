@@ -15,6 +15,12 @@ public class Average extends Sum {
         counter = new Count(expression, evaluator);
     }
 
+    @Override
+    public void resetCurrentResult() {
+
+    }
+
+    @Override
     public PrimitiveValue yield(Tuple tuple) {
         super.yield(tuple);
 
