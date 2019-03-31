@@ -2,6 +2,7 @@ package dubstep.utils;
 
 import dubstep.executor.BaseNode;
 import dubstep.executor.ScanNode;
+import dubstep.executor.SelectNode;
 
 public class Explainer {
 
@@ -23,6 +24,8 @@ public class Explainer {
 
         explainString += ", Number of tuples : " + root.getTupleCount() +
                 ", Time taken : " + root.getExecutionTime() + " ms";
+        if(root instanceof SelectNode)
+            explainString += " filter = "+ (((SelectNode) root).filter.toString());
 
         for(int i = 0; i < indentLevel; i++){
             System.out.print("\t");

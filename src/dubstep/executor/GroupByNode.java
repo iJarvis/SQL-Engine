@@ -28,6 +28,7 @@ public class GroupByNode extends BaseNode {
     private Boolean isInit = false;
     private Tuple next;
     private List<ColumnDefinition> colDefs;
+
     private ArrayList<Integer> aggIndices;
     private boolean bufferStatus;
     //private Boolean done;

@@ -55,26 +55,27 @@ public class PlanTree {
             projInnerNode = selectNode;
         } else
             projInnerNode = scanRoot;
-        //handle order by
-        if (plainSelect.getOrderByElements() != null) {
-            SortNode sortNode = new SortNode(plainSelect.getOrderByElements(), projInnerNode);
-            projInnerNode = sortNode;
-        }
 
         //handle projection
         List<SelectItem> selectItems = plainSelect.getSelectItems();
         GenerateAggregateNode genAgg = new GenerateAggregateNode(selectItems, projInnerNode);
         BaseNode projNode = genAgg.getAggregateNode();
 
-        if(plainSelect.getLimit() != null)
-        {
-            projNode = new LimitNode(plainSelect.getLimit().getRowCount(), projNode);
-        }
         if (plainSelect.getDistinct() != null) {
             List<SelectExpressionItem> distinctItems = plainSelect.getDistinct().getOnSelectItems();
             if (distinctItems != null) {
                 projNode = new DistinctNode(distinctItems, projNode);
             }
+        }
+
+        if (plainSelect.getOrderByElements() != null) {
+            SortNode sortNode = new SortNode(plainSelect.getOrderByElements(), projNode);
+            projNode = sortNode;
+        }
+
+        if(plainSelect.getLimit() != null)
+        {
+            projNode = new LimitNode(plainSelect.getLimit().getRowCount(), projNode);
         }
         return projNode;
     }
@@ -127,7 +128,7 @@ public class PlanTree {
     private static BaseNode getResponsibleChild(BaseNode currentNode, List<Column> columnList) {
         if (currentNode instanceof UnionNode || currentNode instanceof ScanNode)
             return currentNode;
-        if (currentNode.innerNode != null && currentNode instanceof JoinNode) {
+        if (currentNode.innerNode != null &&( currentNode instanceof JoinNode || currentNode instanceof HashJoinNode || currentNode instanceof SortMergeJoinNode) ){
             boolean inner = false, outer = false;
 
             for (Column column : columnList) {

@@ -60,6 +60,10 @@ public class Tuple {
         this.tid = -1;
         this.valueArray.addAll(innerTup.valueArray);
         this.valueArray.addAll(outerTuple.valueArray);
+        this.columnDefinitions = new ArrayList<>();
+        this.columnDefinitions.addAll(innerTup.columnDefinitions);
+        this.columnDefinitions.addAll(outerTuple.columnDefinitions);
+
     }
 
 

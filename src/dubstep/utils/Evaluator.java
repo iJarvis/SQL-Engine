@@ -26,7 +26,4 @@ public class Evaluator extends Eval {
         this.tuple = tuple;
     }
 
-    public PrimitiveValue eval(Function function){
-        return eval(new Column(new Table(), function.toString()));
-    }
 }
