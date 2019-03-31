@@ -26,8 +26,9 @@ public class GroupByNode extends BaseNode {
     private ArrayList<Expression> selectExpressions;
     private Aggregate[] aggObjects;
     private Boolean isInit = false;
+    private Boolean isInitColDef = false;
     private Tuple next;
-    private List<ColumnDefinition> colDefs;
+    private List<ColumnDefinition> colDefs = new ArrayList<>();
 
     private ArrayList<Integer> aggIndices;
     private boolean bufferStatus;
@@ -134,15 +135,12 @@ public class GroupByNode extends BaseNode {
         }
         if (next == null)
             return;
-        this.colDefs = next.getColumnDefinitions();
         ArrayList<Expression> selectExpressions = new ArrayList<>();
 
         for (SelectExpressionItem expressionItems : selectExpressionItems) {
             selectExpressions.add(expressionItems.getExpression());
         }
 
-        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
-        Tuple keyRow = new Tuple(rowValues);
 
         for (int i = 0; i < selectExpressions.size(); i++) {
             if (! (selectExpressions.get(i) instanceof Column)) {
@@ -152,16 +150,24 @@ public class GroupByNode extends BaseNode {
 
         while (next != null) {
             this.evaluator.setTuple(next);
+            List<PrimitiveValue> rowValues = new ArrayList<>();
 
             for (int i = 0; i < selectExpressions.size(); i++) {
                 if (selectExpressions.get(i) instanceof Column) {
                     try {
-                        keyRow.setValue(i, evaluator.eval(selectExpressions.get(i)));
+                        rowValues.add(evaluator.eval(selectExpressions.get(i)));
+                         if(this.isInitColDef == false) {
+                             ColumnDefinition def = next.getColDef(selectExpressions.get(i).toString(), this.innerNode.projectionInfo);
+                             this.colDefs.add(def);
+                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
             }
+
+            Tuple keyRow = new Tuple(rowValues,this.colDefs);
+            this.isInitColDef = true;
 
             String keyString = keyRow.toString();
 

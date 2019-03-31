@@ -38,17 +38,19 @@ public class Tuple {
             }
         }
     }
-
-    public Tuple(String tupleSting) {
-
+    public Tuple(List<PrimitiveValue> values)
+    {
+        this.tid = -1;
+        this.valueArray.addAll(values);
     }
 
-    public Tuple(List<PrimitiveValue> tempvalueArray) {
+    public Tuple(List<PrimitiveValue> tempvalueArray, List<ColumnDefinition> definition) {
         this.tid = -1;
         this.valueArray.addAll(tempvalueArray);
+        this.columnDefinitions = definition;
     }
 
-    public Tuple(PrimitiveValue[] tempvalueArray) {
+    public Tuple(PrimitiveValue[] tempvalueArray , ColumnDefinition definition) {
         this.tid = -1;
         for (PrimitiveValue val : tempvalueArray){
             this.valueArray.add(val);
@@ -80,8 +82,19 @@ public class Tuple {
         return output;
     }
 
-    public  void setValue(int index, PrimitiveValue value){
+    public void setValue(int index, PrimitiveValue value){
         valueArray.set(index, value);
+    }
+
+    public ColumnDefinition getColDef(String columnName,List<String> projInfo)
+    {
+        int index = 0;
+        for(String col : projInfo) {
+            if (col.equals(columnName))
+               break;
+            index++;
+        }
+        return columnDefinitions.get(index);
     }
 
     public PrimitiveValue getValue(String columnName1, String columnName2, List<String> projInfo) {
