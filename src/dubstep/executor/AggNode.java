@@ -60,11 +60,16 @@ public class AggNode extends BaseNode {
             next = innerNode.getNextTuple();
         }
 
-        int i = 0;
+        boolean rowValuesInit = false;
         while (next != null) {
-            for (i = 0; i < selectExpressionItems.size(); i++) {
-                rowValues.add(aggObjects.get(i).yield(next));
+            for (int i = 0; i < selectExpressionItems.size(); i++) {
+                if (!rowValuesInit) {
+                    rowValues.add(aggObjects.get(i).yield(next));
+                } else {
+                    rowValues.set(i, aggObjects.get(i).yield(next));
+                }
             }
+            rowValuesInit = true;
             next = innerNode.getNextTuple();
         }
 
