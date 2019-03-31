@@ -14,6 +14,7 @@ public class JoinNode extends BaseNode {
         this.innerNode.parentNode = this;
         this.outerNode = outerNode;
         this.outerNode.parentNode = this;
+        this.outerNode.isInner = false;
         this.initProjectionInfo();
     }
 
@@ -23,6 +24,8 @@ public class JoinNode extends BaseNode {
             innerTuple = this.innerNode.getNextTuple();
             initJoin = true;
         }
+        if(innerTuple == null)
+            return null;
         Tuple outerTuple;
         outerTuple = this.outerNode.getNextTuple();
 

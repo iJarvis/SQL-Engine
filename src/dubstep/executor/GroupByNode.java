@@ -29,10 +29,12 @@ public class GroupByNode extends BaseNode {
     private Tuple next;
     private List<ColumnDefinition> colDefs;
     private ArrayList<Integer> aggIndices;
+    private boolean bufferStatus;
     //private Boolean done;
 
     public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innernode;
+        this.innerNode.parentNode = this;
         this.selectExpressionItems = selectExpressionItems;
         this.selectExpressions = null;
         this.aggObjects = null;
@@ -40,14 +42,19 @@ public class GroupByNode extends BaseNode {
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
-       // if (Main.mySchema.isInMem())
-            this.fillBuffer();
-        //else {
-        //    this.generateSortNode();
-        //}
+        bufferStatus = false;
+        if (Main.mySchema.isInMem())
+        {}
+        else {
+            this.generateSortNode();
+        }
     }
 
     public Tuple getNextRow() {
+        if (Main.mySchema.isInMem() && this.bufferStatus == false) {
+            this.fillBuffer();
+            bufferStatus = true;
+        }
 
         //if (Main.mySchema.isInMem())
             return inMemNextRow();
@@ -124,6 +131,8 @@ public class GroupByNode extends BaseNode {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
         }
+        if (next == null)
+            return;
         this.colDefs = next.getColumnDefinitions();
         ArrayList<Expression> selectExpressions = new ArrayList<>();
 

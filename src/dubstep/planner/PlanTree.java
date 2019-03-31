@@ -3,6 +3,7 @@ package dubstep.planner;
 import dubstep.executor.*;
 import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
+import dubstep.utils.Evaluator;
 import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -170,11 +171,21 @@ public class PlanTree {
             child.parentNode = parent;
 
             BaseNode newParent = newNode.parentNode;
-            newParent.innerNode = selectNode;
+            if(newNode.isInner) {
+                newParent.innerNode = selectNode;
+                selectNode.isInner = true;
+            }
+            else {
+                newParent.outerNode = selectNode;
+                selectNode.isInner = false;
+            }
+
             selectNode.parentNode = newParent;
             selectNode.innerNode = newNode;
+            newNode.isInner = true;
             newNode.parentNode = selectNode;
             selectNode.projectionInfo = selectNode.innerNode.projectionInfo;
+            selectNode.eval = new Evaluator(selectNode.projectionInfo);
         }
     }
 
@@ -263,9 +274,11 @@ public class PlanTree {
         BaseNode inner = currentNode.innerNode;
         BaseNode outer = currentNode.outerNode;
 
-        if (currentNode instanceof SelectNode) {
+        if (currentNode instanceof SelectNode &&((SelectNode)(SelectNode) currentNode).isOptimized == false ) {
+            selectPushDown((SelectNode) currentNode);
+            ((SelectNode)(SelectNode) currentNode).isOptimized = true;
             convertJoins((SelectNode) currentNode);
-//            selectPushDown((SelectNode) currentNode);
+
         }
         optimizePlan(inner);
         optimizePlan(outer);

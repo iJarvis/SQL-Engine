@@ -14,11 +14,13 @@ abstract public class BaseNode {
     QueryTimer timer; //user for probing running time for every node
     Integer tupleCount;
     public ArrayList<String> projectionInfo;
+    public Boolean isInner;
 
     BaseNode() {
         timer = new QueryTimer();
         timer.reset();
         tupleCount = 0;
+        isInner = true;
     }
 
     abstract Tuple getNextRow();
