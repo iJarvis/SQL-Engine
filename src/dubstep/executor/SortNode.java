@@ -25,7 +25,6 @@ public class SortNode extends BaseNode {
     private TupleOrderByComparator comparator;
     private PriorityQueue<Pair<Integer, Tuple>> queue = null;
     private List<BufferedReader> brList = null;
-    private List<ColumnDefinition> columnDefinitions = null;
 
     public SortNode(List<OrderByElement> elems, BaseNode innerNode) {
         super();
@@ -57,9 +56,6 @@ public class SortNode extends BaseNode {
             currentSortDir.mkdirs();
         }
         Tuple nextTuple = innerNode.getNextTuple();
-        if (nextTuple != null) {
-            columnDefinitions = nextTuple.getColumnDefinitions();
-        }
         try {
             int fileCount = 0;
             while (nextTuple != null) {
@@ -74,7 +70,7 @@ public class SortNode extends BaseNode {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(sortFile));
 
                 for (int i = 0; i < sortBuffer.size(); ++i) {
-                    writer.write(sortBuffer.get(i) + "\n");
+                    writer.write(sortBuffer.get(i).serializeTuple() + "\n");
                 }
 
                 writer.close();
@@ -88,7 +84,7 @@ public class SortNode extends BaseNode {
             for (int i = 0; i < fileCount; ++i) {
                 File sortFile = new File(currentSortDir, String.valueOf(i));
                 BufferedReader br = new BufferedReader(new FileReader(sortFile));
-                Tuple tuple = new Tuple(br.readLine(), -1, columnDefinitions);
+                Tuple tuple = Tuple.deserializeTuple(br.readLine());
                 Pair<Integer, Tuple> pair = new Pair<>(i, tuple);
                 queue.add(pair);
                 brList.add(br);
@@ -118,7 +114,7 @@ public class SortNode extends BaseNode {
                 Pair<Integer, Tuple> pair = queue.poll();
                 String str = brList.get(pair.getElement0()).readLine();
                 if (str != null) {
-                    Tuple tuple = new Tuple(str, -1, columnDefinitions);
+                    Tuple tuple = Tuple.deserializeTuple(str);
                     Pair<Integer, Tuple> newPair = new Pair<>(pair.getElement0(), tuple);
                     queue.add(newPair);
                 } else {
