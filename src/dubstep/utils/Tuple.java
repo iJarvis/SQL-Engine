@@ -39,9 +39,9 @@ public class Tuple {
     }
 
 //    public Tuple(List<PrimitiveValue> tempvalueArray) {
-    public Tuple(List<PrimitiveValue> values) {
+    public Tuple(ArrayList<PrimitiveValue> values) {
         tid = -1;
-        valueArray.addAll(values);
+        valueArray = values;
     }
 
     public Tuple(List<PrimitiveValue> tempvalueArray, List<ColumnDefinition> definition) {
@@ -149,6 +149,45 @@ public class Tuple {
 
     public void addValueItem(PrimitiveValue primitiveValue) {
         valueArray.add(primitiveValue);
+    }
+
+    public String serializeTuple()
+    {
+        String serializedString = "";
+        for(PrimitiveValue value : this.valueArray )
+        {
+            char dt =' ';
+            if(value instanceof LongValue)
+                dt = 'l';
+            else if(value instanceof DoubleValue )
+                dt = 'f';
+            else if (value instanceof StringValue)
+                dt = 's';
+            else if (value instanceof DateValue )
+                dt = 'd';
+            serializedString += value.toString()+"--"+dt+"|";
+
+        }
+        return  serializedString;
+    }
+
+    public Tuple deserializeTuple (String serializedString)
+    {
+        ArrayList<PrimitiveValue> columnValues = new ArrayList<>();
+        String values[] = serializedString.split(("\\|"));
+        for(String value : values)
+        {
+            String column[] = value.split("--");
+            if(column[1].equals("l"))
+                columnValues.add(new LongValue(column[0]));
+            else if(column[1].equals("f"))
+                columnValues.add(new DoubleValue(column[0]));
+            else if(column[1].equals("d"))
+                columnValues.add(new DateValue(column[0]));
+            else if(column[1].equals("s"))
+                columnValues.add(new StringValue(column[0]));
+        }
+        return  new Tuple(columnValues);
     }
 }
 
