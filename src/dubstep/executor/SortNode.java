@@ -51,8 +51,11 @@ public class SortNode extends BaseNode {
 
     private void performExternalSort() {
         File temp = new File(tempDir);
-        File currentSortDir = new File(temp, String.valueOf(Utils.getRandomNumber(0, 100)));
+        File currentSortDir = new File(temp, String.valueOf(Utils.getRandomNumber(0, 10000)));
         if (!currentSortDir.exists()) {
+            currentSortDir.mkdirs();
+        } else {
+            Utils.deleteDir(currentSortDir);
             currentSortDir.mkdirs();
         }
         Tuple nextTuple = innerNode.getNextTuple();

@@ -1,5 +1,6 @@
 package dubstep.utils;
 
+import java.io.File;
 import java.util.Map;
 
 public class Utils {
@@ -15,5 +16,15 @@ public class Utils {
         }
 //            if(!target.containsKey(e.getKey())
 
+    }
+
+    public static void deleteDir(File file) {
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                deleteDir(f);
+            }
+        }
+        file.delete();
     }
 }
