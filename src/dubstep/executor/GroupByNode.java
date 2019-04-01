@@ -245,7 +245,6 @@ public class GroupByNode extends BaseNode {
                 sortElement.setAsc(true);
             }
         }
-        elems.add(sortElement);
         this.innerNode = new SortNode(elems, this.innerNode);
         this.innerNode.parentNode = this;
     }

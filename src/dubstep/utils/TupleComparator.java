@@ -34,6 +34,17 @@ public class TupleComparator {
                     return rightDate.compareTo(leftDate);
                 }
             }
+            else if(leftPV.getType() == PrimitiveType.STRING )
+            {
+                String leftValue = leftPV.toString();
+                String rightValue =rightPV.toString();
+
+                if (isAsc) {
+                    return  leftValue.compareTo(rightValue);
+                }
+                else
+                    return  rightValue.compareTo(leftValue);
+            }
         } catch (PrimitiveValue.InvalidPrimitive | ParseException e) {
             e.printStackTrace();
         }
