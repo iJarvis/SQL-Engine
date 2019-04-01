@@ -4,10 +4,7 @@ import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Tuple {
     int tid;
@@ -51,6 +48,13 @@ public class Tuple {
         tid = -1;
         valueArray.addAll(tempvalueArray);
         columnDefinitions = definition;
+    }
+
+    public Tuple(PrimitiveValue[] tempvalueArray) {
+        tid = -1;
+        for (PrimitiveValue val : tempvalueArray) {
+            valueArray.add(val);
+        }
     }
 
     public Tuple(PrimitiveValue[] tempvalueArray , ColumnDefinition definition) {

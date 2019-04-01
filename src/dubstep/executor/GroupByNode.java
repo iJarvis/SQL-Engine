@@ -26,11 +26,12 @@ public class GroupByNode extends BaseNode {
     private Aggregate[] aggObjects;
     private Boolean isInit = false;
     private Boolean isInitColDef = false;
+    private Boolean resetAgg = false;
     private Tuple next;
     private List<ColumnDefinition> colDefs = new ArrayList<>();
-    private List<Column> groupbyCols;
+    private List<Column> groupbyCols = new ArrayList<>();
     private ArrayList<Integer> aggIndices;
-    private Column groupByCol;
+   // private Column groupByCol;
     private String refCol;
     private  boolean isFilled = false;
     //private Boolean done;
@@ -53,7 +54,9 @@ public class GroupByNode extends BaseNode {
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
         this.refCol = "";
-        // if (Main.mySchema.isInMem())
+        // if (Main.mySchema.isInMem()){
+         //   this.fillBuffer();
+        //}
         //else {
         //   this.generateSortNode();
         //}
@@ -68,7 +71,7 @@ public class GroupByNode extends BaseNode {
         //if (Main.mySchema.isInMem())
         return inMemNextRow();
         //else
-        //    return onDiskNextRow();
+         //  return onDiskNextRow();
 
     }
 
@@ -81,8 +84,17 @@ public class GroupByNode extends BaseNode {
             next = this.innerNode.getNextTuple();
             this.isInit = true;
 
-            if (next != null)
-                this.refCol = this.refCol + next.getValue(groupByCol, this.projectionInfo);
+            if (next != null) {
+                this.refCol = "";
+                for (Column groupCol : groupbyCols) {
+                    this.refCol = this.refCol + next.getValue(groupCol, this.projectionInfo).toString();
+                }
+            }
+        }
+        if (resetAgg) {
+            for (int i : aggIndices) {
+                aggObjects[i].resetCurrentResult();
+            }
         }
 
         String curCol = "";
@@ -90,17 +102,18 @@ public class GroupByNode extends BaseNode {
 
         while (next != null) {
 
-            curCol = curCol + next.getValue(groupByCol, this.projectionInfo);
+            this.evaluator.setTuple(next);
+            curCol = "";
+            for (Column groupCol : groupbyCols) {
+                curCol = curCol + next.getValue(groupCol, this.projectionInfo).toString();
+            }
 
             if (!(curCol.equals(refCol))) {
-                for (int i : aggIndices) {
-                    aggObjects[i].resetCurrentResult();
-                }
+                resetAgg = true;
                 refCol = curCol;
                 return new Tuple(Arrays.asList(rowValues));
             }
 
-            this.evaluator.setTuple(next);
             for (int i = 0; i < selectExpressions.size(); i++) {
                 if (selectExpressions.get(i) instanceof Column) {
                     try {
@@ -112,9 +125,8 @@ public class GroupByNode extends BaseNode {
                     rowValues[i] = aggObjects[i].yield(next);
                 }
             }
+            next = this.innerNode.getNextTuple();
         }
-
-        next = this.innerNode.getNextTuple();
         return null;
     }
 
@@ -208,19 +220,20 @@ public class GroupByNode extends BaseNode {
 
     public void generateSortNode() {
 
-        OrderByElement sortElement = new OrderByElement();
+        List<OrderByElement> elems = new ArrayList<>();
+        OrderByElement sortElement = null;
 
         for (Expression selectExpression : selectExpressions) {
-            if (selectExpression instanceof Column)
-                this.groupByCol = (Column) selectExpression;
+            if (selectExpression instanceof Column) {
+                this.groupbyCols.add((Column) selectExpression);
+                sortElement = new OrderByElement();
+                sortElement.setExpression((Expression) selectExpression);
+                elems.add(sortElement);
+            }
         }
-
-        sortElement.setExpression(this.groupByCol);
-
-        List<OrderByElement> elems = new ArrayList<>();
         elems.add(sortElement);
-
         this.innerNode = new SortNode(elems, this.innerNode);
+        this.innerNode.parentNode = this;
     }
 
     @Override

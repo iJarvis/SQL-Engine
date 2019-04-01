@@ -53,29 +53,23 @@ public class AggNode extends BaseNode {
             return null;
         }
 
-        List<PrimitiveValue> rowValues = new ArrayList<>();
+        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
 
         if (!isInit) {
             isInit = true;
             next = innerNode.getNextTuple();
         }
 
-        boolean rowValuesInit = false;
         while (next != null) {
             for (int i = 0; i < selectExpressionItems.size(); i++) {
-                if (!rowValuesInit) {
-                    rowValues.add(aggObjects.get(i).yield(next));
-                } else {
-                    rowValues.set(i, aggObjects.get(i).yield(next));
-                }
+                rowValues[i] =  aggObjects.get(i).yield(next);
             }
-            rowValuesInit = true;
             next = innerNode.getNextTuple();
         }
 
         done = true;
         aggObjects = null;
-        if (rowValues.size() != 0) {
+        if (rowValues[0] != null) {
            return new Tuple(rowValues);
         }
         return null;
