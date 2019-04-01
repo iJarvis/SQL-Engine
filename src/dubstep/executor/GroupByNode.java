@@ -94,6 +94,7 @@ public class GroupByNode extends BaseNode {
             }
         }
         if (resetAgg) {
+            resetAgg = false;
             for (int i : aggIndices) {
                 aggObjects[i].resetCurrentResult();
             }
