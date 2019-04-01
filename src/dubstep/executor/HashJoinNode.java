@@ -151,6 +151,8 @@ public class HashJoinNode extends BaseNode {
             }
         }
 
+        this.hashJoinTable = null;
+        this.condType = NONE;
         this.resetIterator();
         return null;
     }
