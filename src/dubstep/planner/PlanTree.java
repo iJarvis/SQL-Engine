@@ -201,8 +201,11 @@ public class PlanTree {
                 if (currentNode.outerNode.projectionInfo.containsKey(column.getWholeColumnName()))
                     outer = true;
             }
-            if (inner && outer) {
+            if (inner && outer ) {
+                if(currentNode instanceof JoinNode)
                 return currentNode;
+                else
+                    return null;
             } else {
                 BaseNode leftChild = getResponsibleJoinChild(currentNode.innerNode, columnList);
                 if (leftChild != null) {

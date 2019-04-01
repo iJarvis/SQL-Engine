@@ -49,7 +49,7 @@ public class AggNode extends BaseNode {
     @Override
     public Tuple getNextRow() {
         if (done) {
-            resetIterator();
+            aggObjects = null;
             return null;
         }
 
@@ -73,6 +73,7 @@ public class AggNode extends BaseNode {
         if (rowValues.get(0) != null) {
            return new Tuple(rowValues);
         }
+        aggObjects = null;
         return null;
     }
 

@@ -54,6 +54,8 @@ public class SortMergeJoinNode extends BaseNode {
                 }
             }
         }
+        if(outerTuple == null)
+            return null;
 
         PrimitiveValue innerPV = innerTuple.getValue(innerColumn, innerNode.projectionInfo);
         PrimitiveValue outerPV = outerTuple.getValue(outerColumn, outerNode.projectionInfo);

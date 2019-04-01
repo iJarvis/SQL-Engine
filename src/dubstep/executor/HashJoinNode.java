@@ -150,6 +150,7 @@ public class HashJoinNode extends BaseNode {
                 outerTuple = outerNode.getNextTuple();
             }
         }
+        this.hashJoinTable = null;
 
         this.hashJoinTable = null;
         this.condType = NONE;
@@ -159,9 +160,10 @@ public class HashJoinNode extends BaseNode {
 
     @Override
     void resetIterator() {
+        this.hashJoinTable = null;
+        this.isInit = false;
         innerNode.resetIterator();
         outerNode.resetIterator();
-        initHashMap();
     }
 
     void initProjectionInfo() {
