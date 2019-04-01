@@ -32,11 +32,13 @@ public class GroupByNode extends BaseNode {
     private ArrayList<Integer> aggIndices;
     private Column groupByCol;
     private String refCol;
+    private  boolean isFilled = false;
     //private Boolean done;
 
     public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innernode;
         this.aggIndices = new ArrayList<>();
+        this.innerNode.parentNode = this;
         this.selectExpressionItems = selectExpressionItems;
         for (SelectExpressionItem expressionItems : selectExpressionItems) {
             this.selectExpressions.add(expressionItems.getExpression());
@@ -52,14 +54,17 @@ public class GroupByNode extends BaseNode {
         this.next = null;
         this.refCol = "";
         // if (Main.mySchema.isInMem())
-        this.fillBuffer();
         //else {
         //   this.generateSortNode();
         //}
     }
 
     public Tuple getNextRow() {
-
+        if(!isFilled)
+        {
+            isFilled = true;
+            this.fillBuffer();
+        }
         //if (Main.mySchema.isInMem())
         return inMemNextRow();
         //else
