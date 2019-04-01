@@ -8,16 +8,16 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import static dubstep.utils.Tuple.deserializeTuple;
 
 public class GroupByNode extends BaseNode {
     private HashMap<String, ArrayList<AggregateMap>> buffer;
@@ -29,7 +29,6 @@ public class GroupByNode extends BaseNode {
     private Boolean isInitColDef = false;
     private Boolean resetAgg = false;
     private Tuple next;
-    private List<ColumnDefinition> colDefs = new ArrayList<>();
     private List<Column> groupbyCols = new ArrayList<>();
     private ArrayList<Integer> aggIndices;
    // private Column groupByCol;
@@ -100,7 +99,7 @@ public class GroupByNode extends BaseNode {
         }
 
         String curCol = "";
-        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
+        ArrayList<PrimitiveValue> rowValues = new ArrayList<>(selectExpressions.size());
 
         while (next != null) {
 
@@ -113,24 +112,24 @@ public class GroupByNode extends BaseNode {
             if (!(curCol.equals(refCol))) {
                 resetAgg = true;
                 refCol = curCol;
-                return new Tuple(Arrays.asList(rowValues));
+                return new Tuple(rowValues);
             }
 
             for (int i = 0; i < selectExpressions.size(); i++) {
                 if (selectExpressions.get(i) instanceof Column) {
                     try {
-                        rowValues[i] = evaluator.eval(selectExpressions.get(i));
+                        rowValues.set(i,evaluator.eval(selectExpressions.get(i)));
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    rowValues[i] = aggObjects[i].yield(next);
+                    rowValues.set(i,aggObjects[i].yield(next));
                 }
             }
             next = this.innerNode.getNextTuple();
         }
 
-        if(rowValues[0] != null)
+        if(rowValues.get(0) != null)
             return new Tuple(rowValues);
         return null;
     }
@@ -153,7 +152,7 @@ public class GroupByNode extends BaseNode {
             return null;
         }
         String resString = buffer.keySet().iterator().next();
-        Tuple result = new Tuple(resString, -1, this.colDefs);
+        Tuple result = deserializeTuple(resString);
 
         ArrayList<AggregateMap> mapList = buffer.get(resString);
         buffer.remove(resString);
@@ -194,27 +193,20 @@ public class GroupByNode extends BaseNode {
 
         while (next != null) {
             this.evaluator.setTuple(next);
-            List<PrimitiveValue> rowValues = new ArrayList<>();
+            ArrayList<PrimitiveValue> rowValues = new ArrayList<>();
 
             for (int i = 0; i < selectExpressions.size(); i++) {
                 Expression selectExpression = selectExpressions.get(i);
                 if (selectExpression instanceof Column) {
                     try {
                          rowValues.add(evaluator.eval(selectExpression));
-                         if (!this.isInitColDef) {
-                             ColumnDefinition def = next.getColDef(((Column) selectExpression).getWholeColumnName(), innerNode.projectionInfo);
-                             this.colDefs.add(def);
-                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
             }
-
-            Tuple keyRow = new Tuple(rowValues, this.colDefs);
-            this.isInitColDef = true;
-
-            String keyString = keyRow.toString();
+            Tuple keyRow = new Tuple(rowValues);
+            String keyString = keyRow.serializeTuple();
 
             if (buffer.containsKey(keyString)) {
                 for (AggregateMap pair : buffer.get(keyString)) {

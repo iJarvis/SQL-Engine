@@ -9,10 +9,8 @@ import java.util.*;
 public class Tuple {
     int tid;
     public ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
-    private List<ColumnDefinition> columnDefinitions;
 
     public Tuple(String csv_string, int tid, List<ColumnDefinition> columnDefinitions) {
-        this.columnDefinitions = columnDefinitions;
         String[] args = csv_string.split("\\|");
         tid = this.tid;
         for (int i = 0; i < args.length; i++) {
@@ -47,30 +45,12 @@ public class Tuple {
     public Tuple(List<PrimitiveValue> tempvalueArray, List<ColumnDefinition> definition) {
         tid = -1;
         valueArray.addAll(tempvalueArray);
-        columnDefinitions = definition;
-    }
-
-    public Tuple(PrimitiveValue[] tempvalueArray) {
-        tid = -1;
-        for (PrimitiveValue val : tempvalueArray) {
-            valueArray.add(val);
-        }
-    }
-
-    public Tuple(PrimitiveValue[] tempvalueArray , ColumnDefinition definition) {
-        tid = -1;
-        for (PrimitiveValue val : tempvalueArray) {
-            valueArray.add(val);
-        }
     }
 
     public Tuple(Tuple innerTup, Tuple outerTuple) {
         tid = -1;
         valueArray.addAll(innerTup.valueArray);
         valueArray.addAll(outerTuple.valueArray);
-        columnDefinitions = new ArrayList<>();
-        columnDefinitions.addAll(innerTup.columnDefinitions);
-        columnDefinitions.addAll(outerTuple.columnDefinitions);
     }
 
     public String getProjection() {
@@ -98,33 +78,9 @@ public class Tuple {
         valueArray.set(index, value);
     }
 
-    public ColumnDefinition getColDef(String columnName, Map<String, Integer> projInfo) {
-        return columnDefinitions.get(projInfo.get(columnName));
-    }
 
     public PrimitiveValue getValue(String columnName1, String columnName2, Map<String, Integer> projInfo) {
-        //TODO: optimize it
-        /*
-        String findStr = columnName1;
-        String findStr1 = columnName2;
-        boolean found = false;
-        int final_index = 0;
-        for (String col : projInfo) {
-            String col1 = (col.indexOf('.') > -1) ? col.split("\\.")[1] : col;
-            int index1 = findStr.indexOf('.');
-            if (col.equals(findStr) || ((index1 < 0) && (col1.equals(findStr1)))) {
-                found = true;
-                break;
-            }
-            final_index++;
-        }
-
-        if (!found) {
-            return null;
-        }
-//            throw new UnsupportedOperationException("column not found tuple.getvalue");
-        return valueArray.get(final_index);*/
-        //optimized version
+       
         if (projInfo.containsKey(columnName1)) {
             return valueArray.get(projInfo.get(columnName1));
         }
@@ -141,10 +97,6 @@ public class Tuple {
     @Override
     public String toString() {
         return getProjection();
-    }
-
-    public List<ColumnDefinition> getColumnDefinitions() {
-        return columnDefinitions;
     }
 
     public void addValueItem(PrimitiveValue primitiveValue) {
@@ -171,7 +123,7 @@ public class Tuple {
         return  serializedString;
     }
 
-    public Tuple deserializeTuple (String serializedString)
+    public static Tuple deserializeTuple (String serializedString)
     {
         ArrayList<PrimitiveValue> columnValues = new ArrayList<>();
         String values[] = serializedString.split(("\\|"));

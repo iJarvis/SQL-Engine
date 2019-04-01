@@ -53,7 +53,7 @@ public class AggNode extends BaseNode {
             return null;
         }
 
-        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
+        ArrayList<PrimitiveValue> rowValues = new ArrayList<>(selectExpressionItems.size());
 
         if (!isInit) {
             isInit = true;
@@ -62,14 +62,14 @@ public class AggNode extends BaseNode {
 
         while (next != null) {
             for (int i = 0; i < selectExpressionItems.size(); i++) {
-                rowValues[i] =  aggObjects.get(i).yield(next);
+                rowValues.set(i, aggObjects.get(i).yield(next));
             }
             next = innerNode.getNextTuple();
         }
 
         done = true;
         aggObjects = null;
-        if (rowValues[0] != null) {
+        if (rowValues.get(0) != null) {
            return new Tuple(rowValues);
         }
         return null;
