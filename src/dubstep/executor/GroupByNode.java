@@ -159,7 +159,22 @@ public class GroupByNode extends BaseNode {
         for (AggregateMap map : mapList) {
             result.addValueItem(map.aggregate.getCurrentResult());
         }
+        int valueStartIndex = aggIndices.size() - 1;
+        int aggIndicesIndex = result.valueArray.size() - aggIndices.size();
+        int currentAgg = 0;
 
+        ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
+        for(int i =0 ; i<result.valueArray.size() ;i++)
+        {
+            if(currentAgg < aggIndices.size() && aggIndices.get(currentAgg) == i )
+            {
+                currentAgg++;
+                valueArray.add(result.valueArray.get(aggIndicesIndex++));
+            }
+            else
+                valueArray.add(result.valueArray.get(valueStartIndex++));
+        }
+        result.valueArray = valueArray;
         return (result);
     }
 

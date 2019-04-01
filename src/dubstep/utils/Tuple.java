@@ -8,7 +8,7 @@ import java.util.*;
 
 public class Tuple {
     int tid;
-    private ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
+    public ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
     private List<ColumnDefinition> columnDefinitions;
 
     public Tuple(String csv_string, int tid, List<ColumnDefinition> columnDefinitions) {

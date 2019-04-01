@@ -10,6 +10,7 @@ public class LimitNode extends BaseNode {
         currentRowNo = 0L;
         maxRowNo = limitValue;
         this.innerNode = innerNode;
+        this.innerNode.parentNode = this;
         initProjectionInfo();
     }
 
