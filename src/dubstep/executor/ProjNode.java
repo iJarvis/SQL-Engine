@@ -1,5 +1,6 @@
 package dubstep.executor;
 
+import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.PrimitiveValue;
@@ -19,6 +20,7 @@ public class ProjNode extends BaseNode {
     private List<SelectItem> selectItems; //used for building of projection info
     private ArrayList<SelectExpressionItem> selectExpressionItems = new ArrayList<>();
     private List<String> completeProjectionTables = new ArrayList<>();
+    private Evaluator eval;
     //private BaseNode resNode;
     //private ArrayList<Expression> expressions = new ArrayList<Expression>();
 
@@ -42,6 +44,7 @@ public class ProjNode extends BaseNode {
 //            expressions.add(expressionItems.getExpression());
 //        }
         initProjectionInfo();
+        eval = new Evaluator(innerNode.projectionInfo);
     }
 
     @Override
@@ -51,12 +54,7 @@ public class ProjNode extends BaseNode {
         Tuple nextRow = this.innerNode.getNextTuple();
         if (nextRow == null)
             return null;
-        Eval eval = new Eval() {
-            @Override
-            public PrimitiveValue eval(Column column) {
-                return nextRow.getValue(column, innerNode.projectionInfo);
-            }
-        };
+        eval.setTuple(nextRow);
         for (SelectExpressionItem expression : this.selectExpressionItems) {
             try {
                 PrimitiveValue value = eval.eval(expression.getExpression());

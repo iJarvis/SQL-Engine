@@ -7,7 +7,6 @@ import dubstep.utils.TupleComparator;
 import dubstep.utils.Utils;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 import java.io.*;
@@ -18,7 +17,6 @@ public class SortNode extends BaseNode {
     private static final String tempDir = "temp";
     private static final int NUMBER_OF_TUPLES_IN_MEM = 100;
 
-    private List<OrderByElement> elems;
     private boolean sortDone = false;
     private List<Tuple> sortBuffer = new ArrayList<>();
     private int idx = 0;
@@ -30,7 +28,6 @@ public class SortNode extends BaseNode {
         super();
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
-        this.elems = elems;
         comparator = new TupleOrderByComparator(elems);
         initProjectionInfo();
     }

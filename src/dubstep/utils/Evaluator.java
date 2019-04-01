@@ -4,7 +4,6 @@ import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 public class Evaluator extends Eval {
