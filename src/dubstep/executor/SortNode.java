@@ -15,7 +15,7 @@ import java.util.*;
 public class SortNode extends BaseNode {
 
     private static final String tempDir = "temp";
-    private static final int NUMBER_OF_TUPLES_IN_MEM = 100;
+    private static final int NUMBER_OF_TUPLES_IN_MEM = 500;
 
     private boolean sortDone = false;
     private List<Tuple> sortBuffer = new ArrayList<>();

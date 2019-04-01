@@ -242,6 +242,7 @@ public class GroupByNode extends BaseNode {
                 sortElement = new OrderByElement();
                 sortElement.setExpression((Expression) selectExpression);
                 elems.add(sortElement);
+                sortElement.setAsc(true);
             }
         }
         elems.add(sortElement);

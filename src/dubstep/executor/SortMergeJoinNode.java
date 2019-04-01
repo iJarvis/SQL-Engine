@@ -12,8 +12,8 @@ import java.util.List;
 
 public class SortMergeJoinNode extends BaseNode {
 
-    private Column innerColumn;
-    private Column outerColumn;
+    public Column innerColumn;
+    public Column outerColumn;
     private Tuple innerTuple = null;
     private Tuple outerTuple = null;
     private boolean initDone = false;

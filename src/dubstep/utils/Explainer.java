@@ -4,6 +4,7 @@ import dubstep.executor.BaseNode;
 import dubstep.executor.HashJoinNode;
 import dubstep.executor.ScanNode;
 import dubstep.executor.SelectNode;
+import dubstep.executor.SortMergeJoinNode;
 
 public class Explainer {
 
@@ -18,7 +19,7 @@ public class Explainer {
         if(root == null)
             return;
 
-        String explainString = root.getClass().getName();
+        String explainString = root.toString();
 
         if(root instanceof ScanNode)
             explainString += ", Table scanned : " + ((ScanNode) root).getScanTableName();
@@ -29,6 +30,8 @@ public class Explainer {
             explainString += " filter = "+ (((SelectNode) root).filter.toString());
         if(root instanceof HashJoinNode)
             explainString += " filter ="+(((HashJoinNode) root).filter.toString());
+        if(root instanceof SortMergeJoinNode )
+            explainString += " filter = "+(((SortMergeJoinNode) root).innerColumn.toString() +" = " +((SortMergeJoinNode) root).outerColumn.toString()   );
 
         for(int i = 0; i < indentLevel; i++){
             System.out.print("\t");
