@@ -28,33 +28,43 @@ public class GroupByNode extends BaseNode {
     private Boolean isInitColDef = false;
     private Tuple next;
     private List<ColumnDefinition> colDefs = new ArrayList<>();
-
+    private List<Column> groupbyCols;
     private ArrayList<Integer> aggIndices;
     private Column groupByCol;
     private String refCol;
+    private  boolean isFilled = false;
     //private Boolean done;
 
     public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
         this.innerNode = innernode;
+        this.aggIndices = new ArrayList<>();
+        this.innerNode.parentNode = this;
         this.selectExpressionItems = selectExpressionItems;
         for (SelectExpressionItem expressionItems : selectExpressionItems) {
             this.selectExpressions.add(expressionItems.getExpression());
         }
+        for (int i = 0; i < selectExpressions.size(); i++) {
+            if (!(selectExpressions.get(i) instanceof Column)) {
+                this.aggIndices.add(i);
+            }
+        }
         this.aggObjects = null;
-        this.aggIndices = new ArrayList<>();
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
         this.refCol = "";
         // if (Main.mySchema.isInMem())
-        this.fillBuffer();
         //else {
         //   this.generateSortNode();
         //}
     }
 
     public Tuple getNextRow() {
-
+        if(!isFilled)
+        {
+            isFilled = true;
+            this.fillBuffer();
+        }
         //if (Main.mySchema.isInMem())
         return inMemNextRow();
         //else
@@ -149,17 +159,6 @@ public class GroupByNode extends BaseNode {
 
         if (next == null)
             return;
-        ArrayList<Expression> selectExpressions = new ArrayList<>();
-
-        for (SelectExpressionItem expressionItems : selectExpressionItems) {
-            selectExpressions.add(expressionItems.getExpression());
-        }
-
-        for (int i = 0; i < selectExpressions.size(); i++) {
-            if (!(selectExpressions.get(i) instanceof Column)) {
-                this.aggIndices.add(i);
-            }
-        }
 
         while (next != null) {
             this.evaluator.setTuple(next);

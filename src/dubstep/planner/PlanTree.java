@@ -58,6 +58,7 @@ public class PlanTree {
 
         //handle projection
         List<SelectItem> selectItems = plainSelect.getSelectItems();
+        List<Column> groupColumns = plainSelect.getGroupByColumnReferences();
         GenerateAggregateNode genAgg = new GenerateAggregateNode(selectItems, projInnerNode);
         BaseNode projNode = genAgg.getAggregateNode();
 
@@ -236,14 +237,18 @@ public class PlanTree {
 
             BaseNode newJoinNode;
             Column column1, column2;
-            if (joinInnerChild.projectionInfo.containsKey(columnList.get(0).getWholeColumnName())) {
+            if (joinInnerChild.projectionInfo.containsKey(columnList.get(0).getWholeColumnName()) && joinOuterChild.projectionInfo.containsKey(columnList.get(1).getWholeColumnName())) {
                 //TODO: create appropriate join node
                 column1 = columnList.get(0);
                 column2 = columnList.get(1);
-            } else {
+            } else if (joinOuterChild.projectionInfo.containsKey(columnList.get(0).getWholeColumnName()) && joinInnerChild.projectionInfo.containsKey(columnList.get(1).getWholeColumnName())) {
                 column2 = columnList.get(0);
                 column1 = columnList.get(1);
             }
+            else
+                {
+                    throw  new UnsupportedOperationException("join condition invalid");
+                }
             if(mySchema.isInMem()) {
                 EqualsTo filter = new EqualsTo();
                 filter.setLeftExpression(column1);

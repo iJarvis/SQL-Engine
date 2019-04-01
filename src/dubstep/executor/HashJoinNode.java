@@ -16,7 +16,7 @@ import static dubstep.executor.BaseNode.DataType.*;
 
 public class HashJoinNode extends BaseNode {
 
-    private Expression filter;
+    public Expression filter;
     private DataType condType = DataType.NONE;
     private Iterator<Tuple> leftTupleIterator;
     private Column rightCol;

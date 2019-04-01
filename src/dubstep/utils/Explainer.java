@@ -1,6 +1,7 @@
 package dubstep.utils;
 
 import dubstep.executor.BaseNode;
+import dubstep.executor.HashJoinNode;
 import dubstep.executor.ScanNode;
 import dubstep.executor.SelectNode;
 
@@ -26,6 +27,8 @@ public class Explainer {
                 ", Time taken : " + root.getExecutionTime() + " ms";
         if(root instanceof SelectNode)
             explainString += " filter = "+ (((SelectNode) root).filter.toString());
+        if(root instanceof HashJoinNode)
+            explainString += " filter ="+(((HashJoinNode) root).filter.toString());
 
         for(int i = 0; i < indentLevel; i++){
             System.out.print("\t");

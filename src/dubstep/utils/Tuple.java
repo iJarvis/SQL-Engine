@@ -77,7 +77,11 @@ public class Tuple {
                 continue;
             }
             if (value instanceof DateValue) {
-                output = output + value.toString().substring(1, value.toString().length() - 1) + "|";
+                if(value.toString().contains("\""))
+                    output = output + value.toString().substring(1, value.toString().length() - 1) + "|";
+                else
+                    output = output + value.toString()+"|";
+
                 continue;
             }
             output = output + value.toString() + "|";
