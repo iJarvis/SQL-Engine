@@ -55,24 +55,23 @@ public class GroupByNode extends BaseNode {
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
         this.refCol = "";
-        // if (Main.mySchema.isInMem()){
-         //   this.fillBuffer();
-        //}
-        //else {
+         if (Main.mySchema.isInMem()){
+        }
+        else {
            this.generateSortNode();
-        //}
+        }
     }
 
     public Tuple getNextRow() {
-//        if (Main.mySchema.isInMem()) {
-//            if(!isFilled)
-//            {
-//                isFilled = true;
-//                this.fillBuffer();
-//            }
-//            return inMemNextRow();
-//        }
-//        else
+        if (Main.mySchema.isInMem()) {
+            if(!isFilled)
+            {
+                isFilled = true;
+                this.fillBuffer();
+            }
+            return inMemNextRow();
+        }
+        else
            return onDiskNextRow();
 
     }
@@ -89,7 +88,7 @@ public class GroupByNode extends BaseNode {
             if (next != null) {
                 this.refCol = "";
                 for (Column groupCol : groupbyCols) {
-                    this.refCol = this.refCol + next.getValue(groupCol, this.projectionInfo).toString();
+                    this.refCol = this.refCol + next.getValue(groupCol, this.innerNode.projectionInfo).toString();
                 }
             }
         }
@@ -108,7 +107,7 @@ public class GroupByNode extends BaseNode {
             this.evaluator.setTuple(next);
             curCol = "";
             for (Column groupCol : groupbyCols) {
-                curCol = curCol + next.getValue(groupCol, this.projectionInfo).toString();
+                curCol = curCol + next.getValue(groupCol, this.innerNode.projectionInfo).toString();
             }
 
             if (!(curCol.equals(refCol))) {
@@ -130,6 +129,9 @@ public class GroupByNode extends BaseNode {
             }
             next = this.innerNode.getNextTuple();
         }
+
+        if(rowValues[0] != null)
+            return new Tuple(rowValues);
         return null;
     }
 
