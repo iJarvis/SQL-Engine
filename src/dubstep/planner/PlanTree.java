@@ -8,6 +8,7 @@ import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -155,9 +156,13 @@ public class PlanTree {
             BinaryExpression bin = (BinaryExpression) expression;
             if (bin.getRightExpression() instanceof Column)
                 columnList.add((Column) bin.getRightExpression());
+            else if(bin.getRightExpression() instanceof BinaryExpression)
+                columnList.addAll(getSelectExprColumnList(bin.getRightExpression()));
 
             if (bin.getLeftExpression() instanceof Column)
                 columnList.add((Column) bin.getLeftExpression());
+            else if(bin.getLeftExpression() instanceof  BinaryExpression)
+                columnList.addAll(getSelectExprColumnList(bin.getLeftExpression()));
         }
         return columnList;
     }

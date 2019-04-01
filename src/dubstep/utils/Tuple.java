@@ -117,8 +117,12 @@ public class Tuple {
                 dt = 's';
             else if (value instanceof DateValue )
                 dt = 'd';
-            serializedString += value.toString()+"--"+dt+"|";
-
+            if(dt == 's') {
+                String newVal = value.toString();
+                serializedString += newVal.substring(1, newVal.length() - 1) + "--" + dt + "|";
+            }
+            else
+                serializedString += value.toString()+"--"+dt+"|";
         }
         return  serializedString;
     }
