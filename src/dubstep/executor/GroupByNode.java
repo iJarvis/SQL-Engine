@@ -1,6 +1,7 @@
 package dubstep.executor;
 
 import dubstep.Aggregate.Aggregate;
+import dubstep.Main;
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
@@ -58,20 +59,21 @@ public class GroupByNode extends BaseNode {
          //   this.fillBuffer();
         //}
         //else {
-        //   this.generateSortNode();
+           this.generateSortNode();
         //}
     }
 
     public Tuple getNextRow() {
-        if(!isFilled)
-        {
-            isFilled = true;
-            this.fillBuffer();
-        }
-        //if (Main.mySchema.isInMem())
-        return inMemNextRow();
-        //else
-         //  return onDiskNextRow();
+//        if (Main.mySchema.isInMem()) {
+//            if(!isFilled)
+//            {
+//                isFilled = true;
+//                this.fillBuffer();
+//            }
+//            return inMemNextRow();
+//        }
+//        else
+           return onDiskNextRow();
 
     }
 
