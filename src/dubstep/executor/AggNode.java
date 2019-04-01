@@ -54,7 +54,8 @@ public class AggNode extends BaseNode {
         }
 
         ArrayList<PrimitiveValue> rowValues = new ArrayList<>(selectExpressionItems.size());
-
+        for(int i =0 ; i< selectExpressionItems.size();i++)
+            rowValues.add(null);
         if (!isInit) {
             isInit = true;
             next = innerNode.getNextTuple();

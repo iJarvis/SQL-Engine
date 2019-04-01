@@ -39,7 +39,7 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         QueryTimer timer = new QueryTimer();
-
+        //mySchema.setInMem(false);
         System.out.print(PROMPT);
 //        executeQuery("create table R(id int,id1 int);");
 //        executeQuery("create table S(id int,id1 int);");

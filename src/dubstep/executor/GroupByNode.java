@@ -4,9 +4,7 @@ import dubstep.Aggregate.Aggregate;
 import dubstep.Main;
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
@@ -100,6 +98,9 @@ public class GroupByNode extends BaseNode {
 
         String curCol = "";
         ArrayList<PrimitiveValue> rowValues = new ArrayList<>(selectExpressions.size());
+        for (int i = 0; i < selectExpressions.size(); i++) {
+            rowValues.add(null);
+        }
 
         while (next != null) {
 
