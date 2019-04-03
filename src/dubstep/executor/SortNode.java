@@ -22,7 +22,7 @@ public class SortNode extends BaseNode {
     private int idx = 0;
     private TupleOrderByComparator comparator;
     private PriorityQueue<Pair<Integer, Tuple>> queue = null;
-    private List<BufferedReader> brList = null;
+    private File currentSortDir;
 
     public SortNode(List<OrderByElement> elems, BaseNode innerNode) {
         super();
@@ -48,7 +48,7 @@ public class SortNode extends BaseNode {
 
     private void performExternalSort() {
         File temp = new File(tempDir);
-        File currentSortDir = new File(temp, String.valueOf(Utils.getRandomNumber(0, 10000)));
+        currentSortDir = new File(temp, String.valueOf(Utils.getRandomNumber(0, 10000)));
         if (!currentSortDir.exists()) {
             currentSortDir.mkdirs();
         } else {
@@ -78,16 +78,15 @@ public class SortNode extends BaseNode {
                 ++fileCount;
             }
 
-            brList = new ArrayList<>();
             queue = new PriorityQueue<>(getPQComparator());
 
             for (int i = 0; i < fileCount; ++i) {
                 File sortFile = new File(currentSortDir, String.valueOf(i));
                 BufferedReader br = new BufferedReader(new FileReader(sortFile));
                 Tuple tuple = Tuple.deserializeTuple(br.readLine());
+                br.close();
                 Pair<Integer, Tuple> pair = new Pair<>(i, tuple);
                 queue.add(pair);
-                brList.add(br);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -112,13 +111,14 @@ public class SortNode extends BaseNode {
             }
             try {
                 Pair<Integer, Tuple> pair = queue.poll();
-                String str = brList.get(pair.getElement0()).readLine();
+                File sortFile = new File(currentSortDir, String.valueOf(pair.getElement0()));
+                BufferedReader br = new BufferedReader(new FileReader(sortFile));
+                String str = br.readLine();
+                br.close();
                 if (str != null) {
                     Tuple tuple = Tuple.deserializeTuple(str);
                     Pair<Integer, Tuple> newPair = new Pair<>(pair.getElement0(), tuple);
                     queue.add(newPair);
-                } else {
-                    brList.get(pair.getElement0()).close();
                 }
                 return pair.getElement1();
             } catch (Exception e) {
