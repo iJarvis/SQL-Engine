@@ -242,9 +242,9 @@ public class GroupByNode extends BaseNode {
                 sortElement = new OrderByElement();
                 sortElement.setExpression((Expression) selectExpression);
                 elems.add(sortElement);
+                sortElement.setAsc(true);
             }
         }
-        elems.add(sortElement);
         this.innerNode = new SortNode(elems, this.innerNode);
         this.innerNode.parentNode = this;
     }

@@ -119,10 +119,12 @@ public class Tuple {
                 dt = 'd';
             if(dt == 's') {
                 String newVal = value.toString();
-                serializedString += newVal.substring(1, newVal.length() - 1) + "--" + dt + "|";
+                serializedString += newVal.substring(1, newVal.length() - 1) + "^^" + dt + "|";
             }
+            else if(value == null)
+                serializedString += ""+"^^"+dt+"|";
             else
-                serializedString += value.toString()+"--"+dt+"|";
+                serializedString += value.toString()+"^^"+dt+"|";
         }
         return  serializedString;
     }
@@ -133,7 +135,7 @@ public class Tuple {
         String values[] = serializedString.split(("\\|"));
         for(String value : values)
         {
-            String column[] = value.split("--");
+            String column[] = value.split("\\^\\^");
             if(column[1].equals("l"))
                 columnValues.add(new LongValue(column[0]));
             else if(column[1].equals("f"))
