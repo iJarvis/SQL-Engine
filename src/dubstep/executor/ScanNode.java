@@ -19,12 +19,14 @@ public class ScanNode extends BaseNode {
     private boolean readComplete = false;
     private Table fromTable;
     private Scanner scanner;
+    private TableManager mySchema;
 
     public ScanNode(FromItem fromItem, Expression filter, TableManager mySchema) {
         super();
         if (!(fromItem instanceof Table)) {
             throw new UnsupportedOperationException("Scan node call without table");
         }
+        this.mySchema = mySchema;
         this.fromTable = (Table) fromItem;
         String tableName = fromTable.getName();
         this.scanTable = mySchema.getTable(tableName);
@@ -47,7 +49,11 @@ public class ScanNode extends BaseNode {
         while (1 == 1) {
             if (tupleBuffer.size() <= currentIndex) {
                 if (!readComplete) {
-                    readComplete = scanner.readTuples(3000, tupleBuffer);
+                    if(mySchema.isInMem())
+                        readComplete = scanner.readTuples(10000, tupleBuffer);
+                    else
+                        readComplete = scanner.readTuples(5, tupleBuffer);
+
                     currentIndex = 0;
                     continue;
                 } else
