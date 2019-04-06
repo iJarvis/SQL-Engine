@@ -36,7 +36,7 @@ public class Main {
             if (args[i].equals("--on-disk"))
                 mySchema.setInMem(false);
         }
-//        mySchema.setInMem(false);
+       mySchema.setInMem(true);
 
         Scanner scanner = new Scanner(System.in);
         QueryTimer timer = new QueryTimer();
