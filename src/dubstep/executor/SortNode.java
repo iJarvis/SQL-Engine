@@ -16,7 +16,7 @@ import java.util.*;
 public class SortNode extends BaseNode {
 
     private static final String tempDir = "temp";
-    private static final int NUMBER_OF_TUPLES_IN_MEM = 1000;
+    private static final int NUMBER_OF_TUPLES_IN_MEM = 10000;
 
     private boolean sortDone = false;
     private List<Tuple> sortBuffer = new ArrayList<>();
@@ -34,6 +34,7 @@ public class SortNode extends BaseNode {
         this.innerNode.parentNode = this;
         comparator = new TupleOrderByComparator(elems);
         initProjectionInfo();
+        brList = new ArrayList<>();
 
     }
 
@@ -52,6 +53,7 @@ public class SortNode extends BaseNode {
     }
 
     private void performExternalSort() {
+
         File temp = new File(tempDir);
         currentSortDir = new File(temp, String.valueOf(Utils.getRandomNumber(0, 10000)));
         if (!currentSortDir.exists()) {
@@ -107,9 +109,9 @@ public class SortNode extends BaseNode {
 
             for (int i = 0; i < fileCount; ++i) {
                 File sortFile = new File(currentSortDir, String.valueOf(i));
-                BufferedReader br = new BufferedReader(new FileReader(sortFile));
-                Tuple tuple = Tuple.deserializeTuple(br.readLine());
-                br.close();
+                BufferedReader br = new BufferedReader(new FileReader(sortFile),1000);
+                Tuple tuple = Tuple.deserializeTuple2(br.readLine(),serTypes);
+                brList.add(br);
                 Pair<Integer, Tuple> pair = new Pair<>(i, tuple);
                 queue.add(pair);
             }
@@ -136,14 +138,16 @@ public class SortNode extends BaseNode {
             }
             try {
                 Pair<Integer, Tuple> pair = queue.poll();
-                File sortFile = new File(currentSortDir, String.valueOf(pair.getElement0()));
-                BufferedReader br = new BufferedReader(new FileReader(sortFile));
+                BufferedReader br = brList.get(pair.getElement0());
                 String str = br.readLine();
-                br.close();
                 if (str != null) {
                     Tuple tuple = Tuple.deserializeTuple2(str,serTypes);
                     Pair<Integer, Tuple> newPair = new Pair<>(pair.getElement0(), tuple);
                     queue.add(newPair);
+                }
+                else
+                {
+                    br.close();
                 }
                 return pair.getElement1();
             } catch (Exception e) {
