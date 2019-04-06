@@ -201,7 +201,7 @@ public class Tuple {
                     columnValues.add(new LongValue(value));
                     break;
                 case STRING_TYPE:
-                    columnValues.add(new StringValue(value));
+                    columnValues.add(new StringValue(value.substring(1,value.length()-1)));
                     break;
                 case DOUBLE_TYPE:
                     columnValues.add(new DoubleValue(value));
