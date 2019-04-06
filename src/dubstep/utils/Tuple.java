@@ -1,37 +1,60 @@
 package dubstep.utils;
 
+import dubstep.storage.datatypes;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static net.sf.jsqlparser.expression.DateValue.parseEscaped;
 
 public class Tuple {
     int tid;
     public ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
 
-    public Tuple(String csv_string, int tid, List<ColumnDefinition> columnDefinitions) {
-        String[] args = csv_string.split("\\|");
+    public Tuple(String csv_string, int tid, List<datatypes> typeList) {
+
+        String[] args = new String[typeList.size()];//csv_string.split("\\|");
+        int index = 0;
+        int end_index =0;
+        int runnind_index = 0;
+
+        end_index = csv_string.indexOf('|',0);
+        while (end_index > 0)
+        {
+
+            args[runnind_index] = csv_string.substring(index,end_index);
+            index = end_index+1;
+            end_index = csv_string.indexOf('|',index );
+            runnind_index++;
+        }
+        args[runnind_index] = csv_string.substring(index);
+
         tid = this.tid;
-        for (int i = 0; i < args.length; i++) {
-            String dataType = columnDefinitions.get(i).getColDataType().getDataType().toLowerCase();
-            if (args[i].equals("null"))
-                valueArray.add(null);
-            else if (dataType.equalsIgnoreCase("int"))
-                valueArray.add(new LongValue(args[i]));
 
-            else if (dataType.equalsIgnoreCase("string") || dataType.equalsIgnoreCase("varchar") || dataType.equalsIgnoreCase("char"))
-                valueArray.add(new StringValue(args[i]));
+        for (int i = 0; i < typeList.size() ; i++) {
 
-            else if (dataType.equalsIgnoreCase("decimal"))
-                valueArray.add(new DoubleValue(args[i]));
 
-            else if (dataType.equalsIgnoreCase("date"))
-                valueArray.add(new DateValue(args[i]));
+            switch (typeList.get(i)) {
 
-            else {
-                System.err.println("data type " + dataType + " not found");
-                break;
+                case INT_TYPE:
+                    valueArray.add(new LongValue(args[i]));
+                    break;
+                case STRING_TYPE:
+                    valueArray.add(new StringValue(args[i]));
+                    break;
+                case DOUBLE_TYPE:
+                    valueArray.add(new DoubleValue(args[i]));
+                    break;
+                case DATE_TYPE:
+
+                    valueArray.add(new DateValue(args[i]));
+
+
+                    break;
+
             }
         }
     }
@@ -119,12 +142,12 @@ public class Tuple {
                 dt = 'd';
             if(dt == 's') {
                 String newVal = value.toString();
-                serializedString += newVal.substring(1, newVal.length() - 1) + "^^" + dt + "|";
+                serializedString += newVal.substring(1, newVal.length() - 1) + "^" + dt + "|";
             }
             else if(value == null)
-                serializedString += ""+"^^"+dt+"|";
+                serializedString += ""+"^"+dt+"|";
             else
-                serializedString += value.toString()+"^^"+dt+"|";
+                serializedString += value.toString()+"^"+dt+"|";
         }
         return  serializedString;
     }
@@ -135,7 +158,7 @@ public class Tuple {
         String values[] = serializedString.split(("\\|"));
         for(String value : values)
         {
-            String column[] = value.split("\\^\\^");
+            String column[] = value.split("\\^");
             if(column[1].equals("l"))
                 columnValues.add(new LongValue(column[0]));
             else if(column[1].equals("f"))
@@ -144,6 +167,49 @@ public class Tuple {
                 columnValues.add(new DateValue(column[0]));
             else if(column[1].equals("s"))
                 columnValues.add(new StringValue(column[0]));
+        }
+        return  new Tuple(columnValues);
+    }
+
+
+    public String serializeTuple1()
+    {
+        String serializedString = "";
+        for(PrimitiveValue value : this.valueArray ) {
+            if(value instanceof DateValue )
+                serializedString +=  value.toRawString()+"|";
+            else
+            serializedString += value.toString() + "|";
+        }
+        return serializedString;
+    }
+
+    public static Tuple deserializeTuple2(String serializedString,ArrayList<datatypes> types)
+    {
+        ArrayList<PrimitiveValue> columnValues = new ArrayList<>();
+        String values[] = serializedString.split(("\\|"));
+        int index = 0;
+        for(String value : values)
+        {
+            datatypes type = types.get(index);
+            switch (type)
+            {
+                case DATE_TYPE:
+                    columnValues.add(new DateValue(value));
+                    break;
+                case INT_TYPE:
+                    columnValues.add(new LongValue(value));
+                    break;
+                case STRING_TYPE:
+                    columnValues.add(new StringValue(value));
+                    break;
+                case DOUBLE_TYPE:
+                    columnValues.add(new DoubleValue(value));
+                    break;
+
+            }
+            index++;
+
         }
         return  new Tuple(columnValues);
     }

@@ -25,7 +25,7 @@ public class Main {
     // Globals used across project
     static public int maxThread = 1;
     static public boolean DEBUG_MODE = false; // will print out logs - all logs should be routed through this flag
-    static public boolean EXPLAIN_MODE = false; // will print statistics of the code
+    static public boolean EXPLAIN_MODE = true; // will print statistics of the code
     static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
 
     public static void main(String[] args) throws ParseException, SQLException {
@@ -36,11 +36,12 @@ public class Main {
             if (args[i].equals("--on-disk"))
                 mySchema.setInMem(false);
         }
+//        mySchema.setInMem(false);
 
         Scanner scanner = new Scanner(System.in);
         QueryTimer timer = new QueryTimer();
-        //mySchema.setInMem(false);
-        System.out.print(PROMPT);
+//        mySchema.setInMem(false);
+        System.out.println(PROMPT);
 //        executeQuery("create table R(id int,id1 int);");
 //        executeQuery("create table S(id int,id1 int);");
 
@@ -121,7 +122,7 @@ public class Main {
             System.out.println("Execution time = " + timer.getTotalTime());
         timer.reset();
 
-        System.out.print(PROMPT);
+        System.out.println(PROMPT);
     }
 
 }

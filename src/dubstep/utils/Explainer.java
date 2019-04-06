@@ -32,7 +32,8 @@ public class Explainer {
             explainString += " filter ="+(((HashJoinNode) root).filter.toString());
         if(root instanceof SortMergeJoinNode )
             explainString += " filter = "+(((SortMergeJoinNode) root).innerColumn.toString() +" = " +((SortMergeJoinNode) root).outerColumn.toString()   );
-
+        if(root instanceof ScanNode)
+            explainString +=" Parse time ="+((ScanNode)root).parsetimer.getTotalTime();
         for(int i = 0; i < indentLevel; i++){
             System.out.print("\t");
         }

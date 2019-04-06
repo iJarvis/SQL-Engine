@@ -2,8 +2,8 @@ package dubstep.utils;
 
 public class QueryTimer {
 
-    private Long totalTime;
-    private Long start;
+    private Long totalTime = 0L;
+    private Long start ;
     private Boolean running;
 
     public void start() {

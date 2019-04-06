@@ -3,11 +3,13 @@ package dubstep.executor;
 import dubstep.storage.DubTable;
 import dubstep.storage.Scanner;
 import dubstep.storage.TableManager;
+import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class ScanNode extends BaseNode {
@@ -20,12 +22,14 @@ public class ScanNode extends BaseNode {
     private Table fromTable;
     private Scanner scanner;
     private TableManager mySchema;
+    public QueryTimer parsetimer;
 
     public ScanNode(FromItem fromItem, Expression filter, TableManager mySchema) {
         super();
         if (!(fromItem instanceof Table)) {
             throw new UnsupportedOperationException("Scan node call without table");
         }
+        parsetimer = new QueryTimer();
         this.mySchema = mySchema;
         this.fromTable = (Table) fromItem;
         String tableName = fromTable.getName();
@@ -36,7 +40,7 @@ public class ScanNode extends BaseNode {
         tupleBuffer = new ArrayList<>();
         scanner = new Scanner(this.scanTable);
         scanner.initRead();
-        readComplete = scanner.readTuples(20, tupleBuffer);
+        readComplete = scanner.readTuples(10000, tupleBuffer, parsetimer);
         this.initProjectionInfo();
     }
 
@@ -50,9 +54,9 @@ public class ScanNode extends BaseNode {
             if (tupleBuffer.size() <= currentIndex) {
                 if (!readComplete) {
                     if(mySchema.isInMem())
-                        readComplete = scanner.readTuples(10000, tupleBuffer);
+                        readComplete = scanner.readTuples(10000, tupleBuffer,this.parsetimer );
                     else
-                        readComplete = scanner.readTuples(5, tupleBuffer);
+                        readComplete = scanner.readTuples(5, tupleBuffer,parsetimer);
 
                     currentIndex = 0;
                     continue;

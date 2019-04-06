@@ -1,11 +1,12 @@
 package dubstep.executor;
 
 import dubstep.Main;
+import dubstep.storage.datatypes;
 import dubstep.utils.Pair;
 import dubstep.utils.Tuple;
 import dubstep.utils.TupleComparator;
 import dubstep.utils.Utils;
-import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
@@ -15,7 +16,7 @@ import java.util.*;
 public class SortNode extends BaseNode {
 
     private static final String tempDir = "temp";
-    private static final int NUMBER_OF_TUPLES_IN_MEM = 200;
+    private static final int NUMBER_OF_TUPLES_IN_MEM = 1000;
 
     private boolean sortDone = false;
     private List<Tuple> sortBuffer = new ArrayList<>();
@@ -23,6 +24,9 @@ public class SortNode extends BaseNode {
     private TupleOrderByComparator comparator;
     private PriorityQueue<Pair<Integer, Tuple>> queue = null;
     private File currentSortDir;
+    private List<BufferedReader> brList = null;
+    private ArrayList<datatypes> serTypes = new ArrayList<>();
+    private boolean isTypeInit = false;
 
     public SortNode(List<OrderByElement> elems, BaseNode innerNode) {
         super();
@@ -30,6 +34,7 @@ public class SortNode extends BaseNode {
         this.innerNode.parentNode = this;
         comparator = new TupleOrderByComparator(elems);
         initProjectionInfo();
+
     }
 
     private void performSort() {
@@ -68,9 +73,29 @@ public class SortNode extends BaseNode {
 
                 File sortFile = new File(currentSortDir, String.valueOf(fileCount));
                 BufferedWriter writer = new BufferedWriter(new FileWriter(sortFile));
+                if(!isTypeInit)
+                {
+                    isTypeInit = true;
+                    Tuple tuple = sortBuffer.get(0);
+                    for( PrimitiveValue val : tuple.valueArray )
+                    {
+                        if(val instanceof LongValue)
+                            serTypes.add(datatypes.INT_TYPE);
+
+                        else if(val instanceof StringValue)
+                            serTypes.add(datatypes.STRING_TYPE);
+
+                        else if(val instanceof DateValue)
+                            serTypes.add(datatypes.DATE_TYPE);
+
+                        else if(val instanceof DoubleValue)
+                            serTypes.add(datatypes.DOUBLE_TYPE);
+
+                    }
+                }
 
                 for (int i = 0; i < sortBuffer.size(); ++i) {
-                    writer.write(sortBuffer.get(i).serializeTuple() + "\n");
+                    writer.write(sortBuffer.get(i).serializeTuple1() + "\n");
                 }
 
                 writer.close();
@@ -116,12 +141,13 @@ public class SortNode extends BaseNode {
                 String str = br.readLine();
                 br.close();
                 if (str != null) {
-                    Tuple tuple = Tuple.deserializeTuple(str);
+                    Tuple tuple = Tuple.deserializeTuple2(str,serTypes);
                     Pair<Integer, Tuple> newPair = new Pair<>(pair.getElement0(), tuple);
                     queue.add(newPair);
                 }
                 return pair.getElement1();
             } catch (Exception e) {
+                e.printStackTrace();
                 e.printStackTrace();
             }
         }

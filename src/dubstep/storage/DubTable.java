@@ -10,17 +10,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+
 public class DubTable {
 
     private String tableName;
     List<ColumnDefinition> columnDefinitions;
     String dataFile;
+    public List<datatypes> typeList;
     private int rowCount = -1;
 
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
         columnDefinitions =  createTable.getColumnDefinitions();
         dataFile = "data/" + tableName + ".csv";
+        typeList = new ArrayList<>();
+        for(int i =0 ; i < columnDefinitions.size();i++)
+        {
+            String dataType = columnDefinitions.get(i).getColDataType().getDataType().toLowerCase();
+            if(dataType.equals("int"))
+                typeList.add(datatypes.INT_TYPE);
+            if(dataType.equals("date"))
+                typeList.add(datatypes.DATE_TYPE);
+            if(dataType.equals("decimal"))
+                typeList.add(datatypes.DOUBLE_TYPE);
+            if(dataType.equalsIgnoreCase("string") || dataType.equalsIgnoreCase("varchar") || dataType.equalsIgnoreCase("char"))
+                typeList.add(datatypes.STRING_TYPE);
+
+        }
         countNumRows();
     }
 
