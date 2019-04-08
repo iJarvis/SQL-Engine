@@ -103,7 +103,7 @@ public class Scanner {
                 int size = fileBuffer.size();
                 parseTimer.start();
 
-                int numThreads = 6;
+                int numThreads = 3;
                 ArrayList<TupleConverter> threads = new ArrayList<>();
 
 
