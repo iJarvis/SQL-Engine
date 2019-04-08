@@ -40,7 +40,7 @@ public class ScanNode extends BaseNode {
         tupleBuffer = new ArrayList<>();
         scanner = new Scanner(this.scanTable);
         scanner.initRead();
-        readComplete = scanner.readTuples(20000, tupleBuffer, parsetimer);
+        readComplete = scanner.readTuples(5000, tupleBuffer, parsetimer);
         this.initProjectionInfo();
     }
 
@@ -54,9 +54,9 @@ public class ScanNode extends BaseNode {
             if (tupleBuffer.size() <= currentIndex) {
                 if (!readComplete) {
                     if(mySchema.isInMem())
-                        readComplete = scanner.readTuples(20000, tupleBuffer,this.parsetimer );
+                        readComplete = scanner.readTuples(5000, tupleBuffer,this.parsetimer );
                     else
-                        readComplete = scanner.readTuples(20000, tupleBuffer,parsetimer);
+                        readComplete = scanner.readTuples(5000, tupleBuffer,parsetimer);
 
                     currentIndex = 0;
                     continue;
