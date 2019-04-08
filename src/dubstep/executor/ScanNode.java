@@ -40,7 +40,7 @@ public class ScanNode extends BaseNode {
         tupleBuffer = new ArrayList<>();
         scanner = new Scanner(this.scanTable);
         scanner.initRead();
-        readComplete = scanner.readTuples(10000, tupleBuffer, parsetimer);
+        readComplete = scanner.readTuples(15000, tupleBuffer, parsetimer);
         this.initProjectionInfo();
     }
 
