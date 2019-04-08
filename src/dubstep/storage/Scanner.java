@@ -57,7 +57,7 @@ public class Scanner {
 
     public boolean initRead() {
         try {
-            this.tableReader = new BufferedReader(new FileReader(scanTable.dataFile));
+            this.tableReader = new BufferedReader(new FileReader(scanTable.dataFile),15360);
             this.currentMaxTid = 0;
         } catch (FileNotFoundException e) {
             Path path = FileSystems.getDefault().getPath(".");
