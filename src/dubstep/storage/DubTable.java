@@ -38,7 +38,7 @@ public class DubTable {
                 typeList.add(datatypes.STRING_TYPE);
 
         }
-      //  countNumRows();
+        countNumRows();
     }
 
     private final void countNumRows() {
