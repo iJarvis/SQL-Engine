@@ -54,9 +54,9 @@ public class ScanNode extends BaseNode {
             if (tupleBuffer.size() <= currentIndex) {
                 if (!readComplete) {
                     if(mySchema.isInMem())
-                        readComplete = scanner.readTuples(7000, tupleBuffer,this.parsetimer );
+                        readComplete = scanner.readTuples(8000, tupleBuffer,this.parsetimer );
                     else
-                        readComplete = scanner.readTuples(7000, tupleBuffer,parsetimer);
+                        readComplete = scanner.readTuples(8000, tupleBuffer,parsetimer);
 
                     currentIndex = 0;
                     continue;
