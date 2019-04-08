@@ -14,6 +14,44 @@ public class Tuple {
     int tid;
     public ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
 
+    public Tuple(String csv_string,List<datatypes> typeList,boolean isLineItem)
+    {
+        String[] args = new String[typeList.size()];//csv_string.split("\\|");
+        int index = 0;
+        int end_index =0;
+        int runnind_index = 0;
+
+        end_index = csv_string.indexOf('|',0);
+        while (end_index > 0)
+        {
+
+            args[runnind_index] = csv_string.substring(index,end_index);
+            index = end_index+1;
+            end_index = csv_string.indexOf('|',index );
+            runnind_index++;
+        }
+        args[runnind_index] = csv_string.substring(index);
+
+
+                this.valueArray.add(  new LongValue(args[0]));
+                this.valueArray.add( new LongValue(args[1]));
+                this.valueArray.add( new LongValue(args[2]));
+                this.valueArray.add( new LongValue(args[3]));
+                this.valueArray.add( new DoubleValue(args[4]));
+                this.valueArray.add( new DoubleValue(args[5]));
+                this.valueArray.add( new DoubleValue(args[6]));
+                this.valueArray.add( new DoubleValue(args[7]));
+                this.valueArray.add(  new StringValue(args[8]));
+                this.valueArray.add( new StringValue(args[9]));
+                this.valueArray.add( new DateValue(args[10]));
+                this.valueArray.add( new DateValue(args[11]));
+                this.valueArray.add( new DateValue(args[12]));
+                this.valueArray.add(  new StringValue(args[13]));
+                this.valueArray.add( new  StringValue(args[14]));
+                this.valueArray.add( new StringValue(args[15]));
+    }
+
+
     public Tuple(String csv_string, int tid, List<datatypes> typeList) {
 
         String[] args = new String[typeList.size()];//csv_string.split("\\|");

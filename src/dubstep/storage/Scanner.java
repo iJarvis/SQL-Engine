@@ -31,8 +31,17 @@ public class Scanner {
 
         public void run()
         {
-            for (int i =start_index ; i < end_index; i++) {
-                output.add(new Tuple(input.get(i), 0, scanTable.typeList));
+            if(scanTable.GetTableName().equals("LINEITEM"))
+            {
+                for (int i =start_index ; i < end_index; i++) {
+                    output.add(new Tuple(input.get(i), scanTable.typeList,true));
+                }
+
+            }
+            else {
+                for (int i = start_index; i < end_index; i++) {
+                    output.add(new Tuple(input.get(i), 0, scanTable.typeList));
+                }
             }
 
         }
@@ -94,7 +103,7 @@ public class Scanner {
                 int size = fileBuffer.size();
                 parseTimer.start();
 
-                int numThreads = 3;
+                int numThreads = 6;
                 ArrayList<TupleConverter> threads = new ArrayList<>();
 
 
