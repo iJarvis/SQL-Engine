@@ -39,7 +39,7 @@ public class Average extends Sum {
             this.result = result;
             return result;
         } else {
-            DoubleValue result = new DoubleValue(longValue.getValue());
+            DoubleValue result = new DoubleValue(doubleValue.getValue());
             result.setValue(result.getValue() / count);
             this.result = result;
             return result;
