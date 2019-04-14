@@ -11,7 +11,10 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
 
 public class SortNode extends BaseNode {
 
@@ -35,7 +38,6 @@ public class SortNode extends BaseNode {
         comparator = new TupleOrderByComparator(elems);
         initProjectionInfo();
         brList = new ArrayList<>();
-
     }
 
     private void performSort() {
@@ -75,24 +77,21 @@ public class SortNode extends BaseNode {
 
                 File sortFile = new File(currentSortDir, String.valueOf(fileCount));
                 BufferedWriter writer = new BufferedWriter(new FileWriter(sortFile));
-                if(!isTypeInit)
-                {
+                if (!isTypeInit) {
                     isTypeInit = true;
                     Tuple tuple = sortBuffer.get(0);
-                    for( PrimitiveValue val : tuple.valueArray )
-                    {
-                        if(val instanceof LongValue)
+                    for (PrimitiveValue val : tuple.valueArray) {
+                        if (val instanceof LongValue)
                             serTypes.add(datatypes.INT_TYPE);
 
-                        else if(val instanceof StringValue)
+                        else if (val instanceof StringValue)
                             serTypes.add(datatypes.STRING_TYPE);
 
-                        else if(val instanceof DateValue)
+                        else if (val instanceof DateValue)
                             serTypes.add(datatypes.DATE_TYPE);
 
-                        else if(val instanceof DoubleValue)
+                        else if (val instanceof DoubleValue)
                             serTypes.add(datatypes.DOUBLE_TYPE);
-
                     }
                 }
 
@@ -109,8 +108,8 @@ public class SortNode extends BaseNode {
 
             for (int i = 0; i < fileCount; ++i) {
                 File sortFile = new File(currentSortDir, String.valueOf(i));
-                BufferedReader br = new BufferedReader(new FileReader(sortFile),1000);
-                Tuple tuple = Tuple.deserializeTuple2(br.readLine(),serTypes);
+                BufferedReader br = new BufferedReader(new FileReader(sortFile), 1000);
+                Tuple tuple = Tuple.deserializeTuple2(br.readLine(), serTypes);
                 brList.add(br);
                 Pair<Integer, Tuple> pair = new Pair<>(i, tuple);
                 queue.add(pair);
@@ -141,17 +140,14 @@ public class SortNode extends BaseNode {
                 BufferedReader br = brList.get(pair.getElement0());
                 String str = br.readLine();
                 if (str != null) {
-                    Tuple tuple = Tuple.deserializeTuple2(str,serTypes);
+                    Tuple tuple = Tuple.deserializeTuple2(str, serTypes);
                     Pair<Integer, Tuple> newPair = new Pair<>(pair.getElement0(), tuple);
                     queue.add(newPair);
-                }
-                else
-                {
+                } else {
                     br.close();
                 }
                 return pair.getElement1();
             } catch (Exception e) {
-                e.printStackTrace();
                 e.printStackTrace();
             }
         }
@@ -163,6 +159,7 @@ public class SortNode extends BaseNode {
         if (Main.mySchema.isInMem()) {
             idx = 0;
         }
+        //TODO: handle this in case of on-disk
     }
 
     @Override
@@ -191,12 +188,15 @@ public class SortNode extends BaseNode {
         public int compare(Tuple left, Tuple right) {
             for (int i = 0; i < elems.size(); ++i) {
                 boolean isAsc = elems.get(i).isAsc();
-                if (! (elems.get(i).getExpression() instanceof Column)) {
+                if (!(elems.get(i).getExpression() instanceof Column)) {
                     throw new UnsupportedOperationException("Column isn't of type Column");
                 }
                 PrimitiveValue leftPV = left.getValue((Column) elems.get(i).getExpression(), projectionInfo);
                 PrimitiveValue righPV = right.getValue((Column) elems.get(i).getExpression(), projectionInfo);
-                return TupleComparator.compare(leftPV, righPV, isAsc);
+                int comp = TupleComparator.compare(leftPV, righPV, isAsc);
+                if (comp != 0) {
+                    return comp;
+                }
             }
             return 0;
         }
