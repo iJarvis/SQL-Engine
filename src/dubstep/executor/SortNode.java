@@ -11,10 +11,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class SortNode extends BaseNode {
 
@@ -38,6 +35,19 @@ public class SortNode extends BaseNode {
         comparator = new TupleOrderByComparator(elems);
         initProjectionInfo();
         brList = new ArrayList<>();
+        //check for edge case that a column in order by clause isn't of the form tablename.columnname where it is so
+        //in the select statement
+        for (OrderByElement elem: elems) {
+            Column column = (Column) elem.getExpression();
+            if (!projectionInfo.containsKey(column.getWholeColumnName()) && !projectionInfo.containsKey(column.getColumnName())) {
+                for (String key: projectionInfo.keySet()) {
+                    String[] parts = key.split("\\.");
+                    if (parts.length == 2 && parts[1].equals(column.getWholeColumnName())) {
+                        column.setColumnName(key);
+                    }
+                }
+            }
+        }
     }
 
     private void performSort() {
