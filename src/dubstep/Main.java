@@ -43,21 +43,24 @@ public class Main {
 
 
         try {
-            String line = null;
-            BufferedReader reader = null;
-            reader = new BufferedReader(new FileReader("tables"));
-            line = reader.readLine();
-
-            while (line !=null)
-            {
-                CCJSqlParser parser = new CCJSqlParser(new StringReader(line));
-                Statement query = parser.Statement();
-                CreateTable createQuery = (CreateTable) query;
-                if (!mySchema.createTable(createQuery)) {
-                    System.out.println("Unable to create DubTable - DubTable already exists");
-                }
+            String line;
+            BufferedReader reader;
+            File tablesFile = new File("tables");
+            if (tablesFile.exists()) {
+                reader = new BufferedReader(new FileReader("tables"));
                 line = reader.readLine();
 
+                while (line !=null)
+                {
+                    CCJSqlParser parser = new CCJSqlParser(new StringReader(line));
+                    Statement query = parser.Statement();
+                    CreateTable createQuery = (CreateTable) query;
+                    if (!mySchema.createTable(createQuery)) {
+                        System.out.println("Unable to create DubTable - DubTable already exists");
+                    }
+                    line = reader.readLine();
+
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

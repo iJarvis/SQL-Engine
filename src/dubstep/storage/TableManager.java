@@ -17,8 +17,8 @@ public class TableManager {
         String tableName = createTable.getTable().getName();
         if (tableDirectory.containsKey(tableName))
             return false;
-        else
-            tableDirectory.put(tableName, new DubTable(createTable));
+        DubTable newTable = new DubTable(createTable);
+        tableDirectory.put(tableName, newTable);
         if (createTable.getIndexes().size() != 0) {
             IndexBuilder indexBuilder = new IndexBuilder(createTable.getTable(), createTable.getIndexes());
             indexBuilder.build();

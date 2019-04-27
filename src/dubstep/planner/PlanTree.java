@@ -5,6 +5,7 @@ import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
 import dubstep.utils.Evaluator;
 import dubstep.utils.GenerateAggregateNode;
+import dubstep.utils.Utils;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -58,7 +59,6 @@ public class PlanTree {
 
         //handle projection
         List<SelectItem> selectItems = plainSelect.getSelectItems();
-        List<Column> groupColumns = plainSelect.getGroupByColumnReferences();
         GenerateAggregateNode genAgg = new GenerateAggregateNode(selectItems, projInnerNode);
         BaseNode projNode = genAgg.getAggregateNode();
 
@@ -69,8 +69,9 @@ public class PlanTree {
             }
         }
 
-        if (plainSelect.getOrderByElements() != null) {
-            SortNode sortNode = new SortNode(plainSelect.getOrderByElements(), projNode);
+        List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
+        if (orderByElements != null && Utils.isSortNeeded(fromItem, orderByElements)) {
+            SortNode sortNode = new SortNode(orderByElements, projNode);
             projNode = sortNode;
         }
 

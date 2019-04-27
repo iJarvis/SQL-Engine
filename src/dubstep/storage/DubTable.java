@@ -3,6 +3,7 @@ package dubstep.storage;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.create.table.Index;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public class DubTable {
 
     private String tableName;
     List<ColumnDefinition> columnDefinitions;
+    private Index primaryIndex;
     private String dataFile;
     public List<datatypes> typeList;
     private int rowCount = -1;
@@ -81,5 +83,13 @@ public class DubTable {
 
     public void setDataFile(String dataFile) {
         this.dataFile = dataFile;
+    }
+
+    public void setPrimaryIndex(Index primaryIndex) {
+        this.primaryIndex = primaryIndex;
+    }
+
+    public Index getPrimaryIndex() {
+        return primaryIndex;
     }
 }

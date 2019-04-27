@@ -70,6 +70,8 @@ public class IndexBuilder {
             nextTuple = sortNode.getNextTuple();
         }
         writer.close();
-        mySchema.getTable(table.getName()).setDataFile(tableFile.getPath());
+        DubTable dubTable = mySchema.getTable(table.getName());
+        dubTable.setDataFile(tableFile.getPath());
+        dubTable.setPrimaryIndex(primaryIndex);
     }
 }
