@@ -57,12 +57,12 @@ public class Scanner {
 
     public boolean initRead() {
         try {
-            this.tableReader = new BufferedReader(new FileReader(scanTable.dataFile),25600);
+            this.tableReader = new BufferedReader(new FileReader(scanTable.getDataFile()),25600);
             this.currentMaxTid = 0;
         } catch (FileNotFoundException e) {
             Path path = FileSystems.getDefault().getPath(".");
             System.out.println("Current working directory : " + path.toAbsolutePath());
-            throw new IllegalStateException("datafile not found : " + scanTable.dataFile);
+            throw new IllegalStateException("datafile not found : " + scanTable.getDataFile());
         }
         return (tableReader == null);
 

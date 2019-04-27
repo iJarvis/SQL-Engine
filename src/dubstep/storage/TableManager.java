@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class TableManager {
 
-    HashMap<String, DubTable> tableDirectory = new HashMap<>();
+    private HashMap<String, DubTable> tableDirectory = new HashMap<>();
     private boolean inMem = true;
 
     public boolean createTable(CreateTable createTable) {
@@ -19,6 +19,10 @@ public class TableManager {
             return false;
         else
             tableDirectory.put(tableName, new DubTable(createTable));
+        if (createTable.getIndexes().size() != 0) {
+            IndexBuilder indexBuilder = new IndexBuilder(createTable.getTable(), createTable.getIndexes());
+            indexBuilder.build();
+        }
         return true;
     }
 

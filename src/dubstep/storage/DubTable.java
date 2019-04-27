@@ -16,7 +16,7 @@ public class DubTable {
 
     private String tableName;
     List<ColumnDefinition> columnDefinitions;
-    String dataFile;
+    private String dataFile;
     public List<datatypes> typeList;
     private int rowCount = -1;
 
@@ -38,7 +38,7 @@ public class DubTable {
                 typeList.add(datatypes.STRING_TYPE);
 
         }
-        countNumRows();
+//        countNumRows();
     }
 
     private final void countNumRows() {
@@ -73,5 +73,13 @@ public class DubTable {
 
     public int getRowCount() {
         return rowCount;
+    }
+
+    public String getDataFile() {
+        return dataFile;
+    }
+
+    public void setDataFile(String dataFile) {
+        this.dataFile = dataFile;
     }
 }

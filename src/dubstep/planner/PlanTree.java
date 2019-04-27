@@ -8,7 +8,6 @@ import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -75,8 +74,7 @@ public class PlanTree {
             projNode = sortNode;
         }
 
-        if(plainSelect.getLimit() != null)
-        {
+        if(plainSelect.getLimit() != null) {
             projNode = new LimitNode(plainSelect.getLimit().getRowCount(), projNode);
         }
         return projNode;
