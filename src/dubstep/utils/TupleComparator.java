@@ -5,6 +5,7 @@ import net.sf.jsqlparser.schema.PrimitiveType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 
 public class TupleComparator {
@@ -26,18 +27,18 @@ public class TupleComparator {
                     return isAsc? 1: -1;
                 }
             } else if (leftPV.getType() == PrimitiveType.DATE) {
-                Date leftDate = dateFormat.parse(leftPV.toRawString());
-                Date rightDate = dateFormat.parse(rightPV.toRawString());
+//                Date leftDate = dateFormat.parse(leftPV.toRawString());
+//                Date rightDate = dateFormat.parse(rightPV.toRawString());
                 if (isAsc) {
-                    return leftDate.compareTo(rightDate);
+                    return leftPV.toRawString().compareTo(rightPV.toRawString());
                 } else {
-                    return rightDate.compareTo(leftDate);
+                    return rightPV.toRawString().compareTo(leftPV.toRawString());
                 }
             }
             else if(leftPV.getType() == PrimitiveType.STRING )
             {
                 String leftValue = leftPV.toString();
-                String rightValue =rightPV.toString();
+                String rightValue = rightPV.toString();
 
                 if (isAsc) {
                     return  leftValue.compareTo(rightValue);
@@ -45,7 +46,7 @@ public class TupleComparator {
                 else
                     return  rightValue.compareTo(leftValue);
             }
-        } catch (PrimitiveValue.InvalidPrimitive | ParseException e) {
+        } catch (PrimitiveValue.InvalidPrimitive e) {
             e.printStackTrace();
         }
         return 0;
@@ -53,5 +54,13 @@ public class TupleComparator {
 
     public static int compare(PrimitiveValue leftPV, PrimitiveValue rightPV) {
         return compare(leftPV, rightPV, true);
+    }
+
+    public static class PVComparator implements Comparator<PrimitiveValue> {
+
+        @Override
+        public int compare(PrimitiveValue left, PrimitiveValue right) {
+            return TupleComparator.compare(left, right);
+        }
     }
 }

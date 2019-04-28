@@ -2,10 +2,13 @@ package dubstep.storage;
 
 import dubstep.executor.ScanNode;
 import dubstep.executor.SortNode;
+import dubstep.utils.Pair;
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
+import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 import java.io.BufferedWriter;
@@ -13,6 +16,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static dubstep.Main.mySchema;
@@ -33,14 +37,15 @@ public class IndexBuilder {
     public void build() {
         for (int i = 0; i < indexes.size(); ++i) {
             Index index = indexes.get(i);
-            if (index.getType().equals(PRIMARY_INDEX)) {
-                //sort the table as well
-                try {
-                    sortTable(index);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+//            if (index.getType().equals(PRIMARY_INDEX)) {
+//                //sort the table as well
+//                try {
+//                    sortTable(index);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+
         }
     }
 
@@ -66,7 +71,7 @@ public class IndexBuilder {
         SortNode sortNode = new SortNode(orderByElements, scanNode);
         Tuple nextTuple = sortNode.getNextTuple();
         while (nextTuple != null) {
-            writer.write(nextTuple.toString() + "\n");
+            writer.write(nextTuple.toStringWithoutQuotes() + "\n");
             nextTuple = sortNode.getNextTuple();
         }
         writer.close();

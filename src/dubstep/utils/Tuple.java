@@ -115,6 +115,7 @@ public class Tuple {
     }
 
     public String getProjection() {
+        //TODO: Use StringBuilder for better runtime
         String output = "";
         for (PrimitiveValue value : valueArray) {
             if (value == null) {
@@ -160,13 +161,29 @@ public class Tuple {
         return getProjection();
     }
 
+    public String toStringWithoutQuotes() {
+        StringBuilder output = new StringBuilder();
+        for (PrimitiveValue value : valueArray) {
+            if (value == null) {
+                output.append("null" + "|");
+                continue;
+            }
+            if (value instanceof DateValue || value instanceof StringValue) {
+                output.append(value.toString(), 1, value.toString().length() - 1).append("|");
+            } else {
+                output.append(value.toString()).append("|");
+            }
+        }
+        return output.toString().substring(0, output.length() - 1);
+    }
+
     public void addValueItem(PrimitiveValue primitiveValue) {
         valueArray.add(primitiveValue);
     }
 
     public String serializeTuple()
     {
-        String serializedString = "";
+        StringBuilder serializedString = new StringBuilder();
         for(PrimitiveValue value : this.valueArray )
         {
             char dt =' ';
@@ -180,14 +197,14 @@ public class Tuple {
                 dt = 'd';
             if(dt == 's') {
                 String newVal = value.toString();
-                serializedString += newVal.substring(1, newVal.length() - 1) + "^" + dt + "|";
+                serializedString.append(newVal.substring(1, newVal.length() - 1) + "^" + dt + "|");
             }
             else if(value == null)
-                serializedString += ""+"^"+dt+"|";
+                serializedString.append(""+"^"+dt+"|");
             else
-                serializedString += value.toString()+"^"+dt+"|";
+                serializedString.append(value.toString()+"^"+dt+"|");
         }
-        return  serializedString;
+        return  serializedString.toString();
     }
 
     public static Tuple deserializeTuple (String serializedString)

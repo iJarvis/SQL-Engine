@@ -5,7 +5,7 @@ import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
 import dubstep.utils.Evaluator;
 import dubstep.utils.GenerateAggregateNode;
-import dubstep.utils.Utils;
+import dubstep.utils.TableIndexBuilder;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -25,8 +25,13 @@ public class PlanTree {
     private static final int ON_DISK_JOIN_THRESHOLD = 100;
 
     public static BaseNode generatePlan(PlainSelect plainSelect) {
-        //Handle lowermost node
         FromItem fromItem = plainSelect.getFromItem();
+        if (fromItem instanceof Table) {
+            long start = System.currentTimeMillis();
+            TableIndexBuilder.build(fromItem);
+            long end = System.currentTimeMillis();
+            System.out.println("time = " + (end - start));
+        }
         BaseNode scanRoot;
         if (fromItem instanceof SubSelect) {
             SelectBody selectBody = ((SubSelect) fromItem).getSelectBody();
@@ -70,7 +75,7 @@ public class PlanTree {
         }
 
         List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
-        if (orderByElements != null && Utils.isSortNeeded(fromItem, orderByElements)) {
+        if (orderByElements != null /*&& Utils.isSortNeeded(fromItem, orderByElements)*/) {
             SortNode sortNode = new SortNode(orderByElements, projNode);
             projNode = sortNode;
         }
@@ -97,6 +102,10 @@ public class PlanTree {
         for (Join join : Joins) {
             BaseNode rightNode;
             if (join.getRightItem() instanceof Table) {
+                long start = System.currentTimeMillis();
+                TableIndexBuilder.build(join.getRightItem());
+                long end = System.currentTimeMillis();
+                System.out.println("time = " + (end - start));
                 rightNode = new ScanNode(join.getRightItem(), null, mySchema);
                 lowerNode = new JoinNode(lowerNode, rightNode);
             } else {

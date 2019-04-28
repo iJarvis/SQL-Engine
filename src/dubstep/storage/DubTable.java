@@ -1,5 +1,7 @@
 package dubstep.storage;
 
+import dubstep.utils.Pair;
+import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -12,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 
-
 public class DubTable {
 
     private String tableName;
@@ -21,6 +22,8 @@ public class DubTable {
     private String dataFile;
     public List<datatypes> typeList;
     private int rowCount = -1;
+    private List<Index> indexes;
+    private Map<String, Map<PrimitiveValue, List<Pair<Integer, Long>>>> indexMap;
 
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
@@ -41,6 +44,14 @@ public class DubTable {
 
         }
 //        countNumRows();
+    }
+
+    public void setIndexes(List<Index> indexes) {
+        this.indexes = indexes;
+    }
+
+    public List<Index> getIndexes() {
+        return indexes;
     }
 
     private final void countNumRows() {
@@ -83,6 +94,7 @@ public class DubTable {
 
     public void setDataFile(String dataFile) {
         this.dataFile = dataFile;
+        System.out.println(dataFile);
     }
 
     public void setPrimaryIndex(Index primaryIndex) {
@@ -91,5 +103,13 @@ public class DubTable {
 
     public Index getPrimaryIndex() {
         return primaryIndex;
+    }
+
+    public void setIndexMap(Map<String, Map<PrimitiveValue, List<Pair<Integer, Long>>>> indexMap) {
+        this.indexMap = indexMap;
+    }
+
+    public Map<String, Map<PrimitiveValue, List<Pair<Integer, Long>>>> getIndexMap() {
+        return indexMap;
     }
 }

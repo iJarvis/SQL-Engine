@@ -1,7 +1,9 @@
 package dubstep.utils;
 
+import java.io.Serializable;
+
 //https://stackoverflow.com/a/8446411/1725428
-public class Pair<K, V> {
+public class Pair<K, V> implements Serializable {
 
     private final K element0;
     private final V element1;

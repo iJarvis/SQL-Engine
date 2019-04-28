@@ -1,5 +1,6 @@
 package dubstep.storage;
 
+import dubstep.utils.BPlusTree;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.FromItem;
@@ -10,19 +11,16 @@ import java.util.HashMap;
 public class TableManager {
 
     private HashMap<String, DubTable> tableDirectory = new HashMap<>();
+    private HashMap<String, BPlusTree> bpTrees = new HashMap<>();
     private boolean inMem = true;
 
     public boolean createTable(CreateTable createTable) {
-
         String tableName = createTable.getTable().getName();
         if (tableDirectory.containsKey(tableName))
             return false;
         DubTable newTable = new DubTable(createTable);
+        newTable.setIndexes(createTable.getIndexes());
         tableDirectory.put(tableName, newTable);
-        if (createTable.getIndexes().size() != 0) {
-            IndexBuilder indexBuilder = new IndexBuilder(createTable.getTable(), createTable.getIndexes());
-            indexBuilder.build();
-        }
         return true;
     }
 
@@ -50,6 +48,18 @@ public class TableManager {
 
     public boolean isInMem() {
         return inMem;
+    }
+
+    public BPlusTree getBPTree(String wholeColumnName) {
+        return bpTrees.get(wholeColumnName);
+    }
+
+    public void setBPTree(String wholeColumnName, BPlusTree bPlusTree) {
+        bpTrees.put(wholeColumnName, bPlusTree);
+    }
+
+    public BPlusTree buildBPTreeFromFile(String wholeColumnName) {
+        throw new UnsupportedOperationException("Can't build trees yet");
     }
 }
 
