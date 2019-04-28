@@ -46,7 +46,10 @@ public class Main {
             String line = null;
             BufferedReader reader = null;
             reader = new BufferedReader(new FileReader("tables"));
-            line = reader.readLine();
+            if(reader == null)
+                line = null;
+            else
+                line = reader.readLine();
 
             while (line !=null)
             {
@@ -107,17 +110,21 @@ public class Main {
         if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
-            try {
-                table_file = new BufferedWriter(new FileWriter("tables",true));
-
-                table_file.write(sqlString+"\n");
-                table_file.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
             if (!mySchema.createTable(createQuery)) {
                 System.out.println("Unable to create DubTable - DubTable already exists");
+            }
+            else
+            {
+                try {
+                    table_file = new BufferedWriter(new FileWriter("tables",true));
+
+                    table_file.write(sqlString+"\n");
+                    table_file.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         } else if (query instanceof Select) {
             Select selectQuery = (Select) query;
