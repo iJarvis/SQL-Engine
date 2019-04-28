@@ -71,20 +71,20 @@ public class Main {
 //        executeQuery("create table R(id int,id1 int);");
 //        executeQuery("create table S(id int,id1 int);");
 
-         executeQuery("CREATE TABLE LINEITEM(ORDERKEY INT,PARTKEY INT,SUPPKEY INT,LINENUMBER INT,QUANTITY DECIMAL,EXTENDEDPRICE DECIMAL,DISCOUNT DECIMAL,TAX DECIMAL,RETURNFLAG CHAR(1),LINESTATUS CHAR(1),SHIPDATE DATE,COMMITDATE DATE,RECEIPTDATE DATE,SHIPINSTRUCT CHAR(25),SHIPMODE CHAR(10),COMMENT VARCHAR(44)," +
-                 "PRIMARY KEY (ORDERKEY,LINENUMBER), INDEX SHIPDATE (SHIPDATE), INDEX RECEIPTDATE (RECEIPTDATE), INDEX RETURNFLAG (RETURNFLAG));");
-         executeQuery("CREATE TABLE ORDERS(\n" +
-                 "  ORDERKEY INT, \n" +
-                 "  CUSTKEY INT, \n" +
-                 "  ORDERSTATUS CHAR(1), \n" +
-                 "  TOTALPRICE DECIMAL, \n" +
-                 "  ORDERDATE DATE, \n" +
-                 "  ORDERPRIORITY CHAR(15), \n" +
-                 "  CLERK CHAR(15), \n" +
-                 "  SHIPPRIORITY INT, \n" +
-                 "  COMMENT VARCHAR(79), \n" +
-                 "  PRIMARY KEY (ORDERKEY), \n" +
-                 "  INDEX ORDERDATE (ORDERDATE));");
+//         executeQuery("CREATE TABLE LINEITEM(ORDERKEY INT,PARTKEY INT,SUPPKEY INT,LINENUMBER INT,QUANTITY DECIMAL,EXTENDEDPRICE DECIMAL,DISCOUNT DECIMAL,TAX DECIMAL,RETURNFLAG CHAR(1),LINESTATUS CHAR(1),SHIPDATE DATE,COMMITDATE DATE,RECEIPTDATE DATE,SHIPINSTRUCT CHAR(25),SHIPMODE CHAR(10),COMMENT VARCHAR(44)," +
+//                 "PRIMARY KEY (ORDERKEY,LINENUMBER), INDEX SHIPDATE (SHIPDATE), INDEX RECEIPTDATE (RECEIPTDATE), INDEX RETURNFLAG (RETURNFLAG));");
+//         executeQuery("CREATE TABLE ORDERS(\n" +
+//                 "  ORDERKEY INT, \n" +
+//                 "  CUSTKEY INT, \n" +
+//                 "  ORDERSTATUS CHAR(1), \n" +
+//                 "  TOTALPRICE DECIMAL, \n" +
+//                 "  ORDERDATE DATE, \n" +
+//                 "  ORDERPRIORITY CHAR(15), \n" +
+//                 "  CLERK CHAR(15), \n" +
+//                 "  SHIPPRIORITY INT, \n" +
+//                 "  COMMENT VARCHAR(79), \n" +
+//                 "  PRIMARY KEY (ORDERKEY), \n" +
+//                 "  INDEX ORDERDATE (ORDERDATE));");
          //         executeQuery("CREATE TABLE SUPPLIER(\n" +
 //                 "  SUPPKEY INT, \n" +
 //                 "  NAME CHAR(25), \n" +
