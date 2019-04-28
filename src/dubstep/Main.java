@@ -15,7 +15,7 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.Union;
 
-import java.io.StringReader;
+import java.io.*;
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -40,6 +40,32 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         QueryTimer timer = new QueryTimer();
+
+
+        try {
+            String line = null;
+            BufferedReader reader = null;
+            reader = new BufferedReader(new FileReader("tables"));
+            if(reader == null)
+                line = null;
+            else
+                line = reader.readLine();
+
+            while (line !=null)
+            {
+                CCJSqlParser parser = new CCJSqlParser(new StringReader(line));
+                Statement query = parser.Statement();
+                CreateTable createQuery = (CreateTable) query;
+                if (!mySchema.createTable(createQuery)) {
+                    System.out.println("Unable to create DubTable - DubTable already exists");
+                }
+                line = reader.readLine();
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 //        mySchema.setInMem(false);
         System.out.println(PROMPT);
 //        executeQuery("create table R(id int,id1 int);");
@@ -83,8 +109,22 @@ public class Main {
 
         if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
+            BufferedWriter table_file = null;
+
             if (!mySchema.createTable(createQuery)) {
                 System.out.println("Unable to create DubTable - DubTable already exists");
+            }
+            else
+            {
+                try {
+                    table_file = new BufferedWriter(new FileWriter("tables",true));
+
+                    table_file.write(sqlString+"\n");
+                    table_file.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         } else if (query instanceof Select) {
             Select selectQuery = (Select) query;
