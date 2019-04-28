@@ -6,6 +6,9 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+
+import static dubstep.planner.PlanTree.getSelectExprColumnList;
 
 public class SelectNode extends BaseNode {
 
@@ -52,5 +55,12 @@ public class SelectNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = innerNode.projectionInfo;
+    }
+
+    @Override
+    public void initProjPushDownInfo() {
+        requiredList.addAll(parentNode.requiredList);
+        requiredList.addAll((ArrayList)getSelectExprColumnList(filter));
+        this.innerNode.initProjPushDownInfo();
     }
 }

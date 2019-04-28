@@ -83,4 +83,9 @@ public class ScanNode extends BaseNode {
     void initProjectionInfo() {
         projectionInfo = scanTable.getColumnList(fromTable);
     }
+
+    @Override
+    public void initProjPushDownInfo() {
+        this.requiredList = this.parentNode.requiredList;
+    }
 }

@@ -98,6 +98,7 @@ public class Main {
                }
 
                root = PlanTree.optimizePlan(root);
+                root.initProjPushDownInfo();
                if(EXPLAIN_MODE) {
                    Explainer  e1 = new Explainer(root);
                    e1.explain();

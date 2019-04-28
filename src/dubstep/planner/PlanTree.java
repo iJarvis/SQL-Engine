@@ -7,6 +7,7 @@ import dubstep.utils.Evaluator;
 import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -16,6 +17,7 @@ import net.sf.jsqlparser.statement.select.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static dubstep.Main.mySchema;
@@ -23,6 +25,8 @@ import static dubstep.Main.mySchema;
 public class PlanTree {
 
     private static final int ON_DISK_JOIN_THRESHOLD = 100;
+
+
 
     public static BaseNode generatePlan(PlainSelect plainSelect) {
         //Handle lowermost node
@@ -150,7 +154,7 @@ public class PlanTree {
             return getResponsibleChild(currentNode.innerNode, columnList);
     }
 
-    private static List<Column> getSelectExprColumnList(Expression expression) {
+    public static List<Column> getSelectExprColumnList(Expression expression) {
         List<Column> columnList = new ArrayList<>();
         if (expression instanceof BinaryExpression) {
             BinaryExpression bin = (BinaryExpression) expression;

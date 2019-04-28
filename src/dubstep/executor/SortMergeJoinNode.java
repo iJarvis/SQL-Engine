@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static dubstep.planner.PlanTree.getSelectExprColumnList;
+
 public class SortMergeJoinNode extends BaseNode {
 
     public Column innerColumn;
@@ -105,5 +107,14 @@ public class SortMergeJoinNode extends BaseNode {
     void initProjectionInfo() {
         projectionInfo = new HashMap<>(innerNode.projectionInfo);
         Utils.mapPutAll(outerNode.projectionInfo, projectionInfo);
+    }
+
+    @Override
+    public void initProjPushDownInfo() {
+        this.requiredList.addAll(this.parentNode.requiredList);
+        this.requiredList.add(innerColumn.getWholeColumnName());
+        this.requiredList.add(outerColumn.getWholeColumnName());
+        this.innerNode.initProjPushDownInfo();
+        this.outerNode.initProjPushDownInfo();
     }
 }

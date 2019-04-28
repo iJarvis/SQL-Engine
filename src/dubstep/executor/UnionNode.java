@@ -40,4 +40,10 @@ public class UnionNode extends BaseNode {
         projectionInfo = innerNode.projectionInfo;
         //FIXME: this is most probably broken but we somehow passed CP1. There's no union in CP2 yet.
     }
+
+    @Override
+    public void initProjPushDownInfo() {
+        this.requiredList = this.parentNode.requiredList;
+        this.innerNode.initProjPushDownInfo();
+    }
 }
