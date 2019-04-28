@@ -26,12 +26,12 @@ public class PlanTree {
 
     public static BaseNode generatePlan(PlainSelect plainSelect) {
         FromItem fromItem = plainSelect.getFromItem();
-        if (fromItem instanceof Table) {
-            long start = System.currentTimeMillis();
-            TableIndexBuilder.build(fromItem);
-            long end = System.currentTimeMillis();
-            System.out.println("time = " + (end - start));
-        }
+//        if (fromItem instanceof Table) {
+//            long start = System.currentTimeMillis();
+//            TableIndexBuilder.build(fromItem);
+//            long end = System.currentTimeMillis();
+//            System.out.println("time = " + (end - start));
+//        }
         BaseNode scanRoot;
         if (fromItem instanceof SubSelect) {
             SelectBody selectBody = ((SubSelect) fromItem).getSelectBody();
@@ -102,10 +102,10 @@ public class PlanTree {
         for (Join join : Joins) {
             BaseNode rightNode;
             if (join.getRightItem() instanceof Table) {
-                long start = System.currentTimeMillis();
-                TableIndexBuilder.build(join.getRightItem());
-                long end = System.currentTimeMillis();
-                System.out.println("time = " + (end - start));
+//                long start = System.currentTimeMillis();
+//                TableIndexBuilder.build(join.getRightItem());
+//                long end = System.currentTimeMillis();
+//                System.out.println("time = " + (end - start));
                 rightNode = new ScanNode(join.getRightItem(), null, mySchema);
                 lowerNode = new JoinNode(lowerNode, rightNode);
             } else {
