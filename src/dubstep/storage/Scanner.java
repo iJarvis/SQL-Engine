@@ -2,13 +2,13 @@ package dubstep.storage;
 
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.expression.*;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +20,8 @@ public class Scanner {
     //    Lock tableLock = new Lock();
     BufferedReader tableReader;
     Integer currentMaxTid;
+    ArrayList<DataInputStream> colsDis = new ArrayList<>();
+    ArrayList<ObjectInputStream> colsOis = new ArrayList<>();
 
 
     class TupleConverter extends Thread {
@@ -59,7 +61,15 @@ public class Scanner {
         try {
             this.tableReader = new BufferedReader(new FileReader(scanTable.dataFile),25600);
             this.currentMaxTid = 0;
-        } catch (FileNotFoundException e) {
+            String path = "data/"+scanTable.GetTableName()+"/cols/";
+
+            for(int i =0 ; i< scanTable.columnDefinitions.size();i++)
+            {
+                colsDis.add(new DataInputStream(new BufferedInputStream(new FileInputStream(path+i) )));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
             Path path = FileSystems.getDefault().getPath(".");
             System.out.println("Current working directory : " + path.toAbsolutePath());
             throw new IllegalStateException("datafile not found : " + scanTable.dataFile);
@@ -74,77 +84,47 @@ public class Scanner {
     }
 
     public boolean readTuples(int tupleCount, ArrayList<Tuple> tupleBuffer, QueryTimer parseTimer) {
-
         int readTuples = 0;
         int TidStart = this.currentMaxTid;
+        tupleBuffer.clear();
 
         ArrayList<String> fileBuffer = new ArrayList<>();
-
-        if (this.tableReader == null) {
-            System.err.println("Stop !! - DubTable read not initialized or DubTable read already complete");
-
-            return true;
-        } else {
-
-            try {
-                String line;
-
-                while (tupleCount > readTuples && (line = this.tableReader.readLine()) != null) {
-                    fileBuffer.add(line);
-                    readTuples++;
-                }
-                this.currentMaxTid += readTuples;
-                if (readTuples != tupleCount) {
-                    this.tableReader.close();
-                    this.currentMaxTid = 0;
-                }
-//                this.tableLock.unlock();
-                tupleBuffer.clear();
-                int size = fileBuffer.size();
-                parseTimer.start();
-
-                int numThreads = 3;
-                ArrayList<TupleConverter> threads = new ArrayList<>();
-
-
-                for(int i =0 ; i < numThreads;i++)
+        int numCols = scanTable.columnDefinitions.size();
+        List<datatypes> typeList= scanTable.typeList;
+        parseTimer.start();
+        for(int i =0 ; i < tupleCount;i++)
+        {
+            ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
+            for(int j =0 ; j < numCols;j++)
+            {
+                PrimitiveValue value = null;
+                try {
+                switch (typeList.get(j))
                 {
-                    TupleConverter thread = new TupleConverter();
-                    thread.input = fileBuffer;
-                    thread.start_index = size/numThreads * i;
-                    thread.end_index = thread.start_index + size/numThreads;
-//                    System.out.println(""+thread.start_index+"  "+thread.end_index);
-                    thread.output = new ArrayList<>();
-                    if(i == numThreads-1)
-                        thread.end_index = size;
-                    threads.add(thread);
-                    thread.start();
-
+                    case DATE_TYPE:
+                            String dsr = colsDis.get(j).readLine();
+                            value = new DateValue(dsr);
+                        break;
+                    case INT_TYPE:
+                        value =  new LongValue(colsDis.get(j).readLong());
+                        break;
+                    case DOUBLE_TYPE:
+                        value =  new DoubleValue(colsDis.get(j).readDouble());
+                        break;
+                    case STRING_TYPE:
+                        value = new StringValue(colsDis.get(j).readLine());
                 }
-                for(int i =0 ; i < numThreads;i++)
-                {
-                    try {
-                        threads.get(i).join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    tupleBuffer.addAll(threads.get(i).output);
+                } catch (Exception e) {
+                    parseTimer.stop();
+                    return true;
                 }
-
-                parseTimer.stop();
-                fileBuffer.clear();
-            } catch (IOException e) {
-                e.printStackTrace();
+                valueArray.add(value);
             }
+            parseTimer.stop();
+            tupleBuffer.add(new Tuple(valueArray));
         }
-        return (!(readTuples == tupleCount));
+        return false;
     }
-
-//    void convertToTuples(ArrayList<Tuple> tupleBuffer, ArrayList<String> fileBuffer,int tupleCount, QueryTimer parseTimer) {
-//        for (String tupleString : fileBuffer) {
-//            tupleBuffer.add(new Tuple(tupleString, tupleCount++, scanTable.typeList,parseTimer));
-//        }
-//    }
 
 
 }
