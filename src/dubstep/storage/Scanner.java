@@ -103,18 +103,27 @@ public class Scanner {
             ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
             for(int j =0 ; j < numCols;j++)
             {
+                if(currentMaxTid > scanTable.getRowCount())
+                    return true;
                 PrimitiveValue value = null;
                 if(projVector.get(j)) {
                     if (scanTable.memCols.get(j).size() > 0 ) {
-                        value = scanTable.memCols.get(j).get(currentMaxTid);
+                        if(currentMaxTid < scanTable.memCols.get(j).size())
+                            value = scanTable.memCols.get(j).get(currentMaxTid);
+                        else
+                            return true;
                     }
                     else if(scanTable.dateCols.get(j).size() > 0)
                     {
-                        Long datelong = scanTable.dateCols.get(j).get(currentMaxTid);
-                        Date date = new Date(datelong);
-                        DateValue val = datePlaceHolders.get(j).get(tupleCount);
-                        val.setValue(date);
-                        value = val;
+                        if(currentMaxTid < scanTable.dateCols.get(j).size()) {
+                            Long datelong = scanTable.dateCols.get(j).get(currentMaxTid);
+                            Date date = new Date(datelong);
+                            DateValue val = datePlaceHolders.get(j).get(currentMaxTid);
+                            val.setValue(date);
+                            value = val;
+                        }
+                        else
+                            return true;
                     }
                     else {
                         try {
