@@ -14,10 +14,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static dubstep.Main.mySchema;
 
@@ -205,6 +202,20 @@ public class PlanTree {
                 }
             }
         }
+        if(expression instanceof CaseExpression) {
+            CaseExpression c = (CaseExpression)expression;
+            if (c.getSwitchExpression() == null) {
+                Iterator var2 = c.getWhenClauses().iterator();
+
+                while (var2.hasNext()) {
+                    Object ow = var2.next();
+                    WhenClause w = (WhenClause) ow;
+                    columnList.addAll(getSelectExprColumnStrList(w.getWhenExpression()));
+                }
+            }
+        }
+
+
         if (expression instanceof BinaryExpression) {
             BinaryExpression bin = (BinaryExpression) expression;
             if (bin.getRightExpression() instanceof Column)
