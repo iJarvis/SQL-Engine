@@ -48,6 +48,7 @@ public class DistinctNode extends BaseNode {
 
     @Override
     public void initProjPushDownInfo() {
+        if(this.parentNode !=null)
         this.requiredList = this.parentNode.requiredList;
         this.innerNode.initProjPushDownInfo();
     }

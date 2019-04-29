@@ -47,7 +47,7 @@ public class DubTable {
     private final void postProcessCreate() {
         File file = new File(dataFile);
         String path = "data/" + tableName + "/cols/";
-        File processed = new File(path + "/exists");
+        File processed = new File(path + "/exists.txt");
         if (!file.exists()) {
             throw new IllegalStateException("Data file doesn't exist for table = " + tableName);
         }
@@ -58,7 +58,7 @@ public class DubTable {
             System.out.println(processed.getName());
 
             try {
-                PrintWriter writer = new PrintWriter(path+"/exists", "UTF-8");
+                PrintWriter writer = new PrintWriter(path+"/exists.txt", "UTF-8");
                 writer.println("hello");
                 writer.close();
                 List<DataOutputStream> cols_files = new ArrayList<DataOutputStream>();

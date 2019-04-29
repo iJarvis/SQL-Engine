@@ -102,6 +102,7 @@ public class ProjNode extends BaseNode {
 
     @Override
     public void initProjPushDownInfo() {
+        if(this.parentNode !=null)
         requiredList.addAll(this.parentNode.requiredList);
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
            requiredList.addAll ((ArrayList)getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));

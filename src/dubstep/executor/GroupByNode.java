@@ -268,6 +268,7 @@ public class GroupByNode extends BaseNode {
 
     @Override
     public void initProjPushDownInfo() {
+        if(this.parentNode !=null)
         this.requiredList.addAll(this.parentNode.requiredList);
         for(int i =0 ; i < selectExpressionItems.size();i++)
         {
