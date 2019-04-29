@@ -118,7 +118,7 @@ public class Scanner {
                         if(currentMaxTid < scanTable.dateCols.get(j).size()) {
                             Long datelong = scanTable.dateCols.get(j).get(currentMaxTid);
                             Date date = new Date(datelong);
-                            DateValue val = datePlaceHolders.get(j).get(currentMaxTid);
+                            DateValue val = datePlaceHolders.get(j).get(i);
                             val.setValue(date);
                             value = val;
                         }
