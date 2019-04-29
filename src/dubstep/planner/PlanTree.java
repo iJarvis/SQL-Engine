@@ -168,7 +168,7 @@ public class PlanTree {
             {
                 Function fun = (Function) bin.getLeftExpression();
                 if(fun.getName().equals("DATE"))
-                bin.setLeftExpression(DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString()));
+                bin.setLeftExpression( new LongValue( (DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString())).getValue().getTime() ));
 
             }
 
@@ -176,7 +176,7 @@ public class PlanTree {
             {
                 Function fun = (Function) bin.getRightExpression();
                 if(fun.getName().equals("DATE"))
-                bin.setRightExpression(DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString()));
+                bin.setRightExpression(new LongValue( (DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString())).getValue().getTime() ));
 
             }
         }

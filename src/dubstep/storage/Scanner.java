@@ -96,22 +96,23 @@ public class Scanner {
         ArrayList<String> fileBuffer = new ArrayList<>(scanTable.columnDefinitions.size());
         int numCols = scanTable.columnDefinitions.size();
         List<datatypes> typeList= scanTable.typeList;
-        parseTimer.start();
         Boolean isLineItem = scanTable.GetTableName().equals("LINEITEM");
         for(int i =0 ; i < tupleCount;i++)
         {
             ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
             for(int j =0 ; j < numCols;j++)
             {
-                if(currentMaxTid > scanTable.getRowCount())
+                if(currentMaxTid > scanTable.getRowCount()) {
                     return true;
+                }
                 PrimitiveValue value = null;
                 if(projVector.get(j)) {
                     if (scanTable.memCols.get(j).size() > 0 ) {
                         if(currentMaxTid < scanTable.memCols.get(j).size())
                             value = scanTable.memCols.get(j).get(currentMaxTid);
-                        else
+                        else {
                             return true;
+                        }
                     }
                     else if(scanTable.dateCols.get(j).size() > 0)
                     {
@@ -122,16 +123,14 @@ public class Scanner {
                             val.setValue(date);
                             value = val;
                         }
-                        else
+                        else {
                             return true;
+                        }
                     }
                     else {
                         try {
                             switch (typeList.get(j)) {
                                 case DATE_TYPE:
-                                    String dsr = colsDis.get(j).readLine();
-                                    value = new DateValue(dsr);
-                                    break;
                                 case INT_TYPE:
                                     value =  new LongValue(colsDis.get(j).readLong());
                                     break;

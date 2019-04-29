@@ -117,8 +117,7 @@ public class DubTable {
                 switch (type) {
                     case DATE_TYPE:
                             java.sql.Date dd = ((DateValue) t).getValue();
-                            dateCols.get(index).add(((Date) dd).getTime());
-                        colFiles.get(index).writeBytes(t.toString() + "\n");
+                            colFiles.get(index).writeLong(dd.getTime());
                         break;
                     case INT_TYPE:
                         colFiles.get(index).writeLong(t.toLong());

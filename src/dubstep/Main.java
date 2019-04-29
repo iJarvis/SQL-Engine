@@ -1,11 +1,15 @@
 package dubstep;
 
+import com.sun.xml.internal.rngom.parse.host.Base;
 import dubstep.executor.BaseNode;
 import dubstep.planner.PlanTree;
 import dubstep.storage.TableManager;
 import dubstep.utils.Explainer;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.expression.DateValue;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
@@ -16,7 +20,10 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.Union;
 
 import java.io.*;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
 
 public class Main {
@@ -27,6 +34,7 @@ public class Main {
     static public boolean DEBUG_MODE = false; // will print out logs - all logs should be routed through this flag
     static public boolean EXPLAIN_MODE = false; // will print statistics of the code
     static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
+    static ArrayList<Integer> dateSet;
 
     public static void main(String[] args) throws ParseException, SQLException {
         //Get all command line arguments
@@ -146,8 +154,10 @@ public class Main {
             } else {
                 root = PlanTree.generateUnionPlan((Union) selectBody);
             }
+            setDateCols(root);
             Tuple tuple = root.getNextTuple();
             while (tuple != null) {
+                replaceDate(tuple);
                 System.out.println(tuple.getProjection());
                 tuple = root.getNextTuple();
             }
@@ -164,6 +174,33 @@ public class Main {
         timer.reset();
 
         System.out.println(PROMPT);
+    }
+
+    private static void setDateCols(BaseNode root)
+    {
+        dateSet = new ArrayList<>();
+        Iterator<String> it = root.projectionInfo.keySet().iterator();
+        while (it.hasNext())
+        {
+            String val = it.next();
+            if(val.indexOf("DATE") > 0)
+            {
+                dateSet.add(root.projectionInfo.get(val));
+            }
+
+        }
+    }
+
+    static private void replaceDate(Tuple tuple)
+    {
+        for(Integer dateIndex : dateSet)
+        {
+            LongValue val = (LongValue) tuple.valueArray.get(dateIndex);
+            Date date = new Date(val.getValue());
+            DateValue dval = new DateValue(date.toString());
+            tuple.valueArray.add(dateIndex,dval);
+        }
+
     }
 
 }
