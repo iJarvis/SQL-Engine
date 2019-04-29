@@ -6,6 +6,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +53,10 @@ public class DubTable {
         }
 
         if (!processed.exists()) {
+            System.out.println(path);
             new File(path).mkdirs();
+            System.out.println(processed.getName());
+
             try {
                 processed.createNewFile();
                 List<DataOutputStream> cols_files = new ArrayList<DataOutputStream>();
