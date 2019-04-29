@@ -2,6 +2,7 @@ package dubstep.storage;
 
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.DateValue;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
@@ -117,7 +118,9 @@ public class DubTable {
                 switch (type) {
                     case DATE_TYPE:
                             java.sql.Date dd = ((DateValue) t).getValue();
-                            colFiles.get(index).writeLong(dd.getTime());
+                            Long t1 = dd.getTime();
+                            colFiles.get(index).writeLong(t1);
+                            memCols.get(index).add(new LongValue(t1));
                         break;
                     case INT_TYPE:
                         colFiles.get(index).writeLong(t.toLong());

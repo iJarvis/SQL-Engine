@@ -113,19 +113,6 @@ public class Scanner {
                             return true;
                         }
                     }
-                    else if(scanTable.dateCols.get(j).size() > 0)
-                    {
-                        if(currentMaxTid < scanTable.dateCols.get(j).size()) {
-                            Long datelong = scanTable.dateCols.get(j).get(currentMaxTid);
-                            Date date = new Date(datelong);
-                            DateValue val = datePlaceHolders.get(j).get(i);
-                            val.setValue(date);
-                            value = val;
-                        }
-                        else {
-                            return true;
-                        }
-                    }
                     else {
                         try {
                             switch (typeList.get(j)) {
@@ -162,15 +149,6 @@ public class Scanner {
                 Column col = new Column();
                 if( requiredList.contains(columnName) || requiredList.contains(fullColumnName)) {
                     projVector.add(true);
-                    if(scanTable.typeList.get(i) == DATE_TYPE )
-                    {
-                        datePlaceHolders.add( new ArrayList<>());
-                        for(int j =0; j < 1500002;j++)
-                        {
-                            datePlaceHolders.get(i).add(new DateValue("1995-10-10"));
-                        }
-                    }
-                    else
                         datePlaceHolders.add(null);
                 }
                 else {
