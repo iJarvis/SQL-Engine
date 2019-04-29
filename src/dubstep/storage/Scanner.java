@@ -140,7 +140,6 @@ public class Scanner {
                                     value = new StringValue(colsDis.get(j).readLine());
                             }
                         } catch (Exception e) {
-                            parseTimer.stop();
                             return true;
                         }
                     }
@@ -148,7 +147,6 @@ public class Scanner {
                 valueArray.add(value);
             }
             currentMaxTid++;
-            parseTimer.stop();
             tupleBuffer.add(new Tuple(valueArray));
         }
         return false;
