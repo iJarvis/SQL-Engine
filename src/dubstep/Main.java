@@ -196,7 +196,7 @@ public class Main {
             LongValue val = (LongValue) tuple.valueArray.get(dateIndex);
             Date date = new Date(val.getValue());
             DateValue dval = new DateValue(date.toString());
-            tuple.valueArray.add(dateIndex,dval);
+            tuple.valueArray.set(dateIndex,dval);
         }
 
     }
