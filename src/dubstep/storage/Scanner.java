@@ -9,10 +9,12 @@ import net.sf.jsqlparser.schema.Column;
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import static dubstep.storage.datatypes.DATE_TYPE;
 
 
 public class Scanner {
@@ -24,6 +26,7 @@ public class Scanner {
     ArrayList<DataInputStream> colsDis = new ArrayList<>();
     ArrayList<ObjectInputStream> colsOis = new ArrayList<>();
     ArrayList<Boolean> projVector = new ArrayList<>();
+    ArrayList<ArrayList<DateValue>> datePlaceHolders = new ArrayList<>();
 
 
     class TupleConverter extends Thread {
@@ -105,6 +108,14 @@ public class Scanner {
                     if (scanTable.memCols.get(j).size() > 0 ) {
                         value = scanTable.memCols.get(j).get(currentMaxTid);
                     }
+                    else if(scanTable.dateCols.get(j).size() > 0)
+                    {
+                        Long datelong = scanTable.dateCols.get(j).get(currentMaxTid);
+                        Date date = new Date(datelong);
+                        DateValue val = datePlaceHolders.get(j).get(tupleCount);
+                        val.setValue(date);
+                        value = val;
+                    }
                     else {
                         try {
                             switch (typeList.get(j)) {
@@ -144,10 +155,23 @@ public class Scanner {
                 String columnName = scanTable.columnDefinitions.get(i).getColumnName();
                 String fullColumnName = scanTable.GetTableName()+"."+columnName;
                 Column col = new Column();
-                if( requiredList.contains(columnName) || requiredList.contains(fullColumnName))
-                        projVector.add(true);
-                else
+                if( requiredList.contains(columnName) || requiredList.contains(fullColumnName)) {
+                    projVector.add(true);
+                    if(scanTable.typeList.get(i) == DATE_TYPE )
+                    {
+                        datePlaceHolders.add( new ArrayList<>());
+                        for(int j =0; j < 10000;j++)
+                        {
+                            datePlaceHolders.get(i).add(new DateValue("1995-10-10"));
+                        }
+                    }
+                    else
+                        datePlaceHolders.add(null);
+                }
+                else {
                     projVector.add(false);
+                    datePlaceHolders.add(null);
+                }
             }
     }
 
