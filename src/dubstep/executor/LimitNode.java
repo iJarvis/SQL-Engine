@@ -29,6 +29,13 @@ public class LimitNode extends BaseNode {
     }
 
     @Override
+    public void initProjPushDownInfo() {
+        if(this.parentNode !=null)
+        this.requiredList = this.parentNode.requiredList;
+        this.innerNode.initProjPushDownInfo();
+    }
+
+    @Override
     void resetIterator() {
         this.currentRowNo = 0L;
         this.innerNode.resetIterator();

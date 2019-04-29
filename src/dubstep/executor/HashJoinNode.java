@@ -13,6 +13,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import static dubstep.executor.BaseNode.DataType.*;
+import static dubstep.planner.PlanTree.getSelectExprColumnList;
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class HashJoinNode extends BaseNode {
 
@@ -169,5 +171,13 @@ public class HashJoinNode extends BaseNode {
     void initProjectionInfo() {
         projectionInfo = new HashMap<>(innerNode.projectionInfo);
         Utils.mapPutAll(outerNode.projectionInfo, projectionInfo);
+    }
+
+    @Override
+    public void initProjPushDownInfo() {
+        this.requiredList.addAll(this.parentNode.requiredList);
+        this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(filter));
+        this.innerNode.initProjPushDownInfo();
+        this.outerNode.initProjPushDownInfo();
     }
 }

@@ -1,6 +1,6 @@
 package dubstep.storage;
-
 import dubstep.utils.Pair;
+import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
@@ -44,6 +44,7 @@ public class DubTable {
 
         }
 //        countNumRows();
+        postProcessCreate();
     }
 
     public void setIndexes(List<Index> indexes) {
@@ -54,20 +55,84 @@ public class DubTable {
         return indexes;
     }
 
-    private final void countNumRows() {
+    private final void postProcessCreate() {
         File file = new File(dataFile);
+        String path =   tableName + "/cols/";
+        File processed = new File(path + "/exists.txt");
         if (!file.exists()) {
             throw new IllegalStateException("Data file doesn't exist for table = " + tableName);
         }
-        int lines = 0;
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(dataFile));
-            while (reader.readLine() != null) lines++;
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        if (!processed.exists()) {
+            System.out.println(path);
+            new File(path).mkdirs();
+            System.out.println(processed.getName());
+
+            try {
+                System.out.println(processed.getPath());
+                processed.createNewFile();
+                List<DataOutputStream> cols_files = new ArrayList<DataOutputStream>();
+                int index = 0;
+                for (datatypes type : typeList) {
+                    FileOutputStream file_ptr = new FileOutputStream(path + "/" + index);
+                    DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(file_ptr, 64000));
+                    index++;
+                    cols_files.add(stream);
+                }
+                splitTuplesAndWrite(cols_files);
+                for (DataOutputStream stream : cols_files) {
+                    stream.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(0);
+            }
+        } 
+        else {
+            int lines = 0;
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(dataFile));
+                while (reader.readLine() != null) lines++;
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            rowCount = lines;
         }
-        rowCount = lines;
+    }
+
+    private void splitTuplesAndWrite(List<DataOutputStream> colFiles) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(dataFile));
+        ArrayList<ObjectOutputStream> oosList = new ArrayList<>();
+        String line = reader.readLine();
+        int counter = 0;
+        Boolean isFirst = true;
+        while (line != null) {
+            Tuple tuple = new Tuple(line, counter, typeList);
+            int index = 0;
+            for (PrimitiveValue t : tuple.valueArray) {
+                datatypes type = typeList.get(index);
+                switch (type) {
+                    case DATE_TYPE:
+                        colFiles.get(index).writeBytes(t.toString() + "\n");
+                        break;
+                    case INT_TYPE:
+                        colFiles.get(index).writeLong(t.toLong());
+
+                        break;
+                    case DOUBLE_TYPE:
+                        colFiles.get(index).writeDouble(t.toDouble());
+                        break;
+                    case STRING_TYPE:
+                        colFiles.get(index).writeBytes(t.toRawString() + "\n");
+                        break;
+                }
+                index++;
+            }
+            counter++;
+            line = reader.readLine();
+        }
+        rowCount = counter;
     }
 
     public String GetTableName() {

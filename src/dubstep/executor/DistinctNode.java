@@ -45,4 +45,11 @@ public class DistinctNode extends BaseNode {
     public void initProjectionInfo() {
         projectionInfo = innerNode.projectionInfo;
     }
+
+    @Override
+    public void initProjPushDownInfo() {
+        if(this.parentNode !=null)
+        this.requiredList = this.parentNode.requiredList;
+        this.innerNode.initProjPushDownInfo();
+    }
 }

@@ -57,4 +57,11 @@ public class JoinNode extends BaseNode {
         projectionInfo = new HashMap<>(innerNode.projectionInfo);
         Utils.mapPutAll(outerNode.projectionInfo, projectionInfo);
     }
+
+    @Override
+    public void initProjPushDownInfo() {
+        this.requiredList = this.parentNode.requiredList;
+        this.innerNode.initProjPushDownInfo();
+        this.outerNode.initProjPushDownInfo();
+    }
 }

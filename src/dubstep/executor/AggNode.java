@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static dubstep.planner.PlanTree.getSelectExprColumnList;
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
+
 public class AggNode extends BaseNode {
     private Evaluator evaluator;
     private ArrayList<SelectExpressionItem> selectExpressionItems;
@@ -98,5 +101,16 @@ public class AggNode extends BaseNode {
                 projectionInfo.put(alias, i);
             }
         }
+    }
+
+    @Override
+    public void initProjPushDownInfo() {
+        if(this.parentNode !=null)
+        this.requiredList.addAll(this.parentNode.requiredList);
+        for (int i = 0; i < selectExpressionItems.size(); ++i) {
+            this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
+        }
+        this.innerNode.initProjPushDownInfo();
+        
     }
 }

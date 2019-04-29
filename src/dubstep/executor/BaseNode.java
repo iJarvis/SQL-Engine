@@ -3,6 +3,7 @@ package dubstep.executor;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import static dubstep.Main.EXPLAIN_MODE;
@@ -15,6 +16,7 @@ abstract public class BaseNode {
     Integer tupleCount;
     public Map<String, Integer> projectionInfo;
     public Boolean isInner;
+    public HashSet<String> requiredList =  new HashSet<>();
 
     public BaseNode() {
         timer = new QueryTimer();
@@ -28,6 +30,8 @@ abstract public class BaseNode {
     abstract void resetIterator();
 
     abstract void initProjectionInfo();
+
+    abstract public void initProjPushDownInfo();
 
     public Integer getTupleCount(){
         return this.tupleCount;

@@ -43,24 +43,24 @@ public class Main {
 
 
         try {
-            String line;
-            BufferedReader reader;
-            File tablesFile = new File("tables");
-            if (tablesFile.exists()) {
-                reader = new BufferedReader(new FileReader("tables"));
+            String line = null;
+            BufferedReader reader = null;
+            reader = new BufferedReader(new FileReader("tables"));
+            if(reader == null)
+                line = null;
+            else
                 line = reader.readLine();
 
-                while (line !=null)
-                {
-                    CCJSqlParser parser = new CCJSqlParser(new StringReader(line));
-                    Statement query = parser.Statement();
-                    CreateTable createQuery = (CreateTable) query;
-                    if (!mySchema.createTable(createQuery)) {
-                        System.out.println("Unable to create DubTable - DubTable already exists");
-                    }
-                    line = reader.readLine();
-
+            while (line !=null)
+            {
+                CCJSqlParser parser = new CCJSqlParser(new StringReader(line));
+                Statement query = parser.Statement();
+                CreateTable createQuery = (CreateTable) query;
+                if (!mySchema.createTable(createQuery)) {
+                    System.out.println("Unable to create DubTable - DubTable already exists");
                 }
+                line = reader.readLine();
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -71,40 +71,14 @@ public class Main {
 //        executeQuery("create table R(id int,id1 int);");
 //        executeQuery("create table S(id int,id1 int);");
 
-//         executeQuery("CREATE TABLE LINEITEM(ORDERKEY INT,PARTKEY INT,SUPPKEY INT,LINENUMBER INT,QUANTITY DECIMAL,EXTENDEDPRICE DECIMAL,DISCOUNT DECIMAL,TAX DECIMAL,RETURNFLAG CHAR(1),LINESTATUS CHAR(1),SHIPDATE DATE,COMMITDATE DATE,RECEIPTDATE DATE,SHIPINSTRUCT CHAR(25),SHIPMODE CHAR(10),COMMENT VARCHAR(44)," +
-//                 "PRIMARY KEY (ORDERKEY,LINENUMBER), INDEX SHIPDATE (SHIPDATE), INDEX RECEIPTDATE (RECEIPTDATE), INDEX RETURNFLAG (RETURNFLAG));");
-//         executeQuery("CREATE TABLE ORDERS(\n" +
-//                 "  ORDERKEY INT, \n" +
-//                 "  CUSTKEY INT, \n" +
-//                 "  ORDERSTATUS CHAR(1), \n" +
-//                 "  TOTALPRICE DECIMAL, \n" +
-//                 "  ORDERDATE DATE, \n" +
-//                 "  ORDERPRIORITY CHAR(15), \n" +
-//                 "  CLERK CHAR(15), \n" +
-//                 "  SHIPPRIORITY INT, \n" +
-//                 "  COMMENT VARCHAR(79), \n" +
-//                 "  PRIMARY KEY (ORDERKEY), \n" +
-//                 "  INDEX ORDERDATE (ORDERDATE));");
-         //         executeQuery("CREATE TABLE SUPPLIER(\n" +
-//                 "  SUPPKEY INT, \n" +
-//                 "  NAME CHAR(25), \n" +
-//                 "  ADDRESS VARCHAR(40), \n" +
-//                 "  NATIONKEY INT, \n" +
-//                 "  PHONE CHAR(15), \n" +
-//                 "  ACCTBAL DECIMAL, \n" +
-//                 "  COMMENT VARCHAR(101), \n" +
-//                 "  PRIMARY KEY (SUPPKEY), \n" +
-//                 "  INDEX NATIONKEY (NATIONKEY));");
+//         executeQuery("CREATE TABLE LINEITEM(ORDERKEY INT,PARTKEY INT,SUPPKEY INT,LINENUMBER INT,QUANTITY DECIMAL,EXTENDEDPRICE DECIMAL,DISCOUNT DECIMAL,TAX DECIMAL,RETURNFLAG CHAR(1),LINESTATUS CHAR(1),SHIPDATE DATE,COMMITDATE DATE,RECEIPTDATE DATE,SHIPINSTRUCT CHAR(25),SHIPMODE CHAR(10),COMMENT VARCHAR(44),PRIMARY KEY (ORDERKEY,LINENUMBER));");
+//         executeQuery("CREATE TABLE ORDERS(ORDERKEY INT,CUSTKEY INT,ORDERSTATUS CHAR(1),TOTALPRICE DECIMAL,ORDERDATE DATE,ORDERPRIORITY CHAR(15),CLERK CHAR(15),SHIPPRIORITY INT,COMMENT VARCHAR(79),PRIMARY KEY (ORDERKEY));");
 //         executeQuery("CREATE TABLE PART(PARTKEY INT,NAME VARCHAR(55),MFGR CHAR(25),BRAND CHAR(10),TYPE VARCHAR(25),SIZE INT,CONTAINER CHAR(10),RETAILPRICE DECIMAL,COMMENT VARCHAR(23),PRIMARY KEY (PARTKEY));");
 //         executeQuery("CREATE TABLE CUSTOMER(CUSTKEY INT,NAME VARCHAR(25),ADDRESS VARCHAR(40),NATIONKEY INT,PHONE CHAR(15),ACCTBAL DECIMAL,MKTSEGMENT CHAR(10),COMMENT VARCHAR(117),PRIMARY KEY (CUSTKEY));");
 //         executeQuery("CREATE TABLE SUPPLIER(SUPPKEY INT,NAME CHAR(25),ADDRESS VARCHAR(40),NATIONKEY INT,PHONE CHAR(15),ACCTBAL DECIMAL,COMMENT VARCHAR(101),PRIMARY KEY (SUPPKEY));");
 //         executeQuery("CREATE TABLE PARTSUPP(PARTKEY INT,SUPPKEY INT,AVAILQTY INT,SUPPLYCOST DECIMAL,COMMENT VARCHAR(199),PRIMARY KEY (PARTKEY,SUPPKEY));");
 //         executeQuery("CREATE TABLE NATION(NATIONKEY INT,NAME CHAR(25),REGIONKEY INT,COMMENT VARCHAR(152),PRIMARY KEY (NATIONKEY));");
-//         executeQuery("CREATE TABLE REGION(\n" +
-//                 "  REGIONKEY INT, \n" +
-//                 "  NAME CHAR(25), \n" +
-//                 "  COMMENT VARCHAR(152), \n" +
-//                 "  PRIMARY KEY (REGIONKEY));");
+//         executeQuery("CREATE TABLE REGION(REGIONKEY INT,NAME CHAR(25),COMMENT VARCHAR(152),PRIMARY KEY (REGIONKEY));");
 
         while (scanner.hasNext()) {
 
@@ -135,9 +109,13 @@ public class Main {
 
         if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
-            File tableFile = new File("tables");
-            if (!tableFile.exists()) {
-                BufferedWriter table_file;
+            BufferedWriter table_file = null;
+
+            if (!mySchema.createTable(createQuery)) {
+                System.out.println("Unable to create DubTable - DubTable already exists");
+            }
+            else
+            {
                 try {
                     table_file = new BufferedWriter(new FileWriter("tables",true));
 
@@ -146,10 +124,7 @@ public class Main {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
 
-            if (!mySchema.createTable(createQuery)) {
-                System.out.println("Unable to create DubTable - DubTable already exists");
             }
         } else if (query instanceof Select) {
             Select selectQuery = (Select) query;
@@ -158,15 +133,16 @@ public class Main {
             if (selectBody instanceof PlainSelect) {
                 root = PlanTree.generatePlan((PlainSelect) selectBody);
                 if(EXPLAIN_MODE) {
-                   Explainer e1 = new Explainer(root);
-                   e1.explain();
-               }
+                    Explainer e1 = new Explainer(root);
+                    e1.explain();
+                }
 
-               root = PlanTree.optimizePlan(root);
-               if(EXPLAIN_MODE) {
-                   Explainer  e1 = new Explainer(root);
-                   e1.explain();
-               }
+                root = PlanTree.optimizePlan(root);
+                root.initProjPushDownInfo();
+                if(EXPLAIN_MODE) {
+                    Explainer  e1 = new Explainer(root);
+                    e1.explain();
+                }
             } else {
                 root = PlanTree.generateUnionPlan((Union) selectBody);
             }

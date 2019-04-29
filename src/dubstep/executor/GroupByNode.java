@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static dubstep.planner.PlanTree.getSelectExprColumnList;
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 import static dubstep.utils.Tuple.deserializeTuple;
 
 public class GroupByNode extends BaseNode {
@@ -262,6 +264,18 @@ public class GroupByNode extends BaseNode {
                 projectionInfo.put(alias, i);
             }
         }
+    }
+
+    @Override
+    public void initProjPushDownInfo() {
+        if(this.parentNode !=null)
+        this.requiredList.addAll(this.parentNode.requiredList);
+        for(int i =0 ; i < selectExpressionItems.size();i++)
+        {
+            this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
+        }
+        this.innerNode.initProjPushDownInfo();
+
     }
 
     @Override

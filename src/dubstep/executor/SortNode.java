@@ -13,6 +13,9 @@ import net.sf.jsqlparser.statement.select.OrderByElement;
 import java.io.*;
 import java.util.*;
 
+import static dubstep.planner.PlanTree.getSelectExprColumnList;
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
+
 public class SortNode extends BaseNode {
 
     private static final String tempDir = "temp";
@@ -22,6 +25,7 @@ public class SortNode extends BaseNode {
     private List<Tuple> sortBuffer = new ArrayList<>();
     private int idx = 0;
     private TupleOrderByComparator comparator;
+    private List<OrderByElement> orderByElements;
     private PriorityQueue<Pair<Integer, Tuple>> queue = null;
     private File currentSortDir;
     private List<BufferedReader> brList = null;
@@ -35,6 +39,8 @@ public class SortNode extends BaseNode {
         comparator = new TupleOrderByComparator(elems);
         initProjectionInfo();
         brList = new ArrayList<>();
+        orderByElements = elems;
+
         //check for edge case that a column in order by clause isn't of the form tablename.columnname where it is so
         //in the select statement
         for (OrderByElement elem: elems) {
@@ -175,6 +181,18 @@ public class SortNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = innerNode.projectionInfo;
+    }
+
+    @Override
+    public void initProjPushDownInfo() {
+        if(this.parentNode !=null)
+        this.requiredList.addAll(this.parentNode.requiredList);
+        for(int i =0 ; i < orderByElements.size();i++ )
+        {
+            this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(orderByElements.get(i).getExpression()));
+        }
+
+        this.innerNode.initProjPushDownInfo();
     }
 
     private Comparator<Pair<Integer, Tuple>> getPQComparator() {
