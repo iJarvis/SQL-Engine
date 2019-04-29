@@ -5,10 +5,7 @@ import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
 import dubstep.utils.Evaluator;
 import dubstep.utils.GenerateAggregateNode;
-import net.sf.jsqlparser.expression.BinaryExpression;
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -173,15 +170,15 @@ public class PlanTree {
             if(bin.getLeftExpression() instanceof Function)
             {
                 Function fun = (Function) bin.getLeftExpression();
-                if(fun.getName() =="DATE");
-                    bin.setLeftExpression(new DateValue(fun.getParameters().toString()));
+                if(fun.getName() =="DATE")
+                bin.setLeftExpression(DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString()));
 
             }
 
             if(bin.getRightExpression() instanceof Function)
             {
                 Function fun = (Function) bin.getRightExpression();
-                if(fun.getName() =="DATE");
+                if(fun.getName() =="DATE")
                 bin.setRightExpression(DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString()));
 
             }
