@@ -58,7 +58,9 @@ public class DubTable {
             System.out.println(processed.getName());
 
             try {
-                processed.createNewFile();
+                PrintWriter writer = new PrintWriter(path+"/exists", "UTF-8");
+                writer.println("hello");
+                writer.close();
                 List<DataOutputStream> cols_files = new ArrayList<DataOutputStream>();
                 int index = 0;
                 for (datatypes type : typeList) {
