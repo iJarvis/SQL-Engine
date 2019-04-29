@@ -63,7 +63,7 @@ public class Scanner {
         try {
             this.tableReader = new BufferedReader(new FileReader(scanTable.dataFile),25600);
             this.currentMaxTid = 0;
-            String path = "data/"+scanTable.GetTableName()+"/cols/";
+            String path = scanTable.GetTableName()+"/cols/";
 
             for(int i =0 ; i< scanTable.columnDefinitions.size();i++)
             {

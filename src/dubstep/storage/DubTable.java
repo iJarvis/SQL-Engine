@@ -46,7 +46,7 @@ public class DubTable {
 
     private final void postProcessCreate() {
         File file = new File(dataFile);
-        String path = "data/" + tableName + "/cols/";
+        String path =   tableName + "/cols/";
         File processed = new File(path + "/exists.txt");
         if (!file.exists()) {
             throw new IllegalStateException("Data file doesn't exist for table = " + tableName);
