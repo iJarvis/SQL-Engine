@@ -100,4 +100,9 @@ public class IndexScanNode extends BaseNode {
     @Override
     void initProjectionInfo() {
     }
+
+    @Override
+    public void initProjPushDownInfo() {
+
+    }
 }
