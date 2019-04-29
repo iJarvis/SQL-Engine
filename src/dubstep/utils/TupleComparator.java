@@ -27,12 +27,12 @@ public class TupleComparator {
                     return isAsc? 1: -1;
                 }
             } else if (leftPV.getType() == PrimitiveType.DATE) {
-//                Date leftDate = dateFormat.parse(leftPV.toRawString());
-//                Date rightDate = dateFormat.parse(rightPV.toRawString());
+                Date leftDate = dateFormat.parse(leftPV.toRawString());
+                Date rightDate = dateFormat.parse(rightPV.toRawString());
                 if (isAsc) {
-                    return leftPV.toRawString().compareTo(rightPV.toRawString());
+                    return leftDate.compareTo(rightDate);
                 } else {
-                    return rightPV.toRawString().compareTo(leftPV.toRawString());
+                    return rightDate.compareTo(leftDate);
                 }
             }
             else if(leftPV.getType() == PrimitiveType.STRING )
@@ -46,7 +46,7 @@ public class TupleComparator {
                 else
                     return  rightValue.compareTo(leftValue);
             }
-        } catch (PrimitiveValue.InvalidPrimitive e) {
+        } catch (PrimitiveValue.InvalidPrimitive | ParseException e) {
             e.printStackTrace();
         }
         return 0;
