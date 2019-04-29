@@ -169,7 +169,7 @@ public class Scanner {
                     if(scanTable.typeList.get(i) == DATE_TYPE )
                     {
                         datePlaceHolders.add( new ArrayList<>());
-                        for(int j =0; j < 10000;j++)
+                        for(int j =0; j < 1500002;j++)
                         {
                             datePlaceHolders.get(i).add(new DateValue("1995-10-10"));
                         }
