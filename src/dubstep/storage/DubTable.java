@@ -30,7 +30,7 @@ public class DubTable {
         columnDefinitions =  createTable.getColumnDefinitions();
         dataFile = "data/" + tableName + ".csv";
         typeList = new ArrayList<>();
-        for(int i =0 ; i < columnDefinitions.size();i++)
+        for(int i = 0; i < columnDefinitions.size();i++)
         {
             String dataType = columnDefinitions.get(i).getColDataType().getDataType().toLowerCase();
             if(dataType.equals("int"))
