@@ -1,6 +1,5 @@
 package dubstep;
 
-import com.sun.xml.internal.rngom.parse.host.Base;
 import dubstep.executor.BaseNode;
 import dubstep.planner.PlanTree;
 import dubstep.storage.TableManager;
@@ -9,7 +8,6 @@ import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
