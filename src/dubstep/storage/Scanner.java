@@ -94,6 +94,7 @@ public class Scanner {
         int numCols = scanTable.columnDefinitions.size();
         List<datatypes> typeList= scanTable.typeList;
         parseTimer.start();
+        Boolean isLineItem = scanTable.GetTableName().equals("LINEITEM");
         for(int i =0 ; i < tupleCount;i++)
         {
             ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
@@ -101,28 +102,34 @@ public class Scanner {
             {
                 PrimitiveValue value = null;
                 if(projVector.get(j)) {
-                    try {
-                        switch (typeList.get(j)) {
-                            case DATE_TYPE:
-                                String dsr = colsDis.get(j).readLine();
-                                value = new DateValue(dsr);
-                                break;
-                            case INT_TYPE:
-                                value =  new LongValue(colsDis.get(j).readLong());
-                                break;
-                            case DOUBLE_TYPE:
-                                value =  new DoubleValue(colsDis.get(j).readDouble());
-                                break;
-                            case STRING_TYPE:
-                                value = new StringValue(colsDis.get(j).readLine());
+                    if (scanTable.memCols.get(j).size() > 0 ) {
+                        value = scanTable.memCols.get(j).get(currentMaxTid);
+                    }
+                    else {
+                        try {
+                            switch (typeList.get(j)) {
+                                case DATE_TYPE:
+                                    String dsr = colsDis.get(j).readLine();
+                                    value = new DateValue(dsr);
+                                    break;
+                                case INT_TYPE:
+                                    value =  new LongValue(colsDis.get(j).readLong());
+                                    break;
+                                case DOUBLE_TYPE:
+                                    value =  new DoubleValue(colsDis.get(j).readDouble());
+                                    break;
+                                case STRING_TYPE:
+                                    value = new StringValue(colsDis.get(j).readLine());
+                            }
+                        } catch (Exception e) {
+                            parseTimer.stop();
+                            return true;
                         }
-                    } catch (Exception e) {
-                        parseTimer.stop();
-                        return true;
                     }
                 }
                 valueArray.add(value);
             }
+            currentMaxTid++;
             parseTimer.stop();
             tupleBuffer.add(new Tuple(valueArray));
         }

@@ -22,15 +22,18 @@ public class DubTable {
     String dataFile;
     public List<datatypes> typeList;
     private int rowCount = -1;
+    public ArrayList<ArrayList<PrimitiveValue>> memCols;
 
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
         columnDefinitions =  createTable.getColumnDefinitions();
         dataFile = "data/" + tableName + ".csv";
         typeList = new ArrayList<>();
+        memCols = new ArrayList<>();
         for(int i =0 ; i < columnDefinitions.size();i++)
         {
             String dataType = columnDefinitions.get(i).getColDataType().getDataType().toLowerCase();
+            memCols.add(new ArrayList<>());
             if(dataType.equals("int"))
                 typeList.add(datatypes.INT_TYPE);
             if(dataType.equals("date"))
@@ -64,7 +67,7 @@ public class DubTable {
                 int index = 0;
                 for (datatypes type : typeList) {
                     FileOutputStream file_ptr = new FileOutputStream(path + "/" + index);
-                    DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(file_ptr, 64000));
+                    DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(file_ptr, 8000));
                     index++;
                     cols_files.add(stream);
                 }
@@ -103,6 +106,8 @@ public class DubTable {
                 datatypes type = typeList.get(index);
                 switch (type) {
                     case DATE_TYPE:
+                        if(!tableName.equals("LINEITEM"))
+                        memCols.get(index).add(t);
                         colFiles.get(index).writeBytes(t.toString() + "\n");
                         break;
                     case INT_TYPE:
@@ -116,6 +121,7 @@ public class DubTable {
                         colFiles.get(index).writeBytes(t.toRawString() + "\n");
                         break;
                 }
+                tuple.valueArray.set(index,null);
                 index++;
             }
             counter++;
