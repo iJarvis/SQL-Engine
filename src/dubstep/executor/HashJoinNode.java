@@ -14,6 +14,7 @@ import java.util.LinkedList;
 
 import static dubstep.executor.BaseNode.DataType.*;
 import static dubstep.planner.PlanTree.getSelectExprColumnList;
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class HashJoinNode extends BaseNode {
 
@@ -175,7 +176,7 @@ public class HashJoinNode extends BaseNode {
     @Override
     public void initProjPushDownInfo() {
         this.requiredList.addAll(this.parentNode.requiredList);
-        this.requiredList.addAll((ArrayList)getSelectExprColumnList(filter));
+        this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(filter));
         this.innerNode.initProjPushDownInfo();
         this.outerNode.initProjPushDownInfo();
     }

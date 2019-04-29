@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import static dubstep.planner.PlanTree.getSelectExprColumnList;
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class SelectNode extends BaseNode {
 
@@ -60,7 +61,7 @@ public class SelectNode extends BaseNode {
     @Override
     public void initProjPushDownInfo() {
         requiredList.addAll(parentNode.requiredList);
-        requiredList.addAll((ArrayList)getSelectExprColumnList(filter));
+        requiredList.addAll((ArrayList)getSelectExprColumnStrList(filter));
         this.innerNode.initProjPushDownInfo();
     }
 }

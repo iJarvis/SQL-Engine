@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static dubstep.planner.PlanTree.getSelectExprColumnList;
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class AggNode extends BaseNode {
     private Evaluator evaluator;
@@ -106,7 +107,7 @@ public class AggNode extends BaseNode {
     public void initProjPushDownInfo() {
         this.requiredList.addAll(this.parentNode.requiredList);
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
-            this.requiredList.addAll((ArrayList)getSelectExprColumnList(selectExpressionItems.get(i).getExpression()));
+            this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
         }
         this.innerNode.initProjPushDownInfo();
         

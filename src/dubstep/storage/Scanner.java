@@ -1,15 +1,16 @@
 package dubstep.storage;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.schema.Column;
 
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -22,6 +23,7 @@ public class Scanner {
     Integer currentMaxTid;
     ArrayList<DataInputStream> colsDis = new ArrayList<>();
     ArrayList<ObjectInputStream> colsOis = new ArrayList<>();
+    ArrayList<Boolean> projVector = new ArrayList<>();
 
 
     class TupleConverter extends Thread {
@@ -88,7 +90,7 @@ public class Scanner {
         int TidStart = this.currentMaxTid;
         tupleBuffer.clear();
 
-        ArrayList<String> fileBuffer = new ArrayList<>();
+        ArrayList<String> fileBuffer = new ArrayList<>(scanTable.columnDefinitions.size());
         int numCols = scanTable.columnDefinitions.size();
         List<datatypes> typeList= scanTable.typeList;
         parseTimer.start();
@@ -98,25 +100,26 @@ public class Scanner {
             for(int j =0 ; j < numCols;j++)
             {
                 PrimitiveValue value = null;
-                try {
-                switch (typeList.get(j))
-                {
-                    case DATE_TYPE:
-                            String dsr = colsDis.get(j).readLine();
-                            value = new DateValue(dsr);
-                        break;
-                    case INT_TYPE:
-                        value =  new LongValue(colsDis.get(j).readLong());
-                        break;
-                    case DOUBLE_TYPE:
-                        value =  new DoubleValue(colsDis.get(j).readDouble());
-                        break;
-                    case STRING_TYPE:
-                        value = new StringValue(colsDis.get(j).readLine());
-                }
-                } catch (Exception e) {
-                    parseTimer.stop();
-                    return true;
+                if(projVector.get(j)) {
+                    try {
+                        switch (typeList.get(j)) {
+                            case DATE_TYPE:
+                                String dsr = colsDis.get(j).readLine();
+                                value = new DateValue(dsr);
+                                break;
+                            case INT_TYPE:
+                                value =  new LongValue(colsDis.get(j).readLong());
+                                break;
+                            case DOUBLE_TYPE:
+                                value =  new DoubleValue(colsDis.get(j).readDouble());
+                                break;
+                            case STRING_TYPE:
+                                value = new StringValue(colsDis.get(j).readLine());
+                        }
+                    } catch (Exception e) {
+                        parseTimer.stop();
+                        return true;
+                    }
                 }
                 valueArray.add(value);
             }
@@ -126,6 +129,20 @@ public class Scanner {
         return false;
     }
 
+    public void setupProjList(HashSet<String> requiredList)
+    {
+
+            for(int i =0 ; i < scanTable.columnDefinitions.size();i++)
+            {
+                String columnName = scanTable.columnDefinitions.get(i).getColumnName();
+                String fullColumnName = scanTable.GetTableName()+"."+columnName;
+                Column col = new Column();
+                if( requiredList.contains(columnName) || requiredList.contains(fullColumnName))
+                        projVector.add(true);
+                else
+                    projVector.add(false);
+            }
+    }
 
 }
 

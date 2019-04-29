@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.*;
 
 import static dubstep.planner.PlanTree.getSelectExprColumnList;
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class SortNode extends BaseNode {
 
@@ -184,10 +185,11 @@ public class SortNode extends BaseNode {
 
     @Override
     public void initProjPushDownInfo() {
+        if(this.parentNode !=null)
         this.requiredList.addAll(this.parentNode.requiredList);
         for(int i =0 ; i < orderByElements.size();i++ )
         {
-            this.requiredList.addAll((ArrayList)getSelectExprColumnList(orderByElements.get(i).getExpression()));
+            this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(orderByElements.get(i).getExpression()));
         }
 
         this.innerNode.initProjPushDownInfo();

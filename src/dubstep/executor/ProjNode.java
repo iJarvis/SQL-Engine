@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static dubstep.planner.PlanTree.getSelectExprColumnList;
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class ProjNode extends BaseNode {
 
@@ -103,7 +104,7 @@ public class ProjNode extends BaseNode {
     public void initProjPushDownInfo() {
         requiredList.addAll(this.parentNode.requiredList);
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
-           requiredList.addAll ((ArrayList)getSelectExprColumnList(selectExpressionItems.get(i).getExpression()));
+           requiredList.addAll ((ArrayList)getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
         }
         this.innerNode.initProjPushDownInfo();
     }

@@ -12,6 +12,7 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
@@ -184,6 +185,40 @@ public class PlanTree {
                 bin.setRightExpression(DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString()));
 
             }
+        }
+        return columnList;
+    }
+
+
+    public static List<String> getSelectExprColumnStrList(Expression expression) {
+        List<String> columnList = new ArrayList<>();
+        if(expression instanceof  Column)
+        {
+            columnList.add(((Column)expression).getWholeColumnName());
+        }
+        if(expression instanceof Function)
+        {
+            Function function = (Function)expression;
+            ExpressionList exprList= function.getParameters();
+            if(exprList!= null) {
+                List<Expression> exprs = exprList.getExpressions();
+
+                for (Expression expression1 : exprs) {
+                    columnList.addAll(getSelectExprColumnStrList(expression1));
+                }
+            }
+        }
+        if (expression instanceof BinaryExpression) {
+            BinaryExpression bin = (BinaryExpression) expression;
+            if (bin.getRightExpression() instanceof Column)
+                columnList.add(((Column) bin.getRightExpression()).getWholeColumnName());
+            else if(bin.getRightExpression() instanceof BinaryExpression)
+                columnList.addAll(getSelectExprColumnStrList(bin.getRightExpression()));
+
+            if (bin.getLeftExpression() instanceof Column)
+                columnList.add(((Column) bin.getLeftExpression()).getWholeColumnName());
+            else if(bin.getLeftExpression() instanceof  BinaryExpression)
+                columnList.addAll(getSelectExprColumnStrList(bin.getLeftExpression()));
         }
         return columnList;
     }
