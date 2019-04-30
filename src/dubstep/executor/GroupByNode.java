@@ -52,6 +52,7 @@ public class GroupByNode extends BaseNode {
         this.aggObjects = null;
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
+        this.evaluator.safeMode = false;
         this.next = null;
         this.refCol = "";
          if (Main.mySchema.isInMem()){
