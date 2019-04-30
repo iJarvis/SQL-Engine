@@ -29,6 +29,7 @@ public class HashJoinNode extends BaseNode {
     private  boolean isInit = false;
     private boolean isEmpty = false;
     private Expression filter1 =  null;
+    Integer leftIndex,leftIndex1,rightIndex,rightIndex1;
 
     public HashJoinNode(BaseNode innerNode,BaseNode outerNode, Expression filter) {
 
@@ -90,13 +91,18 @@ public class HashJoinNode extends BaseNode {
         }
         this.rightCol = rightColumn;
 
+        leftIndex =  innerTuple.GetPosition(leftColumn,innerNode.projectionInfo);
+
+        if(leftColumn1 !=null)
+        leftIndex1 =  innerTuple.GetPosition(leftColumn1,innerNode.projectionInfo);
+
         int i = 1;
 
         while(innerTuple != null){
 
-            innerTupleValue = innerTuple.getValue(leftColumn, innerNode.projectionInfo);
+            innerTupleValue = innerTuple.getValue(leftIndex);
             if(leftColumn1 != null)
-                innerTupleValue1 = innerTuple.getValue(leftColumn1,innerNode.projectionInfo);
+                innerTupleValue1 = innerTuple.getValue(leftIndex1);
             if (condType == NONE){
                 if (innerTupleValue instanceof LongValue)
                     condType = LONG;
@@ -170,14 +176,20 @@ public class HashJoinNode extends BaseNode {
         PrimitiveValue outerTupleValue1;
         while (outerTuple != null){
             if (leftTupleIterator == null){
+                if(rightIndex == null)
+                {
+                    rightIndex = outerTuple.GetPosition(this.rightCol,outerNode.projectionInfo);
+                    if(this.rightCol1 !=null)
+                        rightIndex1 = outerTuple.GetPosition(this.rightCol1,outerNode.projectionInfo);
+                }
 
-                outerTupleValue = outerTuple.getValue(this.rightCol, outerNode.projectionInfo);
+                outerTupleValue = outerTuple.getValue(rightIndex);
 
 
                 String castedValue = outerTupleValue.toString();
                 if(this.rightCol1!=null)
                 {
-                    outerTupleValue1 = outerTuple.getValue(this.rightCol1,outerNode.projectionInfo);
+                    outerTupleValue1 = outerTuple.getValue(rightIndex1);
                     castedValue += outerTupleValue1;
                 }
 

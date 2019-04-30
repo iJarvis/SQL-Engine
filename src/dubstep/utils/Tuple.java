@@ -138,8 +138,12 @@ public class Tuple {
     public void setValue(int index, PrimitiveValue value) {
         valueArray.set(index, value);
     }
+    public  PrimitiveValue getValue(Integer index)
+    {
+        return  valueArray.get(index);
+    }
 
-
+    
     public PrimitiveValue getValue(String columnName1, String columnName2, Map<String, Integer> projInfo) {
        
         if (projInfo.containsKey(columnName1)) {
@@ -153,6 +157,20 @@ public class Tuple {
 
     public PrimitiveValue getValue(Column column, Map<String, Integer> projInfo) {
         return getValue(column.getWholeColumnName(), column.getColumnName(), projInfo);
+    }
+
+    public Integer GetPosition(Column column,Map<String,Integer> projInfo)
+    {
+        String columnName1 = column.getWholeColumnName();
+        String columnName2 = column.getColumnName();
+        if (projInfo.containsKey(columnName1)) {
+            return projInfo.get(columnName1);
+        }
+        if (projInfo.containsKey(columnName2)) {
+            return projInfo.get(columnName2);
+        }
+        return  null;
+
     }
 
     @Override
