@@ -2,8 +2,10 @@ package dubstep.executor;
 
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.schema.Column;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,6 +18,9 @@ public class SelectNode extends BaseNode {
     public Expression filter;
     public Evaluator eval;
     public boolean isOptimized = false;
+    Integer Index;
+    Boolean isBinarySingular = false;
+    Column singname;
 
     public SelectNode(Expression filter, BaseNode InnerNode) {
         super();
@@ -23,6 +28,14 @@ public class SelectNode extends BaseNode {
         this.innerNode = InnerNode;
         innerNode.parentNode = this;
         eval = new Evaluator(this.innerNode.projectionInfo);
+
+        if(filter instanceof BinaryExpression)
+        {
+            BinaryExpression be = (BinaryExpression)filter;
+            if(be.getRightExpression() instanceof PrimitiveValue && be.getLeftExpression()  instanceof Column);
+            isBinarySingular = true;
+            singname = ((Column)be.getLeftExpression());
+        }
         this.initProjectionInfo();
     }
 
@@ -34,7 +47,15 @@ public class SelectNode extends BaseNode {
                 return  null;
             if (filter == null)
                 return row;
-            else {
+            if (Index == null && isBinarySingular)
+            {
+                Index = row.GetPosition(singname,this.projectionInfo);
+            }
+            if(isBinarySingular)
+            {
+
+                ((BinaryExpression)filter).setLeftExpression(row.valueArray[Index]);
+            }
                 eval.setTuple(row);
                 try {
                     PrimitiveValue value = eval.eval(filter);
@@ -44,7 +65,6 @@ public class SelectNode extends BaseNode {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-            }
         }
     }
 
