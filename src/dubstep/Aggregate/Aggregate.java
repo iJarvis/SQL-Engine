@@ -13,7 +13,7 @@ public abstract class Aggregate {
 
     protected Aggregate(Expression expression, Evaluator evaluator){
         this.expression = expression;
-        this.evaluator = evaluator;
+        this.evaluator = new Evaluator(evaluator.projectionInfo);
     }
 
     public abstract PrimitiveValue yield(Tuple tuple);

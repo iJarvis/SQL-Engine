@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Evaluator extends Eval {
     private Tuple tuple;
-    Map<String, Integer> projectionInfo;
+    public Map<String, Integer> projectionInfo;
     ArrayList<Integer> requestList = new ArrayList<>();
     Integer currentIndex = 0;
     public Boolean safeMode = true;
