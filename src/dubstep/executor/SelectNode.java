@@ -32,7 +32,7 @@ public class SelectNode extends BaseNode {
         if(filter instanceof BinaryExpression)
         {
             BinaryExpression be = (BinaryExpression)filter;
-            if(be.getRightExpression() instanceof PrimitiveValue && be.getLeftExpression()  instanceof Column);
+            if(be.getRightExpression() instanceof PrimitiveValue && be.getLeftExpression()  instanceof Column)
             {
                 isBinarySingular = true;
                 singname = ((Column) be.getLeftExpression());
