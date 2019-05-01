@@ -195,16 +195,26 @@ public class GroupByNode extends BaseNode {
 
         if (next == null)
             return;
+        int count =0;
+        for(Expression expr : selectExpressions)
+        {
+            if(expr instanceof Column)
+                count++;
+
+        }
 
         while (next != null) {
             this.evaluator.setTuple(next);
-            PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
+
+            PrimitiveValue[] rowValues = new PrimitiveValue[count];
+            int selindex =0;
 
             for (int i = 0; i < selectExpressions.size(); i++) {
                 Expression selectExpression = selectExpressions.get(i);
                 if (selectExpression instanceof Column) {
                     try {
-                         rowValues[i] = (evaluator.eval(selectExpression));
+                         rowValues[selindex] = (evaluator.eval(selectExpression));
+                         selindex++;
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
