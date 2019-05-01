@@ -33,8 +33,10 @@ public class SelectNode extends BaseNode {
         {
             BinaryExpression be = (BinaryExpression)filter;
             if(be.getRightExpression() instanceof PrimitiveValue && be.getLeftExpression()  instanceof Column);
-            isBinarySingular = true;
-            singname = ((Column)be.getLeftExpression());
+            {
+                isBinarySingular = true;
+                singname = ((Column) be.getLeftExpression());
+            }
         }
         this.initProjectionInfo();
     }
