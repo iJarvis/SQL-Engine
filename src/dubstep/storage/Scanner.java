@@ -8,12 +8,9 @@ import net.sf.jsqlparser.schema.Column;
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
-import static dubstep.storage.datatypes.DATE_TYPE;
 
 
 public class Scanner {
@@ -30,28 +27,42 @@ public class Scanner {
 
     class TupleConverter extends Thread {
 
-        public List<String> input;
-        public List<Tuple> output;
-        int start_index;
-        int end_index;
+        datatypes type;
+        ArrayList<Tuple> tupleList;
+        DataInputStream dis;
+        Integer count;
+        Integer tupleIndex;
+        Boolean finished = false;
 
-        public void run()
-        {
-            if(scanTable.GetTableName().equals("LINEITEM"))
-            {
-                for (int i =start_index ; i < end_index; i++) {
-                    output.add(new Tuple(input.get(i), scanTable.typeList,true));
-                }
 
-            }
-            else {
-                for (int i = start_index; i < end_index; i++) {
-                    output.add(new Tuple(input.get(i), 0, scanTable.typeList));
+        public void run() {
+            int current = 0;
+            count = tupleList.size();
+            while (count > current) {
+                PrimitiveValue value = null;
+                try {
+
+                    switch (type) {
+                        case DATE_TYPE:
+                        case INT_TYPE:
+                            value = new LongValue(dis.readLong());
+                            break;
+                        case DOUBLE_TYPE:
+                            value = new DoubleValue(dis.readDouble());
+                            break;
+                        case STRING_TYPE:
+                            value = new StringValue(dis.readLine());
+                    }
+                } catch (Exception e) {
+                    finished = true;
+                    return;
                 }
+                tupleList.get(current).valueArray.set(tupleIndex, value);
+                current++;
+
             }
 
         }
-
     }
 
     public Scanner(DubTable table)
@@ -90,53 +101,75 @@ public class Scanner {
     public boolean readTuples(int tupleCount, ArrayList<Tuple> tupleBuffer, QueryTimer parseTimer) {
         int readTuples = 0;
         int TidStart = this.currentMaxTid;
+        Boolean readComplete = false;
         tupleBuffer.clear();
 
         ArrayList<String> fileBuffer = new ArrayList<>(scanTable.columnDefinitions.size());
         int numCols = scanTable.columnDefinitions.size();
         List<datatypes> typeList= scanTable.typeList;
-        Boolean isLineItem = scanTable.GetTableName().equals("LINEITEM");
         for(int i =0 ; i < tupleCount;i++)
         {
             ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
+            if(currentMaxTid >= scanTable.getRowCount()) {
+                readComplete = true;
+                break;
+            }
             for(int j =0 ; j < numCols;j++)
             {
-                if(currentMaxTid > scanTable.getRowCount()) {
-                    return true;
-                }
-                PrimitiveValue value = null;
-                if(projVector.get(j)) {
-                    if (scanTable.memCols.get(j).size() > 0 ) {
-                        if(currentMaxTid < scanTable.memCols.get(j).size())
-                            value = scanTable.memCols.get(j).get(currentMaxTid);
-                        else {
-                            return true;
-                        }
-                    }
-                    else {
-                        try {
-                            switch (typeList.get(j)) {
-                                case DATE_TYPE:
-                                case INT_TYPE:
-                                    value =  new LongValue(colsDis.get(j).readLong());
-                                    break;
-                                case DOUBLE_TYPE:
-                                    value =  new DoubleValue(colsDis.get(j).readDouble());
-                                    break;
-                                case STRING_TYPE:
-                                    value = new StringValue(colsDis.get(j).readLine());
-                            }
-                        } catch (Exception e) {
-                            return true;
-                        }
-                    }
-                }
-                valueArray.add(value);
+
+                valueArray.add(null);
+
             }
             currentMaxTid++;
             tupleBuffer.add(new Tuple(valueArray));
         }
-        return false;
+        Boolean isComplete = false;
+
+        int current_index = 0;
+        int numThread = 4;
+        while (!isComplete)
+        {
+            ArrayList<TupleConverter> threads= new ArrayList<>();
+            for(int i =0 ; i <numThread;i++)
+            {
+                while (current_index < projVector.size() && projVector.get(current_index)== false )
+                {
+                    current_index++;
+                }
+                if(current_index < projVector.size())
+                {
+                    TupleConverter thread = new TupleConverter();
+                    thread.tupleList = tupleBuffer;
+                    thread.type = typeList.get(current_index);
+                    thread.finished = false;
+                    thread.tupleIndex = current_index;
+                    thread.dis = colsDis.get(current_index);
+                    threads.add(thread);
+                    current_index++;
+                }
+                else {
+                    isComplete = true;
+                }
+
+            }
+            for(int i =0 ; i< threads.size();i++)
+            {
+                threads.get(i).run();
+            }
+            for(int i =0 ; i < threads.size();i++)
+            {
+                try {
+                    threads.get(i).join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(isComplete)
+                break;
+
+        }
+
+        return readComplete;
     }
 
     public void setupProjList(HashSet<String> requiredList)
