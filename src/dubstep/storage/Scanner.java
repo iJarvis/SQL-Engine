@@ -126,7 +126,7 @@ public class Scanner {
         Boolean isComplete = false;
 
         int current_index = 0;
-        int numThread = 4;
+        int numThread = 3;
         while (!isComplete)
         {
             ArrayList<TupleConverter> threads= new ArrayList<>();
