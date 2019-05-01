@@ -52,32 +52,24 @@ public class ProjNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        List<PrimitiveValue> values = new ArrayList<>();
+        PrimitiveValue values[] = new PrimitiveValue[this.selectExpressionItems.size()];
         List<ColumnDefinition> colDefs = new ArrayList<>();
         Tuple nextRow = this.innerNode.getNextTuple();
         if (nextRow == null)
             return null;
         eval.setTuple(nextRow);
+        int index =0;
         for (SelectExpressionItem expression : this.selectExpressionItems) {
             try {
                 PrimitiveValue value = eval.eval(expression.getExpression());
-                values.add(value);
+                values[index] = value;
+                index++;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-        //hack for now. hate me.
-        /*
-        if (completeProjectionTables.size() != 0) {
-            for (String column: projectionInfo) {
-                PrimitiveValue value = nextRow.getValue(column, column, projectionInfo);
-                colDefs.add(nextRow.getColDef(column,projectionInfo) );
 
-                values.add(value);
-            }
-        }*/
-
-        return new Tuple(values,colDefs);
+        return new Tuple(values);
     }
 
     @Override

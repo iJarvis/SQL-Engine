@@ -193,10 +193,10 @@ public class Main {
     {
         for(Integer dateIndex : dateSet)
         {
-            LongValue val = (LongValue) tuple.valueArray.get(dateIndex);
+            LongValue val = (LongValue) tuple.valueArray[dateIndex];
             Date date = new Date(val.getValue());
             DateValue dval = new DateValue(date.toString());
-            tuple.valueArray.set(dateIndex,dval);
+            tuple.valueArray[dateIndex] =dval;
         }
 
     }

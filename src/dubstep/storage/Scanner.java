@@ -38,29 +38,37 @@ public class Scanner {
         public void run() {
             int current = 0;
             count = tupleList.size();
-            while (count > current) {
                 PrimitiveValue value = null;
                 try {
 
                     switch (type) {
                         case DATE_TYPE:
                         case INT_TYPE:
-                            value = new LongValue(dis.readLong());
+                            while (count > current) {
+                                tupleList.get(current).valueArray[tupleIndex] = new LongValue(dis.readLong());
+                                current++;
+                            }
+
                             break;
                         case DOUBLE_TYPE:
-                            value = new DoubleValue(dis.readDouble());
+                            while (count > current)
+                            { tupleList.get(current).valueArray[tupleIndex] =  new DoubleValue(dis.readDouble());
+                            current++;
+                            }
                             break;
                         case STRING_TYPE:
-                            value = new StringValue(dis.readLine());
+                            while (count > current)
+                            {
+                                tupleList.get(current).valueArray[tupleIndex] =  new StringValue(dis.readLine());
+                                current++;
+                            }
+                            break;
                     }
                 } catch (Exception e) {
                     finished = true;
                     return;
                 }
-                tupleList.get(current).valueArray.set(tupleIndex, value);
-                current++;
 
-            }
 
         }
     }
@@ -104,25 +112,23 @@ public class Scanner {
         Boolean readComplete = false;
         tupleBuffer.clear();
 
-        ArrayList<String> fileBuffer = new ArrayList<>(scanTable.columnDefinitions.size());
         int numCols = scanTable.columnDefinitions.size();
         List<datatypes> typeList= scanTable.typeList;
+
+
+        if(currentMaxTid + tupleCount+1 >= scanTable.getRowCount()) {
+            readComplete = true;
+            tupleCount = scanTable.getRowCount() - currentMaxTid;
+        }
+
+        parseTimer.start();
         for(int i =0 ; i < tupleCount;i++)
         {
-            ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
-            if(currentMaxTid >= scanTable.getRowCount()) {
-                readComplete = true;
-                break;
-            }
-            for(int j =0 ; j < numCols;j++)
-            {
-
-                valueArray.add(null);
-
-            }
+            PrimitiveValue valueArray[] = new PrimitiveValue[ numCols];
             currentMaxTid++;
             tupleBuffer.add(new Tuple(valueArray));
         }
+        parseTimer.stop();
         Boolean isComplete = false;
 
         int current_index = 0;

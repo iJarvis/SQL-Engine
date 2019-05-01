@@ -12,44 +12,8 @@ import static net.sf.jsqlparser.expression.DateValue.parseEscaped;
 
 public class Tuple {
     int tid;
-    public ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
-
-    public Tuple(String csv_string,List<datatypes> typeList,boolean isLineItem)
-    {
-        String[] args = new String[typeList.size()];//csv_string.split("\\|");
-        int index = 0;
-        int end_index =0;
-        int runnind_index = 0;
-
-        end_index = csv_string.indexOf('|',0);
-        while (end_index > 0)
-        {
-
-            args[runnind_index] = csv_string.substring(index,end_index);
-            index = end_index+1;
-            end_index = csv_string.indexOf('|',index );
-            runnind_index++;
-        }
-        args[runnind_index] = csv_string.substring(index);
-
-
-                this.valueArray.add(  new LongValue(args[0]));
-                this.valueArray.add( new LongValue(args[1]));
-                this.valueArray.add( new LongValue(args[2]));
-                this.valueArray.add( new LongValue(args[3]));
-                this.valueArray.add( new DoubleValue(args[4]));
-                this.valueArray.add( new DoubleValue(args[5]));
-                this.valueArray.add( new DoubleValue(args[6]));
-                this.valueArray.add( new DoubleValue(args[7]));
-                this.valueArray.add(  new StringValue(args[8]));
-                this.valueArray.add( new StringValue(args[9]));
-                this.valueArray.add( new DateValue(args[10]));
-                this.valueArray.add( new DateValue(args[11]));
-                this.valueArray.add( new DateValue(args[12]));
-                this.valueArray.add(  new StringValue(args[13]));
-                this.valueArray.add( new  StringValue(args[14]));
-                this.valueArray.add( new StringValue(args[15]));
-    }
+    public PrimitiveValue[] valueArray;
+    static int length =0;
 
 
     public Tuple(String csv_string, int tid, List<datatypes> typeList) {
@@ -71,6 +35,7 @@ public class Tuple {
         args[runnind_index] = csv_string.substring(index);
 
         tid = this.tid;
+        valueArray = new PrimitiveValue[typeList.size()];
 
         for (int i = 0; i < typeList.size() ; i++) {
 
@@ -78,17 +43,17 @@ public class Tuple {
             switch (typeList.get(i)) {
 
                 case INT_TYPE:
-                    valueArray.add(new LongValue(args[i]));
+                    valueArray[i]= new LongValue(args[i]);
                     break;
                 case STRING_TYPE:
-                    valueArray.add(new StringValue(args[i]));
+                    valueArray[i]= (new StringValue(args[i]));
                     break;
                 case DOUBLE_TYPE:
-                    valueArray.add(new DoubleValue(args[i]));
+                    valueArray[i]= (new DoubleValue(args[i]));
                     break;
                 case DATE_TYPE:
 
-                    valueArray.add(new DateValue(args[i]));
+                    valueArray[i]= (new DateValue(args[i]));
 
 
                     break;
@@ -97,21 +62,22 @@ public class Tuple {
         }
     }
 
-//    public Tuple(List<PrimitiveValue> tempvalueArray) {
-    public Tuple(ArrayList<PrimitiveValue> values) {
+    public Tuple(PrimitiveValue[] values) {
         tid = -1;
         valueArray = values;
     }
 
-    public Tuple(List<PrimitiveValue> tempvalueArray, List<ColumnDefinition> definition) {
-        tid = -1;
-        valueArray.addAll(tempvalueArray);
-    }
 
     public Tuple(Tuple innerTup, Tuple outerTuple) {
         tid = -1;
-        valueArray.addAll(innerTup.valueArray);
-        valueArray.addAll(outerTuple.valueArray);
+        int innerlen = innerTup.valueArray.length;
+        int outerlen = outerTuple.valueArray.length;
+
+        valueArray = new PrimitiveValue[innerTup.valueArray.length + outerTuple.valueArray.length ];
+        for(int i =0 ; i < innerlen;i++)
+            valueArray[i] = innerTup.valueArray[i];
+        for(int j =0 ; j < outerlen;j++)
+            valueArray[innerlen+j] = outerTuple.valueArray[j];
     }
 
     public String getProjection() {
@@ -135,22 +101,19 @@ public class Tuple {
         return output;
     }
 
-    public void setValue(int index, PrimitiveValue value) {
-        valueArray.set(index, value);
-    }
     public  PrimitiveValue getValue(Integer index)
     {
-        return  valueArray.get(index);
+        return  valueArray[index];
     }
 
     
     public PrimitiveValue getValue(String columnName1, String columnName2, Map<String, Integer> projInfo) {
        
         if (projInfo.containsKey(columnName1)) {
-            return valueArray.get(projInfo.get(columnName1));
+            return valueArray[projInfo.get(columnName1)];
         }
         if (projInfo.containsKey(columnName2)) {
-            return valueArray.get(projInfo.get(columnName2));
+            return valueArray[projInfo.get(columnName2)];
         }
         return null;
     }
@@ -178,8 +141,9 @@ public class Tuple {
         return getProjection();
     }
 
-    public void addValueItem(PrimitiveValue primitiveValue) {
-        valueArray.add(primitiveValue);
+    public void addValueItem(PrimitiveValue primitiveValue)
+    {
+        valueArray[length++] = primitiveValue;
     }
 
     public String serializeTuple()
@@ -210,21 +174,47 @@ public class Tuple {
 
     public static Tuple deserializeTuple (String serializedString)
     {
-        ArrayList<PrimitiveValue> columnValues = new ArrayList<>();
+
         String values[] = serializedString.split(("\\|"));
+        PrimitiveValue[] columnValues = new PrimitiveValue[values.length];
+        int i =0;
         for(String value : values)
         {
             String column[] = value.split("\\^");
             if(column[1].equals("l"))
-                columnValues.add(new LongValue(column[0]));
+                columnValues[i]= (new LongValue(column[0]));
             else if(column[1].equals("f"))
-                columnValues.add(new DoubleValue(column[0]));
+                columnValues[i]= (new DoubleValue(column[0]));
             else if(column[1].equals("d"))
-                columnValues.add(new DateValue(column[0]));
+                columnValues[i]= (new DateValue(column[0]));
             else if(column[1].equals("s"))
-                columnValues.add(new StringValue(column[0]));
+                columnValues[i]= (new StringValue(column[0]));
+            i++;
         }
-        return  new Tuple(columnValues);
+        return  new Tuple(columnValues );
+    }
+
+    public static Tuple deserializeTuple (String serializedString,int maxlength)
+    {
+
+        String values[] = serializedString.split(("\\|"));
+        PrimitiveValue[] columnValues = new PrimitiveValue[values.length + maxlength];
+        int i =0;
+        for(String value : values)
+        {
+            String column[] = value.split("\\^");
+            if(column[1].equals("l"))
+                columnValues[i]= (new LongValue(column[0]));
+            else if(column[1].equals("f"))
+                columnValues[i]= (new DoubleValue(column[0]));
+            else if(column[1].equals("d"))
+                columnValues[i]= (new DateValue(column[0]));
+            else if(column[1].equals("s"))
+                columnValues[i]= (new StringValue(column[0]));
+            i++;
+        }
+        length = values.length ;
+        return  new Tuple(columnValues );
     }
 
 
@@ -242,7 +232,7 @@ public class Tuple {
 
     public static Tuple deserializeTuple2(String serializedString,ArrayList<datatypes> types)
     {
-        ArrayList<PrimitiveValue> columnValues = new ArrayList<>();
+        PrimitiveValue[] columnValues = new PrimitiveValue[types.size()];
         String values[] = serializedString.split(("\\|"));
         int index = 0;
         for(String value : values)
@@ -251,16 +241,16 @@ public class Tuple {
             switch (type)
             {
                 case DATE_TYPE:
-                    columnValues.add(new DateValue(value));
+                    columnValues[index] = new DateValue(value);
                     break;
                 case INT_TYPE:
-                    columnValues.add(new LongValue(value));
+                    columnValues[index] = new LongValue(value);
                     break;
                 case STRING_TYPE:
-                    columnValues.add(new StringValue(value.substring(1,value.length()-1)));
+                    columnValues[index] = new StringValue(value.substring(1,value.length()-1));
                     break;
                 case DOUBLE_TYPE:
-                    columnValues.add(new DoubleValue(value));
+                    columnValues[index] = new DoubleValue(value);
                     break;
 
             }

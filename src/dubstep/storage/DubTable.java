@@ -120,8 +120,7 @@ public class DubTable {
                             java.sql.Date dd = ((DateValue) t).getValue();
                             Long t1 = dd.getTime();
                             colFiles.get(index).writeLong(t1);
-                           // memCols.get(index).add(new LongValue(t1));
-                        break;
+                            break;
                     case INT_TYPE:
                         colFiles.get(index).writeLong(t.toLong());
 
@@ -133,7 +132,7 @@ public class DubTable {
                         colFiles.get(index).writeBytes(t.toRawString() + "\n");
                         break;
                 }
-                tuple.valueArray.set(index,null);
+                tuple.valueArray[index] =null;
                 index++;
             }
             counter++;

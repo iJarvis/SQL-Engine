@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.PrimitiveIterator;
 
 import static dubstep.planner.PlanTree.getSelectExprColumnList;
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
@@ -100,9 +101,9 @@ public class GroupByNode extends BaseNode {
         }
 
         String curCol = "";
-        ArrayList<PrimitiveValue> rowValues = new ArrayList<>(selectExpressions.size());
+        PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
         for (int i = 0; i < selectExpressions.size(); i++) {
-            rowValues.add(null);
+            rowValues[i] = (null);
         }
 
         while (next != null) {
@@ -122,18 +123,18 @@ public class GroupByNode extends BaseNode {
             for (int i = 0; i < selectExpressions.size(); i++) {
                 if (selectExpressions.get(i) instanceof Column) {
                     try {
-                        rowValues.set(i,evaluator.eval(selectExpressions.get(i)));
+                        rowValues[i] = evaluator.eval(selectExpressions.get(i));
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    rowValues.set(i,aggObjects[i].yield(next));
+                    rowValues[i] = aggObjects[i].yield(next);
                 }
             }
             next = this.innerNode.getNextTuple();
         }
 
-        if(rowValues.get(0) != null)
+        if(rowValues[0] != null)
             return new Tuple(rowValues);
         return null;
     }
@@ -156,28 +157,28 @@ public class GroupByNode extends BaseNode {
             return null;
         }
         String resString = buffer.keySet().iterator().next();
-        Tuple result = deserializeTuple(resString);
 
         ArrayList<AggregateMap> mapList = buffer.get(resString);
+        Tuple result = deserializeTuple(resString, mapList.size());
         buffer.remove(resString);
 
         for (AggregateMap map : mapList) {
             result.addValueItem(map.aggregate.getCurrentResult());
         }
         int valueStartIndex = 0;
-        int aggIndicesIndex = result.valueArray.size() - aggIndices.size();
+        int aggIndicesIndex = result.valueArray.length - aggIndices.size();
         int currentAgg = 0;
 
-        ArrayList<PrimitiveValue> valueArray = new ArrayList<>();
-        for(int i =0 ; i<result.valueArray.size() ;i++)
+        PrimitiveValue[] valueArray = new PrimitiveValue[result.valueArray.length];
+        for(int i =0 ; i<result.valueArray.length ;i++)
         {
             if(currentAgg < aggIndices.size() && aggIndices.get(currentAgg) == i )
             {
                 currentAgg++;
-                valueArray.add(result.valueArray.get(aggIndicesIndex++));
+                valueArray[i] =result.getValue(aggIndicesIndex++);
             }
             else
-                valueArray.add(result.valueArray.get(valueStartIndex++));
+                valueArray[i] = result.getValue(valueStartIndex++);
         }
         result.valueArray = valueArray;
         return (result);
@@ -197,13 +198,13 @@ public class GroupByNode extends BaseNode {
 
         while (next != null) {
             this.evaluator.setTuple(next);
-            ArrayList<PrimitiveValue> rowValues = new ArrayList<>();
+            PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
 
             for (int i = 0; i < selectExpressions.size(); i++) {
                 Expression selectExpression = selectExpressions.get(i);
                 if (selectExpression instanceof Column) {
                     try {
-                         rowValues.add(evaluator.eval(selectExpression));
+                         rowValues[i] = (evaluator.eval(selectExpression));
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
