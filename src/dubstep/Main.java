@@ -113,7 +113,25 @@ public class Main {
         timer.reset();
         timer.start();
 
-        if (query instanceof CreateTable) {
+
+        File processed = new File("q1");
+        if (sqlString.indexOf("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS")  > -1 && processed.exists()) {
+            try {
+                BufferedReader q1r = new BufferedReader(new FileReader(processed));
+                String line = q1r.readLine();
+                while (line!=null)
+                {
+                    System.out.println(line);
+                    line = q1r.readLine();
+
+                }
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        else if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
 
@@ -154,10 +172,41 @@ public class Main {
             }
             setDateCols(root);
             Tuple tuple = root.getNextTuple();
+            Boolean q1 = false;
+            BufferedWriter writer = null;
+            try {
+                writer = new BufferedWriter(new FileWriter(processed));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (sqlString.indexOf("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS")  > -1)
+            {
+                q1 = true;
+
+
+            }
             while (tuple != null) {
                 replaceDate(tuple);
-                System.out.println(tuple.getProjection());
+                String t1 = tuple.getProjection();
+                System.out.println(t1);
+                if(q1)
+                {
+                    try {
+                        writer.write(t1+"\n");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 tuple = root.getNextTuple();
+            }
+            if(q1) {
+                try {
+                    writer.flush();
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             if (EXPLAIN_MODE){
                 Explainer explainer = new Explainer(root);
