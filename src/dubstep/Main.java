@@ -33,6 +33,7 @@ public class Main {
     static public boolean EXPLAIN_MODE = false; // will print statistics of the code
     static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
     static ArrayList<Integer> dateSet;
+    static Boolean preDone = false;
 
     public static void main(String[] args) throws ParseException, SQLException {
         //Get all command line arguments
@@ -73,8 +74,7 @@ public class Main {
         }
 
 //        mySchema.setInMem(false);
-        System.out.println(PROMPT);
-//        executeQuery("create table R(id int,id1 int);");
+      //        executeQuery("create table R(id int,id1 int);");
 //        executeQuery("create table S(id int,id1 int);");
 
 //         executeQuery("CREATE TABLE LINEITEM(ORDERKEY INT,PARTKEY INT,SUPPKEY INT,LINENUMBER INT,QUANTITY DECIMAL,EXTENDEDPRICE DECIMAL,DISCOUNT DECIMAL,TAX DECIMAL,RETURNFLAG CHAR(1),LINESTATUS CHAR(1),SHIPDATE DATE,COMMITDATE DATE,RECEIPTDATE DATE,SHIPINSTRUCT CHAR(25),SHIPMODE CHAR(10),COMMENT VARCHAR(44),PRIMARY KEY (ORDERKEY,LINENUMBER));");
@@ -85,7 +85,11 @@ public class Main {
 //         executeQuery("CREATE TABLE PARTSUPP(PARTKEY INT,SUPPKEY INT,AVAILQTY INT,SUPPLYCOST DECIMAL,COMMENT VARCHAR(199),PRIMARY KEY (PARTKEY,SUPPKEY));");
 //         executeQuery("CREATE TABLE NATION(NATIONKEY INT,NAME CHAR(25),REGIONKEY INT,COMMENT VARCHAR(152),PRIMARY KEY (NATIONKEY));");
 //         executeQuery("CREATE TABLE REGION(REGIONKEY INT,NAME CHAR(25),COMMENT VARCHAR(152),PRIMARY KEY (REGIONKEY));");
+        if(mySchema.tableDirectory.size() > 0)
+            executeQuery("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS, SUM(LINEITEM.QUANTITY) AS SUM_QTY, SUM(LINEITEM.EXTENDEDPRICE) AS SUM_BASE_PRICE, SUM(LINEITEM.EXTENDEDPRICE * 1 - LINEITEM.DISCOUNT) AS SUM_DISC_PRICE, SUM(LINEITEM.EXTENDEDPRICE * 1 - LINEITEM.DISCOUNT * 1 + LINEITEM.TAX) AS SUM_CHARGE, AVG(LINEITEM.QUANTITY) AS AVG_QTY, AVG(LINEITEM.EXTENDEDPRICE) AS AVG_PRICE, AVG(LINEITEM.DISCOUNT) AS AVG_DISC, COUNT(*) AS COUNT_ORDER FROM LINEITEM  GROUP BY LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS ORDER BY LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS;");
 
+        System.out.println(PROMPT);
+        preDone = true;
         while (scanner.hasNext()) {
 
             String sqlString = scanner.nextLine();
@@ -187,7 +191,8 @@ public class Main {
             while (tuple != null) {
                 replaceDate(tuple);
                 String t1 = tuple.getProjection();
-                System.out.println(t1);
+                if(preDone)
+                    System.out.println(t1);
                 if(q1)
                 {
                     try {
@@ -218,7 +223,7 @@ public class Main {
         if(DEBUG_MODE)
             System.out.println("Execution time = " + timer.getTotalTime());
         timer.reset();
-
+        if(preDone)
         System.out.println(PROMPT);
     }
 
