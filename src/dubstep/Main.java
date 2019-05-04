@@ -136,6 +136,7 @@ public class Main {
                 return;
             } catch (Exception e) {
                 e.printStackTrace();
+                return;
             }
         }
 
@@ -155,6 +156,7 @@ public class Main {
                     table_file.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+
                 }
 
             }
@@ -166,6 +168,7 @@ public class Main {
                   sleep(20000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                    return;
                 }
             }
                counter++;
@@ -196,6 +199,7 @@ public class Main {
                 writer = new BufferedWriter(new FileWriter(processed));
             } catch (IOException e) {
                 e.printStackTrace();
+                return;
             }
             if (sqlString.indexOf("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS")  > -1)
             {
@@ -213,6 +217,7 @@ public class Main {
                         writer.write(t1+"\n");
                     } catch (IOException e) {
                         e.printStackTrace();
+                        return;
                     }
                 }
 
@@ -222,8 +227,10 @@ public class Main {
                 try {
                     writer.flush();
                     writer.close();
+
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return;
                 }
             }
             if (EXPLAIN_MODE){
