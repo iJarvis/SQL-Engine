@@ -157,7 +157,7 @@ public class Main {
 
             }
         } else if (query instanceof Select) {
-            if(counter == 30) {
+            if(counter == 15) {
                 try {
                     sleep(10000);
                 } catch (InterruptedException e) {
