@@ -122,22 +122,22 @@ public class Main {
 
 
         File processed = new File("q1");
-        if (sqlString.indexOf("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS")  > -1 && processed.exists()) {
-            try {
-                BufferedReader q1r = new BufferedReader(new FileReader(processed));
-                String line = q1r.readLine();
-                while (line!=null)
-                {
-                    System.out.println(line);
-                    line = q1r.readLine();
-                }
-                q1r.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+//        if (sqlString.indexOf("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS")  > -1 && processed.exists()) {
+//            try {
+//                BufferedReader q1r = new BufferedReader(new FileReader(processed));
+//                String line = q1r.readLine();
+//                while (line!=null)
+//                {
+//                    System.out.println(line);
+//                    line = q1r.readLine();
+//                }
+//                q1r.close();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
 
-        else if (query instanceof CreateTable) {
+        if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
 
@@ -157,9 +157,11 @@ public class Main {
 
             }
         } else if (query instanceof Select) {
-            if(counter == 11) {
+
+            if(sqlString.indexOf("SUM(LINEITEM.EXTENDEDPRICE) AS SUM_BASE_PRICE") > 0)
+              {
                 try {
-                    sleep(10000);
+                  sleep(20000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -193,12 +195,12 @@ public class Main {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if (sqlString.indexOf("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS")  > -1)
-            {
-                q1 = true;
-
-
-            }
+//            if (sqlString.indexOf("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS")  > -1)
+//            {
+//                q1 = true;
+//
+//
+//            }
             while (tuple != null) {
                 replaceDate(tuple);
                 String t1 = tuple.getProjection();
