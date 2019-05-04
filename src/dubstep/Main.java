@@ -127,8 +127,8 @@ public class Main {
                 {
                     System.out.println(line);
                     line = q1r.readLine();
-
                 }
+                q1r.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -191,8 +191,7 @@ public class Main {
             while (tuple != null) {
                 replaceDate(tuple);
                 String t1 = tuple.getProjection();
-                if(preDone)
-                    System.out.println(t1);
+                System.out.println(t1);
                 if(q1)
                 {
                     try {
