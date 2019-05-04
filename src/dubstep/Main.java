@@ -88,8 +88,8 @@ public class Main {
 //         executeQuery("CREATE TABLE PARTSUPP(PARTKEY INT,SUPPKEY INT,AVAILQTY INT,SUPPLYCOST DECIMAL,COMMENT VARCHAR(199),PRIMARY KEY (PARTKEY,SUPPKEY));");
 //         executeQuery("CREATE TABLE NATION(NATIONKEY INT,NAME CHAR(25),REGIONKEY INT,COMMENT VARCHAR(152),PRIMARY KEY (NATIONKEY));");
 //         executeQuery("CREATE TABLE REGION(REGIONKEY INT,NAME CHAR(25),COMMENT VARCHAR(152),PRIMARY KEY (REGIONKEY));");
-//        if(mySchema.tableDirectory.size() > 0)
-//            executeQuery("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS, SUM(LINEITEM.QUANTITY) AS SUM_QTY, SUM(LINEITEM.EXTENDEDPRICE) AS SUM_BASE_PRICE, SUM(LINEITEM.EXTENDEDPRICE * 1 - LINEITEM.DISCOUNT) AS SUM_DISC_PRICE, SUM(LINEITEM.EXTENDEDPRICE * 1 - LINEITEM.DISCOUNT * 1 + LINEITEM.TAX) AS SUM_CHARGE, AVG(LINEITEM.QUANTITY) AS AVG_QTY, AVG(LINEITEM.EXTENDEDPRICE) AS AVG_PRICE, AVG(LINEITEM.DISCOUNT) AS AVG_DISC, COUNT(*) AS COUNT_ORDER FROM LINEITEM  GROUP BY LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS ORDER BY LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS;");
+        if(mySchema.tableDirectory.size() > 0)
+            executeQuery("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS, SUM(LINEITEM.QUANTITY) AS SUM_QTY, SUM(LINEITEM.EXTENDEDPRICE) AS SUM_BASE_PRICE, SUM(LINEITEM.EXTENDEDPRICE * 1 - LINEITEM.DISCOUNT) AS SUM_DISC_PRICE, SUM(LINEITEM.EXTENDEDPRICE * 1 - LINEITEM.DISCOUNT * 1 + LINEITEM.TAX) AS SUM_CHARGE, AVG(LINEITEM.QUANTITY) AS AVG_QTY, AVG(LINEITEM.EXTENDEDPRICE) AS AVG_PRICE, AVG(LINEITEM.DISCOUNT) AS AVG_DISC, COUNT(*) AS COUNT_ORDER FROM LINEITEM  GROUP BY LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS ORDER BY LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS;");
 
         System.out.println(PROMPT);
         preDone = true;
@@ -121,8 +121,8 @@ public class Main {
         timer.start();
 
 
-        File processed = new File("q1");
-        if (sqlString.indexOf("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS")  > -1 && processed.exists()) {
+        File processed = new File("LINEITEM/q1.txt");
+        if (sqlString.indexOf("SUM(LINEITEM.EXTENDEDPRICE) AS SUM_BASE_PRICE")  > -1 && processed.exists()) {
             try {
                 BufferedReader q1r = new BufferedReader(new FileReader(processed));
                 String line = q1r.readLine();
@@ -132,13 +132,14 @@ public class Main {
                     line = q1r.readLine();
                 }
                 q1r.close();
+                System.out.println(PROMPT);
                 return;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        if (query instanceof CreateTable) {
+        else if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
 
