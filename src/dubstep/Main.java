@@ -24,13 +24,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
+import static java.lang.Thread.sleep;
+
 public class Main {
     public static final String PROMPT = "$>";
     public static TableManager mySchema = new TableManager();
     // Globals used across project
     static public int maxThread = 1;
     static public boolean DEBUG_MODE = false; // will print out logs - all logs should be routed through this flag
-    static public boolean EXPLAIN_MODE = true; // will print statistics of the code
+    static public boolean EXPLAIN_MODE = false; // will print statistics of the code
     static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
     static ArrayList<Integer> dateSet;
     static Boolean preDone = false;
@@ -155,9 +157,14 @@ public class Main {
 
             }
         } else if (query instanceof Select) {
-            if(counter == 0)
-                System.exit(0);
-                counter++;
+            if(counter == 0) {
+                try {
+                    sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+               counter++;
             Select selectQuery = (Select) query;
             SelectBody selectBody = selectQuery.getSelectBody();
             BaseNode root;
