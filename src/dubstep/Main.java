@@ -119,6 +119,7 @@ public class Main {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
             create = false;
+            processed.delete();
 
 
 
