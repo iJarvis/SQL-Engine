@@ -168,6 +168,7 @@ public class Main {
             if (sqlString.contains("SUM_BASE_PRICE")) {
                 q1 = true;
                 try {
+                    processed.delete();
                     writer = new BufferedWriter(new FileWriter(processed));
                 } catch (IOException e) {
                     e.printStackTrace();
