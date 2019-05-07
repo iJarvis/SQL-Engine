@@ -163,14 +163,15 @@ public class Main {
             Tuple tuple = root.getNextTuple();
             Boolean q1 = false;
             BufferedWriter writer = null;
-            try {
-                writer = new BufferedWriter(new FileWriter(processed));
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            }
-            if (sqlString.contains("SUM_BASE_PRICE"))
+
+            if (sqlString.contains("SUM_BASE_PRICE")) {
                 q1 = true;
+                try {
+                    writer = new BufferedWriter(new FileWriter(processed));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
 
             while (tuple != null) {
                 replaceDate(tuple);
@@ -195,7 +196,6 @@ public class Main {
 
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return;
                 }
             }
             if (EXPLAIN_MODE){
