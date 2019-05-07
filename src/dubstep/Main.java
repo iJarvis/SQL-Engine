@@ -115,7 +115,7 @@ public class Main {
             }
         }
 
-        if (query instanceof CreateTable) {
+        else if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
             create = false;
