@@ -65,7 +65,6 @@ public class Main {
                 Statement query = parser.Statement();
                 CreateTable createQuery = (CreateTable) query;
                 if (!mySchema.createTable(createQuery)) {
-                    System.out.println("Unable to create DubTable - DubTable already exists");
                 }
                 line = reader.readLine();
 
@@ -85,8 +84,6 @@ public class Main {
             if (sqlString == null)
                 continue;
 
-            if (sqlString.equals("\\q;") || sqlString.equals("quit;") || sqlString.equals("exit;"))
-                break;
             executeQuery(sqlString);
 
         }
@@ -103,24 +100,24 @@ public class Main {
         timer.start();
 
 
-        File processed = new File("q1.txt");
-        if (sqlString.contains("SUM_BASE_PRICE")  && processed.exists()) {
-            try {
-                BufferedReader q1r = new BufferedReader(new FileReader(processed));
-                String line = q1r.readLine();
-                while (line!=null)
-                {
-                    System.out.println(line);
-                    line = q1r.readLine();
-                }
-                q1r.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
-            }
-        }
+          File processed = new File("q1.txt");
+//        if (sqlString.contains("SUM_BASE_PRICE")  && processed.exists()) {
+//            try {
+//                BufferedReader q1r = new BufferedReader(new FileReader(processed));
+//                String line = q1r.readLine();
+//                while (line!=null)
+//                {
+//                    System.out.println(line);
+//                    line = q1r.readLine();
+//                }
+//                q1r.close();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                return;
+//            }
+//        }
 
-        else if (query instanceof CreateTable) {
+        if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
 
@@ -172,11 +169,8 @@ public class Main {
                 return;
             }
             if (sqlString.contains("SUM_BASE_PRICE"))
-            {
                 q1 = true;
 
-
-            }
             while (tuple != null) {
                 replaceDate(tuple);
                 String t1 = tuple.getProjection();
