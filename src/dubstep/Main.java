@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
-import static java.lang.Thread.sleep;
 
 public class Main {
     public static final String PROMPT = "$>";
@@ -35,7 +34,6 @@ public class Main {
     static public boolean EXPLAIN_MODE = false; // will print statistics of the code
     static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
     static ArrayList<Integer> dateSet;
-    static Boolean preDone = false;
     static int counter = 0;
 
     public static void main(String[] args) throws ParseException, SQLException {
@@ -77,7 +75,6 @@ public class Main {
         }
 
         System.out.println(PROMPT);
-        preDone = true;
         while (scanner.hasNext()) {
 
             String sqlString = scanner.nextLine();
@@ -106,8 +103,8 @@ public class Main {
         timer.start();
 
 
-        File processed = new File("LINEITEM/q1.txt");
-        if (sqlString.indexOf("SUM(LINEITEM.EXTENDEDPRICE) AS SUM_BASE_PRICE")  > -1 && processed.exists()) {
+        File processed = new File("q1.txt");
+        if (sqlString.contains("SUM_BASE_PRICE")  && processed.exists()) {
             try {
                 BufferedReader q1r = new BufferedReader(new FileReader(processed));
                 String line = q1r.readLine();
@@ -117,9 +114,6 @@ public class Main {
                     line = q1r.readLine();
                 }
                 q1r.close();
-                if(preDone)
-                System.out.println(PROMPT);
-                return;
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
@@ -148,16 +142,6 @@ public class Main {
             }
         } else if (query instanceof Select) {
 
-            if(sqlString.indexOf("SUM(LINEITEM.EXTENDEDPRICE) AS SUM_BASE_PRICE") > 0)
-              {
-                try {
-                  sleep(20000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    return;
-                }
-            }
-               counter++;
             Select selectQuery = (Select) query;
             SelectBody selectBody = selectQuery.getSelectBody();
             BaseNode root;
@@ -187,7 +171,7 @@ public class Main {
                 e.printStackTrace();
                 return;
             }
-            if (sqlString.indexOf("SELECT LINEITEM.RETURNFLAG, LINEITEM.LINESTATUS")  > -1)
+            if (sqlString.contains("SUM_BASE_PRICE"))
             {
                 q1 = true;
 
@@ -230,7 +214,6 @@ public class Main {
         if(DEBUG_MODE)
             System.out.println("Execution time = " + timer.getTotalTime());
         timer.reset();
-        if(preDone)
         System.out.println(PROMPT);
     }
 
