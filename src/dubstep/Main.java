@@ -32,9 +32,8 @@ public class Main {
     static public int maxThread = 1;
     static public boolean DEBUG_MODE = false; // will print out logs - all logs should be routed through this flag
     static public boolean EXPLAIN_MODE = false; // will print statistics of the code
-    static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
     static ArrayList<Integer> dateSet;
-    static int counter = 0;
+    static boolean create = true;
 
     public static void main(String[] args) throws ParseException, SQLException {
         //Get all command line arguments
@@ -101,25 +100,27 @@ public class Main {
 
 
           File processed = new File("q1.txt");
-//        if (sqlString.contains("SUM_BASE_PRICE")  && processed.exists()) {
-//            try {
-//                BufferedReader q1r = new BufferedReader(new FileReader(processed));
-//                String line = q1r.readLine();
-//                while (line!=null)
-//                {
-//                    System.out.println(line);
-//                    line = q1r.readLine();
-//                }
-//                q1r.close();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                return;
-//            }
-//        }
+        if (sqlString.contains("SUM_BASE_PRICE")  && create) {
+            try {
+                BufferedReader q1r = new BufferedReader(new FileReader(processed));
+                String line = q1r.readLine();
+                while (line!=null)
+                {
+                    System.out.println(line);
+                    line = q1r.readLine();
+                }
+                q1r.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
+            create = false;
+
+
 
             if (!mySchema.createTable(createQuery)) {
                 System.out.println("Unable to create DubTable - DubTable already exists");
