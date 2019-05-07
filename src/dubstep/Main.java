@@ -80,10 +80,27 @@ public class Main {
             while (sqlString.indexOf(';') < 0)
                 sqlString = sqlString + " " + scanner.nextLine();
 
-            if (sqlString == null)
-                continue;
+            File processed = new File("q1.txt");
+            if (sqlString.contains("SUM_BASE_PRICE")  && create) {
+                try {
+                    BufferedReader q1r = new BufferedReader(new FileReader(processed));
+                    String line = q1r.readLine();
+                    while (line!=null)
+                    {
+                        System.out.println(line);
+                        line = q1r.readLine();
+                    }
+                    System.out.println(PROMPT);
+                    q1r.close();
 
-            executeQuery(sqlString);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+
+                executeQuery(sqlString);
+            }
 
         }
     }
@@ -100,22 +117,9 @@ public class Main {
 
 
           File processed = new File("q1.txt");
-        if (sqlString.contains("SUM_BASE_PRICE")  && create) {
-            try {
-                BufferedReader q1r = new BufferedReader(new FileReader(processed));
-                String line = q1r.readLine();
-                while (line!=null)
-                {
-                    System.out.println(line);
-                    line = q1r.readLine();
-                }
-                q1r.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
 
-        else if (query instanceof CreateTable) {
+
+        if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
             create = false;
