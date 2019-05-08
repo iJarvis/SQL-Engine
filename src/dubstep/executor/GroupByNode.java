@@ -11,12 +11,8 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.PrimitiveIterator;
+import java.util.*;
 
-import static dubstep.planner.PlanTree.getSelectExprColumnList;
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 import static dubstep.utils.Tuple.deserializeTuple;
 
@@ -53,7 +49,6 @@ public class GroupByNode extends BaseNode {
         this.aggObjects = null;
         this.initProjectionInfo();
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
-        this.evaluator.safeMode = false;
         this.next = null;
         this.refCol = "";
          if (Main.mySchema.isInMem()){
@@ -195,16 +190,26 @@ public class GroupByNode extends BaseNode {
 
         if (next == null)
             return;
+        int count =0;
+        for(Expression expr : selectExpressions)
+        {
+            if(expr instanceof Column)
+                count++;
+
+        }
 
         while (next != null) {
             this.evaluator.setTuple(next);
-            PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressions.size()];
+
+            PrimitiveValue[] rowValues = new PrimitiveValue[count];
+            int selindex =0;
 
             for (int i = 0; i < selectExpressions.size(); i++) {
                 Expression selectExpression = selectExpressions.get(i);
                 if (selectExpression instanceof Column) {
                     try {
-                         rowValues[i] = (evaluator.eval(selectExpression));
+                         rowValues[selindex] = (evaluator.eval(selectExpression));
+                         selindex++;
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -212,7 +217,6 @@ public class GroupByNode extends BaseNode {
             }
             Tuple keyRow = new Tuple(rowValues);
             String keyString = keyRow.serializeTuple();
-
             if (buffer.containsKey(keyString)) {
                 for (AggregateMap pair : buffer.get(keyString)) {
                     pair.aggregate.yield(next);

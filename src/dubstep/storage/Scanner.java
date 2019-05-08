@@ -121,14 +121,12 @@ public class Scanner {
             tupleCount = scanTable.getRowCount() - currentMaxTid;
         }
 
-        parseTimer.start();
         for(int i =0 ; i < tupleCount;i++)
         {
             PrimitiveValue valueArray[] = new PrimitiveValue[ numCols];
             currentMaxTid++;
             tupleBuffer.add(new Tuple(valueArray));
         }
-        parseTimer.stop();
         Boolean isComplete = false;
 
         int current_index = 0;
@@ -180,6 +178,7 @@ public class Scanner {
 
     public void setupProjList(HashSet<String> requiredList)
     {
+        projVector = new ArrayList<>();
 
             for(int i =0 ; i < scanTable.columnDefinitions.size();i++)
             {

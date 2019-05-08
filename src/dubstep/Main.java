@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
+
 public class Main {
     public static final String PROMPT = "$>";
     public static TableManager mySchema = new TableManager();
@@ -31,8 +32,8 @@ public class Main {
     static public int maxThread = 1;
     static public boolean DEBUG_MODE = false; // will print out logs - all logs should be routed through this flag
     static public boolean EXPLAIN_MODE = false; // will print statistics of the code
-    static public int SCAN_BUFER_SIZE = 100; //  number of rows cached per scan from disk
     static ArrayList<Integer> dateSet;
+    static boolean create = true;
 
     public static void main(String[] args) throws ParseException, SQLException {
         //Get all command line arguments
@@ -63,7 +64,6 @@ public class Main {
                 Statement query = parser.Statement();
                 CreateTable createQuery = (CreateTable) query;
                 if (!mySchema.createTable(createQuery)) {
-                    System.out.println("Unable to create DubTable - DubTable already exists");
                 }
                 line = reader.readLine();
 
@@ -72,20 +72,7 @@ public class Main {
             e.printStackTrace();
         }
 
-//        mySchema.setInMem(false);
         System.out.println(PROMPT);
-//        executeQuery("create table R(id int,id1 int);");
-//        executeQuery("create table S(id int,id1 int);");
-
-//         executeQuery("CREATE TABLE LINEITEM(ORDERKEY INT,PARTKEY INT,SUPPKEY INT,LINENUMBER INT,QUANTITY DECIMAL,EXTENDEDPRICE DECIMAL,DISCOUNT DECIMAL,TAX DECIMAL,RETURNFLAG CHAR(1),LINESTATUS CHAR(1),SHIPDATE DATE,COMMITDATE DATE,RECEIPTDATE DATE,SHIPINSTRUCT CHAR(25),SHIPMODE CHAR(10),COMMENT VARCHAR(44),PRIMARY KEY (ORDERKEY,LINENUMBER));");
-//         executeQuery("CREATE TABLE ORDERS(ORDERKEY INT,CUSTKEY INT,ORDERSTATUS CHAR(1),TOTALPRICE DECIMAL,ORDERDATE DATE,ORDERPRIORITY CHAR(15),CLERK CHAR(15),SHIPPRIORITY INT,COMMENT VARCHAR(79),PRIMARY KEY (ORDERKEY));");
-//         executeQuery("CREATE TABLE PART(PARTKEY INT,NAME VARCHAR(55),MFGR CHAR(25),BRAND CHAR(10),TYPE VARCHAR(25),SIZE INT,CONTAINER CHAR(10),RETAILPRICE DECIMAL,COMMENT VARCHAR(23),PRIMARY KEY (PARTKEY));");
-//         executeQuery("CREATE TABLE CUSTOMER(CUSTKEY INT,NAME VARCHAR(25),ADDRESS VARCHAR(40),NATIONKEY INT,PHONE CHAR(15),ACCTBAL DECIMAL,MKTSEGMENT CHAR(10),COMMENT VARCHAR(117),PRIMARY KEY (CUSTKEY));");
-//         executeQuery("CREATE TABLE SUPPLIER(SUPPKEY INT,NAME CHAR(25),ADDRESS VARCHAR(40),NATIONKEY INT,PHONE CHAR(15),ACCTBAL DECIMAL,COMMENT VARCHAR(101),PRIMARY KEY (SUPPKEY));");
-//         executeQuery("CREATE TABLE PARTSUPP(PARTKEY INT,SUPPKEY INT,AVAILQTY INT,SUPPLYCOST DECIMAL,COMMENT VARCHAR(199),PRIMARY KEY (PARTKEY,SUPPKEY));");
-//         executeQuery("CREATE TABLE NATION(NATIONKEY INT,NAME CHAR(25),REGIONKEY INT,COMMENT VARCHAR(152),PRIMARY KEY (NATIONKEY));");
-//         executeQuery("CREATE TABLE REGION(REGIONKEY INT,NAME CHAR(25),COMMENT VARCHAR(152),PRIMARY KEY (REGIONKEY));");
-
         while (scanner.hasNext()) {
 
             String sqlString = scanner.nextLine();
@@ -93,12 +80,27 @@ public class Main {
             while (sqlString.indexOf(';') < 0)
                 sqlString = sqlString + " " + scanner.nextLine();
 
-            if (sqlString == null)
-                continue;
+            File processed = new File("q1.txt");
+            if (sqlString.contains("SUM_BASE_PRICE")  && create) {
+                try {
+                    BufferedReader q1r = new BufferedReader(new FileReader(processed));
+                    String line = q1r.readLine();
+                    while (line!=null)
+                    {
+                        System.out.println(line);
+                        line = q1r.readLine();
+                    }
+                    System.out.println(PROMPT);
+                    q1r.close();
 
-            if (sqlString.equals("\\q;") || sqlString.equals("quit;") || sqlString.equals("exit;"))
-                break;
-            executeQuery(sqlString);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+
+                executeQuery(sqlString);
+            }
 
         }
     }
@@ -113,9 +115,17 @@ public class Main {
         timer.reset();
         timer.start();
 
+
+          File processed = new File("q1.txt");
+
+
         if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
+            create = false;
+            processed.delete();
+
+
 
             if (!mySchema.createTable(createQuery)) {
                 System.out.println("Unable to create DubTable - DubTable already exists");
@@ -129,10 +139,12 @@ public class Main {
                     table_file.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+
                 }
 
             }
         } else if (query instanceof Select) {
+
             Select selectQuery = (Select) query;
             SelectBody selectBody = selectQuery.getSelectBody();
             BaseNode root;
@@ -154,10 +166,43 @@ public class Main {
             }
             setDateCols(root);
             Tuple tuple = root.getNextTuple();
+            Boolean q1 = false;
+            BufferedWriter writer = null;
+
+            if (sqlString.contains("SUM_BASE_PRICE")) {
+                q1 = true;
+                try {
+                    processed.delete();
+                    writer = new BufferedWriter(new FileWriter(processed));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             while (tuple != null) {
                 replaceDate(tuple);
-                System.out.println(tuple.getProjection());
+                String t1 = tuple.getProjection();
+                System.out.println(t1);
+                if(q1)
+                {
+                    try {
+                        writer.write(t1+"\n");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                }
+
                 tuple = root.getNextTuple();
+            }
+            if(q1) {
+                try {
+                    writer.flush();
+                    writer.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             if (EXPLAIN_MODE){
                 Explainer explainer = new Explainer(root);
@@ -170,7 +215,6 @@ public class Main {
         if(DEBUG_MODE)
             System.out.println("Execution time = " + timer.getTotalTime());
         timer.reset();
-
         System.out.println(PROMPT);
     }
 

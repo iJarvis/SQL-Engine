@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class TableManager {
 
-    HashMap<String, DubTable> tableDirectory = new HashMap<>();
+    public HashMap<String, DubTable> tableDirectory = new HashMap<>();
     private boolean inMem = true;
 
     public boolean createTable(CreateTable createTable) {

@@ -54,7 +54,7 @@ public class ScanNode extends BaseNode {
     Tuple getNextRow() {
         if(!isInit)
         {
-            readComplete = scanner.readTuples(8000, tupleBuffer, parsetimer);
+            readComplete = scanner.readTuples(80, tupleBuffer, parsetimer);
             isInit = true;
         }
 

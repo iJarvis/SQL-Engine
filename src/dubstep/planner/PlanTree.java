@@ -7,7 +7,6 @@ import dubstep.utils.Evaluator;
 import dubstep.utils.GenerateAggregateNode;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
@@ -28,6 +27,9 @@ public class PlanTree {
         //Handle lowermost node
         FromItem fromItem = plainSelect.getFromItem();
         BaseNode scanRoot;
+        List<Join> joins;
+        List<Expression> onExpressions = new ArrayList<>();
+
         if (fromItem instanceof SubSelect) {
             SelectBody selectBody = ((SubSelect) fromItem).getSelectBody();
             if (selectBody instanceof PlainSelect) {
@@ -36,14 +38,33 @@ public class PlanTree {
                 throw new UnsupportedOperationException("Subselect is of type other than PlainSelect");
             }
         } else if (fromItem instanceof Table) {
+            joins = plainSelect.getJoins();
+            if(joins.size() > 0 )
+            {
+                for(Join join : joins)
+                {
+                    if(join.getOnExpression()!=null)
+                        onExpressions.add(join.getOnExpression());
+                }
+
+                Join join = new Join();
+                join.setRightItem(fromItem);
+                joins.add(join);
+                Collections.sort(joins,new tableComparator());
+                join = joins.remove(0);
+                fromItem = join.getRightItem();
+
+
+            }
+
+
             String tableName = ((Table) fromItem).getWholeTableName();
             DubTable table = mySchema.getTable(tableName);
             if (table == null) {
                 throw new IllegalStateException("Table " + tableName + " not found in our schema");
             }
             BaseNode scanNode = new ScanNode(fromItem, null, mySchema);
-            List<Join> joins = plainSelect.getJoins();
-            scanRoot = generateJoin(scanNode, joins, mySchema);
+              scanRoot = generateJoin(scanNode, joins, mySchema);
         } else {
             throw new UnsupportedOperationException("We don't support this FROM clause");
         }
@@ -56,6 +77,11 @@ public class PlanTree {
             projInnerNode = selectNode;
         } else
             projInnerNode = scanRoot;
+        for(Expression expr : onExpressions)
+        {
+            projInnerNode = generateSelect(projInnerNode,expr);
+        }
+
 
         //handle projection
         List<SelectItem> selectItems = plainSelect.getSelectItems();
@@ -80,6 +106,21 @@ public class PlanTree {
             projNode = new LimitNode(plainSelect.getLimit().getRowCount(), projNode);
         }
         return projNode;
+    }
+    static class tableComparator implements Comparator
+    {
+
+        @Override
+        public int compare(Object o1, Object o2) {
+             Object item1 = ((Join)o1).getRightItem();
+             Object item2 = ((Join)o2).getRightItem();
+             if(item1 instanceof Table && item2 instanceof Table)
+             {
+                 return (Long.compare(mySchema.getTable(((Table) item1).getWholeTableName()).getRowCount(),mySchema.getTable(((Table) item2).getWholeTableName()).getRowCount()));
+             }
+             else
+                 return 0;
+        }
     }
 
     private static BaseNode generateSelect(BaseNode lowerNode, Expression filter) {
