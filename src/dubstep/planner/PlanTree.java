@@ -310,7 +310,6 @@ public class PlanTree {
             BaseNode newJoinNode;
             Column column1, column2;
             if (joinInnerChild.projectionInfo.containsKey(columnList.get(0).getWholeColumnName()) && joinOuterChild.projectionInfo.containsKey(columnList.get(1).getWholeColumnName())) {
-                //TODO: create appropriate join node
                 column1 = columnList.get(0);
                 column2 = columnList.get(1);
             } else if (joinOuterChild.projectionInfo.containsKey(columnList.get(0).getWholeColumnName()) && joinInnerChild.projectionInfo.containsKey(columnList.get(1).getWholeColumnName())) {

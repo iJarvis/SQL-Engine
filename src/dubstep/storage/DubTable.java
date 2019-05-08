@@ -7,6 +7,7 @@ import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.create.table.Index;
 
 import java.awt.*;
 import java.io.*;
@@ -22,6 +23,7 @@ public class DubTable {
     private int rowCount = -1;
     public ArrayList<ArrayList<PrimitiveValue>> memCols;
     public ArrayList<ArrayList<Long>> dateCols;
+    public List<String> primaryColumns = new ArrayList<>();
 
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
@@ -45,6 +47,10 @@ public class DubTable {
             if(dataType.equalsIgnoreCase("string") || dataType.equalsIgnoreCase("varchar") || dataType.equalsIgnoreCase("char"))
                 typeList.add(datatypes.STRING_TYPE);
 
+        }
+        List<Index> indexes = createTable.getIndexes();
+        if (indexes != null && indexes.size() != 0) {
+            primaryColumns.add(indexes.get(0).getName());
         }
         postProcessCreate();
     }
