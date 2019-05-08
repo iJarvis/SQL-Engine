@@ -3,9 +3,9 @@ package dubstep.executor;
 import dubstep.utils.Tuple;
 import dubstep.utils.Utils;
 import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.expression.PrimitiveValue;
-import net.sf.jsqlparser.expression.PrimitiveValue.InvalidPrimitive;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import static dubstep.executor.BaseNode.DataType.*;
-import static dubstep.planner.PlanTree.getSelectExprColumnList;
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class HashJoinNode extends BaseNode {
@@ -46,7 +45,11 @@ public class HashJoinNode extends BaseNode {
         if(this.parentNode instanceof SelectNode)
         {
             SelectNode sel = (SelectNode) this.parentNode;
-            filter1 = sel.filter;
+            if(sel.filter instanceof BinaryExpression ) {
+                BinaryExpression binExpr = (BinaryExpression)sel.filter;
+                if(binExpr.getLeftExpression() instanceof Column && binExpr.getRightExpression() instanceof Column && binExpr instanceof EqualsTo)
+                    filter1 = sel.filter;
+            }
 
         }
 

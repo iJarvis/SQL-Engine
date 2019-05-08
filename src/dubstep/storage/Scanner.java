@@ -178,6 +178,7 @@ public class Scanner {
 
     public void setupProjList(HashSet<String> requiredList)
     {
+        projVector = new ArrayList<>();
 
             for(int i =0 ; i < scanTable.columnDefinitions.size();i++)
             {

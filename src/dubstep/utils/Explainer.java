@@ -19,7 +19,7 @@ public class Explainer {
         if(root == null)
             return;
 
-        String explainString = root.toString();
+        String explainString = root.getClass().getSimpleName() ;
 
         if(root instanceof ScanNode)
             explainString += ", Table scanned : " + ((ScanNode) root).getScanTableName();
@@ -35,7 +35,7 @@ public class Explainer {
         if(root instanceof ScanNode)
             explainString +=" Parse time ="+((ScanNode)root).parsetimer.getTotalTime();
         for(int i = 0; i < indentLevel; i++){
-            System.out.print("\t");
+            System.out.print("\t|");
         }
 
         System.out.println(explainString);
