@@ -82,10 +82,10 @@ public class HashJoinNode extends BaseNode {
             rightColumn1 = (Column) binaryExpression1.getRightExpression();
             Column tempColumn1;
 
-            innerTupleValue1 = innerTuple.getValue(leftColumn, innerNode.projectionInfo);
+            innerTupleValue1 = innerTuple.getValue(leftColumn1, innerNode.projectionInfo);
 
 
-            if (innerTupleValue == null) {       // if column is not found in one of the two children, swap left and right columns.
+            if (innerTupleValue1 == null) {       // if column is not found in one of the two children, swap left and right columns.
                 tempColumn1 = rightColumn1;
                 rightColumn1 = leftColumn1;
                 leftColumn1 = tempColumn1;
@@ -97,7 +97,7 @@ public class HashJoinNode extends BaseNode {
         leftIndex =  innerTuple.GetPosition(leftColumn,innerNode.projectionInfo);
 
         if(leftColumn1 !=null)
-        leftIndex1 =  innerTuple.GetPosition(leftColumn1,innerNode.projectionInfo);
+            leftIndex1 =  innerTuple.GetPosition(leftColumn1,innerNode.projectionInfo);
 
         int i = 1;
 

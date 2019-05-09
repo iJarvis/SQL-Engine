@@ -39,7 +39,7 @@ public class PlanTree {
             }
         } else if (fromItem instanceof Table) {
             joins = plainSelect.getJoins();
-            if(joins.size() > 0 )
+            if(joins != null && joins.size() > 0 )
             {
                 for(Join join : joins)
                 {
@@ -50,11 +50,11 @@ public class PlanTree {
                 Join join = new Join();
                 join.setRightItem(fromItem);
                 joins.add(join);
-                Collections.sort(joins,new tableComparator());
+//                Collections.sort(joins,new tableComparator());
                 join = joins.remove(0);
                 fromItem = join.getRightItem();
 
-
+                
             }
 
 
