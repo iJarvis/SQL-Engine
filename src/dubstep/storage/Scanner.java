@@ -85,6 +85,7 @@ public class Scanner {
             this.tableReader = new BufferedReader(new FileReader(scanTable.dataFile),25600);
             this.currentMaxTid = 0;
             String path = "split/" + scanTable.GetTableName()+"/cols/";
+            colsDis = new ArrayList<>();
 
             for(int i =0 ; i< scanTable.columnDefinitions.size();i++)
             {
