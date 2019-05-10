@@ -38,6 +38,7 @@ public class UnionNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = innerNode.projectionInfo;
+        typeList = innerNode.typeList;
         //FIXME: this is most probably broken but we somehow passed CP1. There's no union in CP2 yet.
     }
 

@@ -3,6 +3,7 @@ package dubstep.executor;
 import dubstep.utils.Tuple;
 import dubstep.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class JoinNode extends BaseNode {
@@ -56,6 +57,8 @@ public class JoinNode extends BaseNode {
     void initProjectionInfo() {
         projectionInfo = new HashMap<>(innerNode.projectionInfo);
         Utils.mapPutAll(outerNode.projectionInfo, projectionInfo);
+        typeList = new ArrayList<>(innerNode.typeList);
+        typeList.addAll(outerNode.typeList);
     }
 
     @Override

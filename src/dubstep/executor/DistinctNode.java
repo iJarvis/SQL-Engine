@@ -44,6 +44,7 @@ public class DistinctNode extends BaseNode {
 
     public void initProjectionInfo() {
         projectionInfo = innerNode.projectionInfo;
+        typeList = innerNode.typeList;
     }
 
     @Override

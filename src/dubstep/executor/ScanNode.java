@@ -90,6 +90,7 @@ public class ScanNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = scanTable.getColumnList(fromTable);
+        this.typeList = scanTable.typeList;
     }
 
     @Override

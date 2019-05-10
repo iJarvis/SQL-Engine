@@ -78,6 +78,7 @@ public class SelectNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = innerNode.projectionInfo;
+        typeList = innerNode.typeList;
     }
 
     @Override

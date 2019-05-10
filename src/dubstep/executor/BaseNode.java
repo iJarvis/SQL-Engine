@@ -1,9 +1,12 @@
 package dubstep.executor;
 
+import dubstep.storage.datatypes;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import static dubstep.Main.EXPLAIN_MODE;
@@ -17,6 +20,7 @@ abstract public class BaseNode {
     public Map<String, Integer> projectionInfo;
     public Boolean isInner;
     public HashSet<String> requiredList =  new HashSet<>();
+    public List<datatypes> typeList = new ArrayList<datatypes>();
 
     public BaseNode() {
         timer = new QueryTimer();

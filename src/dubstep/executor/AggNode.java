@@ -6,6 +6,7 @@ import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
@@ -91,9 +92,14 @@ public class AggNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         this.projectionInfo = new HashMap<>();
+        this.typeList = new ArrayList<>(selectExpressionItems.size());
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
             SelectItem selectItem = selectExpressionItems.get(i);
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
+            if(((SelectExpressionItem) selectItem).getExpression() instanceof Column )
+                typeList.add(i,this.innerNode.typeList.get(innerNode.projectionInfo.get(columnName)));
+            else
+                typeList.add(i,null);
             String alias = ((SelectExpressionItem) selectItem).getAlias();
             if (alias == null) {
                 projectionInfo.put(columnName, i);

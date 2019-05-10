@@ -26,6 +26,7 @@ public class LimitNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         this.projectionInfo = this.innerNode.projectionInfo;
+        typeList = innerNode.typeList;
     }
 
     @Override

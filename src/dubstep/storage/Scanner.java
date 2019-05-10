@@ -20,7 +20,6 @@ public class Scanner {
     BufferedReader tableReader;
     Integer currentMaxTid;
     ArrayList<DataInputStream> colsDis = new ArrayList<>();
-    ArrayList<ObjectInputStream> colsOis = new ArrayList<>();
     ArrayList<Boolean> projVector = new ArrayList<>();
     ArrayList<ArrayList<DateValue>> datePlaceHolders = new ArrayList<>();
 

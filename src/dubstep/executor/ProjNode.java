@@ -80,10 +80,16 @@ public class ProjNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = new HashMap<>();
+        typeList = new ArrayList<>();
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
             SelectItem selectItem = selectExpressionItems.get(i);
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
             String alias = ((SelectExpressionItem) selectItem).getAlias();
+
+            if(((SelectExpressionItem) selectItem).getExpression() instanceof Column)
+                typeList.add(innerNode.typeList.get(innerNode.projectionInfo.get(columnName)));
+            else
+                typeList.add(null);
             if (alias == null) {
                 projectionInfo.put(columnName, i);
             } else {

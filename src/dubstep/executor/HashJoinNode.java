@@ -229,6 +229,8 @@ public class HashJoinNode extends BaseNode {
     void initProjectionInfo() {
         projectionInfo = new HashMap<>(innerNode.projectionInfo);
         Utils.mapPutAll(outerNode.projectionInfo, projectionInfo);
+        typeList = new ArrayList<>(innerNode.typeList);
+        typeList.addAll(outerNode.typeList);
     }
 
     @Override
