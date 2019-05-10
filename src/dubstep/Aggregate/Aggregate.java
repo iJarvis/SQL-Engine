@@ -11,23 +11,15 @@ public abstract class Aggregate {
     public Expression expression;
     public Evaluator evaluator;
 
-    protected Aggregate(Expression expression, Evaluator evaluator){
+    protected Aggregate(Expression expression, Evaluator evaluator) {
         this.expression = expression;
         this.evaluator = new Evaluator(evaluator.projectionInfo);
     }
 
-    public abstract PrimitiveValue yield(Tuple tuple);
-
-    public abstract void resetCurrentResult();
-
-    public PrimitiveValue getCurrentResult() {
-        return result;
-    }
-
-    public static Aggregate getAggObject(Function func, Evaluator evaluator){
+    public static Aggregate getAggObject(Function func, Evaluator evaluator) {
         Expression expression = null;
 
-        if (!func.isAllColumns()){
+        if (!func.isAllColumns()) {
             expression = func.getParameters().getExpressions().get(0);
         }
 
@@ -39,5 +31,13 @@ public abstract class Aggregate {
         else if (funcName.equals("min")) return new Min(expression, evaluator);
         else if (funcName.equals("max")) return new Max(expression, evaluator);
         else throw new UnsupportedOperationException("This aggregate funtion is not supported");
+    }
+
+    public abstract PrimitiveValue yield(Tuple tuple);
+
+    public abstract void resetCurrentResult();
+
+    public PrimitiveValue getCurrentResult() {
+        return result;
     }
 }

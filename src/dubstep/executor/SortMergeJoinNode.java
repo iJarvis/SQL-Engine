@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static dubstep.planner.PlanTree.getSelectExprColumnList;
-
 public class SortMergeJoinNode extends BaseNode {
 
     public Column innerColumn;
@@ -56,7 +54,7 @@ public class SortMergeJoinNode extends BaseNode {
                 }
             }
         }
-        if(outerTuple == null)
+        if (outerTuple == null)
             return null;
 
         PrimitiveValue innerPV = innerTuple.getValue(innerColumn, innerNode.projectionInfo);

@@ -12,9 +12,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-import static dubstep.planner.PlanTree.getSelectExprColumnList;
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class AggNode extends BaseNode {
@@ -58,8 +56,8 @@ public class AggNode extends BaseNode {
         }
 
         PrimitiveValue[] rowValues = new PrimitiveValue[selectExpressionItems.size()];
-        for(int i =0 ; i< selectExpressionItems.size();i++)
-            rowValues[i]=(null);
+        for (int i = 0; i < selectExpressionItems.size(); i++)
+            rowValues[i] = (null);
         if (!isInit) {
             isInit = true;
             next = innerNode.getNextTuple();
@@ -67,7 +65,7 @@ public class AggNode extends BaseNode {
 
         while (next != null) {
             for (int i = 0; i < selectExpressionItems.size(); i++) {
-                rowValues[i]=(aggObjects.get(i).yield(next));
+                rowValues[i] = (aggObjects.get(i).yield(next));
             }
             next = innerNode.getNextTuple();
         }
@@ -75,7 +73,7 @@ public class AggNode extends BaseNode {
         done = true;
         aggObjects = null;
         if (rowValues[0] != null) {
-           return new Tuple(rowValues);
+            return new Tuple(rowValues);
         }
         aggObjects = null;
         return null;
@@ -96,10 +94,10 @@ public class AggNode extends BaseNode {
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
             SelectItem selectItem = selectExpressionItems.get(i);
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
-            if(((SelectExpressionItem) selectItem).getExpression() instanceof Column )
-                typeList.add(i,this.innerNode.typeList.get(innerNode.projectionInfo.get(columnName)));
+            if (((SelectExpressionItem) selectItem).getExpression() instanceof Column)
+                typeList.add(i, this.innerNode.typeList.get(innerNode.projectionInfo.get(columnName)));
             else
-                typeList.add(i,null);
+                typeList.add(i, null);
             String alias = ((SelectExpressionItem) selectItem).getAlias();
             if (alias == null) {
                 projectionInfo.put(columnName, i);
@@ -111,12 +109,12 @@ public class AggNode extends BaseNode {
 
     @Override
     public void initProjPushDownInfo() {
-        if(this.parentNode !=null)
-        this.requiredList.addAll(this.parentNode.requiredList);
+        if (this.parentNode != null)
+            this.requiredList.addAll(this.parentNode.requiredList);
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
-            this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
+            this.requiredList.addAll(getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
         }
         this.innerNode.initProjPushDownInfo();
-        
+
     }
 }

@@ -22,7 +22,6 @@ import java.io.*;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -46,7 +45,7 @@ public class Main {
             if (args[i].equals("--on-disk"))
                 mySchema.setInMem(false);
         }
-       mySchema.setInMem(true);
+        mySchema.setInMem(true);
 
         Scanner scanner = new Scanner(System.in);
         QueryTimer timer = new QueryTimer();
@@ -56,13 +55,12 @@ public class Main {
             String line = null;
             BufferedReader reader = null;
             reader = new BufferedReader(new FileReader("tables"));
-            if(reader == null)
+            if (reader == null)
                 line = null;
             else
                 line = reader.readLine();
 
-            while (line !=null)
-            {
+            while (line != null) {
                 CCJSqlParser parser = new CCJSqlParser(new StringReader(line));
                 Statement query = parser.Statement();
                 CreateTable createQuery = (CreateTable) query;
@@ -82,13 +80,12 @@ public class Main {
 
             while (sqlString.indexOf(';') < 0)
                 sqlString = sqlString + " " + scanner.nextLine();
-                executeQuery(sqlString);
+            executeQuery(sqlString);
 
         }
     }
 
-    private static void executeQuery(String sqlString) throws ParseException, SQLException
-    {
+    private static void executeQuery(String sqlString) throws ParseException, SQLException {
 
         QueryTimer timer = new QueryTimer();
         CCJSqlParser parser = new CCJSqlParser(new StringReader(sqlString));
@@ -104,13 +101,11 @@ public class Main {
 
             if (!mySchema.createTable(createQuery)) {
                 System.out.println("Unable to create DubTable - DubTable already exists");
-            }
-            else
-            {
+            } else {
                 try {
-                    table_file = new BufferedWriter(new FileWriter("tables",true));
+                    table_file = new BufferedWriter(new FileWriter("tables", true));
 
-                    table_file.write(sqlString+"\n");
+                    table_file.write(sqlString + "\n");
                     table_file.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -125,31 +120,31 @@ public class Main {
             BaseNode root;
             if (selectBody instanceof PlainSelect) {
                 root = PlanTree.generatePlan((PlainSelect) selectBody);
-                if(EXPLAIN_MODE) {
-                   Explainer e1 = new Explainer(root);
-                   e1.explain();
-               }
+                if (EXPLAIN_MODE) {
+                    Explainer e1 = new Explainer(root);
+                    e1.explain();
+                }
 
-               root = PlanTree.optimizePlan(root);
+                root = PlanTree.optimizePlan(root);
                 root.initProjPushDownInfo();
-               if(EXPLAIN_MODE) {
-                   Explainer  e1 = new Explainer(root);
-                   e1.explain();
-               }
+                if (EXPLAIN_MODE) {
+                    Explainer e1 = new Explainer(root);
+                    e1.explain();
+                }
             } else {
                 root = PlanTree.generateUnionPlan((Union) selectBody);
             }
             Tuple tuple = root.getNextTuple();
 
             while (tuple != null) {
-                replaceDate(tuple,root.typeList);
+                replaceDate(tuple, root.typeList);
                 String t1 = tuple.getProjection();
                 System.out.println(t1);
 
                 tuple = root.getNextTuple();
             }
 
-            if (EXPLAIN_MODE){
+            if (EXPLAIN_MODE) {
                 Explainer explainer = new Explainer(root);
                 explainer.explain();
             }
@@ -157,23 +152,20 @@ public class Main {
             throw new java.sql.SQLException("I can't understand " + sqlString);
         }
         timer.stop();
-        if(DEBUG_MODE)
+        if (DEBUG_MODE)
             System.out.println("Execution time = " + timer.getTotalTime());
         timer.reset();
         System.out.println(PROMPT);
     }
 
-    static private void replaceDate(Tuple tuple, List<datatypes> typeList)
-    {
+    static private void replaceDate(Tuple tuple, List<datatypes> typeList) {
 
-        for(int i =0 ; i < typeList.size();i++)
-        {
-            if(typeList.get(i) == DATE_TYPE)
-            {
+        for (int i = 0; i < typeList.size(); i++) {
+            if (typeList.get(i) == DATE_TYPE) {
                 LongValue val = (LongValue) tuple.valueArray[i];
                 Date date = new Date(val.getValue());
                 DateValue dval = new DateValue(date.toString());
-                tuple.valueArray[i] =dval;
+                tuple.valueArray[i] = dval;
             }
         }
     }

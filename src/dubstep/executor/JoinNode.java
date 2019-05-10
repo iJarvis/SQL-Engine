@@ -11,7 +11,7 @@ public class JoinNode extends BaseNode {
     private Tuple innerTuple;
     private boolean initJoin = false;
 
-    public JoinNode(BaseNode innerNode,BaseNode outerNode) {
+    public JoinNode(BaseNode innerNode, BaseNode outerNode) {
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
         this.outerNode = outerNode;
@@ -26,7 +26,7 @@ public class JoinNode extends BaseNode {
             innerTuple = innerNode.getNextTuple();
             initJoin = true;
         }
-        if(innerTuple == null)
+        if (innerTuple == null)
             return null;
         Tuple outerTuple;
         outerTuple = outerNode.getNextTuple();

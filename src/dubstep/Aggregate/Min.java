@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 public class Min extends Aggregate {
 
-    public Min (Expression expression, Evaluator evaluator) {
+    public Min(Expression expression, Evaluator evaluator) {
         super(expression, evaluator);
         this.result = null;
     }
@@ -19,7 +19,7 @@ public class Min extends Aggregate {
     }
 
     @Override
-    public PrimitiveValue yield (Tuple tuple) {
+    public PrimitiveValue yield(Tuple tuple) {
         this.evaluator.setTuple(tuple);
         PrimitiveValue curResult = null;
 
@@ -34,9 +34,10 @@ public class Min extends Aggregate {
             } else if (curResult instanceof StringValue) {
                 if (result.toString().compareTo(curResult.toString()) > 0) result = curResult;
             } else if (curResult instanceof DateValue) {
-                if (((DateValue) result).getValue().getTime() > ((DateValue) curResult).getValue().getTime()) result = curResult;
+                if (((DateValue) result).getValue().getTime() > ((DateValue) curResult).getValue().getTime())
+                    result = curResult;
             }
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return result;

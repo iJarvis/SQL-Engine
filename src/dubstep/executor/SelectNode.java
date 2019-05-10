@@ -10,7 +10,6 @@ import net.sf.jsqlparser.schema.Column;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static dubstep.planner.PlanTree.getSelectExprColumnList;
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class SelectNode extends BaseNode {
@@ -29,11 +28,9 @@ public class SelectNode extends BaseNode {
         innerNode.parentNode = this;
         eval = new Evaluator(this.innerNode.projectionInfo);
 
-        if(filter instanceof BinaryExpression)
-        {
-            BinaryExpression be = (BinaryExpression)filter;
-            if(be.getRightExpression() instanceof PrimitiveValue && be.getLeftExpression()  instanceof Column)
-            {
+        if (filter instanceof BinaryExpression) {
+            BinaryExpression be = (BinaryExpression) filter;
+            if (be.getRightExpression() instanceof PrimitiveValue && be.getLeftExpression() instanceof Column) {
                 isBinarySingular = true;
                 singname = ((Column) be.getLeftExpression());
             }
@@ -43,30 +40,28 @@ public class SelectNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        while(true) {
+        while (true) {
             Tuple row = this.innerNode.getNextTuple();
-            if(row == null)
-                return  null;
+            if (row == null)
+                return null;
             if (filter == null)
                 return row;
-            if (Index == null && isBinarySingular)
-            {
-                Index = row.GetPosition(singname,this.projectionInfo);
+            if (Index == null && isBinarySingular) {
+                Index = row.GetPosition(singname, this.projectionInfo);
             }
-            if(isBinarySingular)
-            {
+            if (isBinarySingular) {
 
-                ((BinaryExpression)filter).setLeftExpression(row.valueArray[Index]);
+                ((BinaryExpression) filter).setLeftExpression(row.valueArray[Index]);
             }
-                eval.setTuple(row);
-                try {
-                    PrimitiveValue value = eval.eval(filter);
-                    if (value!= null && value.toBool()) {
-                        return row;
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
+            eval.setTuple(row);
+            try {
+                PrimitiveValue value = eval.eval(filter);
+                if (value != null && value.toBool()) {
+                    return row;
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -84,7 +79,7 @@ public class SelectNode extends BaseNode {
     @Override
     public void initProjPushDownInfo() {
         requiredList.addAll(parentNode.requiredList);
-        requiredList.addAll((ArrayList)getSelectExprColumnStrList(filter));
+        requiredList.addAll(getSelectExprColumnStrList(filter));
         this.innerNode.initProjPushDownInfo();
     }
 }

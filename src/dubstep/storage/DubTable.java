@@ -2,49 +2,48 @@ package dubstep.storage;
 
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.Index;
 
-import java.awt.*;
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DubTable {
 
-    private String tableName;
-    List<ColumnDefinition> columnDefinitions;
-    String dataFile;
     public List<datatypes> typeList;
-    private int rowCount = -1;
     public ArrayList<ArrayList<PrimitiveValue>> memCols;
     public ArrayList<ArrayList<Long>> dateCols;
     public List<String> primaryColumns = new ArrayList<>();
+    List<ColumnDefinition> columnDefinitions;
+    String dataFile;
+    private String tableName;
+    private int rowCount = -1;
 
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
-        columnDefinitions =  createTable.getColumnDefinitions();
+        columnDefinitions = createTable.getColumnDefinitions();
         dataFile = "data/" + tableName + ".csv";
         typeList = new ArrayList<>();
         memCols = new ArrayList<>();
         dateCols = new ArrayList<>();
-        for(int i =0 ; i < columnDefinitions.size();i++)
-        {
+        for (int i = 0; i < columnDefinitions.size(); i++) {
             String dataType = columnDefinitions.get(i).getColDataType().getDataType().toLowerCase();
             memCols.add(new ArrayList<>());
             dateCols.add(new ArrayList<>());
-            if(dataType.equals("int"))
+            if (dataType.equals("int"))
                 typeList.add(datatypes.INT_TYPE);
-            if(dataType.equals("date")) {
+            if (dataType.equals("date")) {
                 typeList.add(datatypes.DATE_TYPE);
             }
-            if(dataType.equals("decimal"))
+            if (dataType.equals("decimal"))
                 typeList.add(datatypes.DOUBLE_TYPE);
-            if(dataType.equalsIgnoreCase("string") || dataType.equalsIgnoreCase("varchar") || dataType.equalsIgnoreCase("char"))
+            if (dataType.equalsIgnoreCase("string") || dataType.equalsIgnoreCase("varchar") || dataType.equalsIgnoreCase("char"))
                 typeList.add(datatypes.STRING_TYPE);
 
         }
@@ -57,7 +56,7 @@ public class DubTable {
 
     private final void postProcessCreate() {
         File file = new File(dataFile);
-        String path =   "split/" + tableName + "/cols/";
+        String path = "split/" + tableName + "/cols/";
         File processed = new File(path + "/exists.txt");
         if (!file.exists()) {
             throw new IllegalStateException("Data file doesn't exist for table = " + tableName);
@@ -87,8 +86,7 @@ public class DubTable {
                 e.printStackTrace();
                 System.exit(0);
             }
-        } 
-        else {
+        } else {
             int lines = 0;
             try {
                 BufferedReader reader = new BufferedReader(new FileReader(dataFile));
@@ -105,7 +103,7 @@ public class DubTable {
     private void splitTuplesAndWrite(List<DataOutputStream> colFiles) throws Exception {
 
         DateValue val = new DateValue("2019-10-10");
-        java.util.Date d =  (java.util.Date)val.getValue();
+        java.util.Date d = val.getValue();
         Long time = d.getTime();
         java.sql.Date d1 = new java.sql.Date(time);
         val.setValue(d1);
@@ -123,10 +121,10 @@ public class DubTable {
                 datatypes type = typeList.get(index);
                 switch (type) {
                     case DATE_TYPE:
-                            java.sql.Date dd = ((DateValue) t).getValue();
-                            Long t1 = dd.getTime();
-                            colFiles.get(index).writeLong(t1);
-                            break;
+                        java.sql.Date dd = ((DateValue) t).getValue();
+                        Long t1 = dd.getTime();
+                        colFiles.get(index).writeLong(t1);
+                        break;
                     case INT_TYPE:
                         colFiles.get(index).writeLong(t.toLong());
 
@@ -138,7 +136,7 @@ public class DubTable {
                         colFiles.get(index).writeBytes(t.toRawString() + "\n");
                         break;
                 }
-                tuple.valueArray[index] =null;
+                tuple.valueArray[index] = null;
                 index++;
             }
             counter++;
