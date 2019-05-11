@@ -24,6 +24,7 @@ public class DubTable {
     public ArrayList<ArrayList<PrimitiveValue>> memCols;
     public ArrayList<ArrayList<Long>> dateCols;
     public List<String> primaryColumns = new ArrayList<>();
+    public Long[] isDeleted;
 
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();
@@ -32,8 +33,7 @@ public class DubTable {
         typeList = new ArrayList<>();
         memCols = new ArrayList<>();
         dateCols = new ArrayList<>();
-        for(int i =0 ; i < columnDefinitions.size();i++)
-        {
+        for(int i =0 ; i < columnDefinitions.size();i++) {
             String dataType = columnDefinitions.get(i).getColDataType().getDataType().toLowerCase();
             memCols.add(new ArrayList<>());
             dateCols.add(new ArrayList<>());
@@ -57,7 +57,8 @@ public class DubTable {
 
     private final void postProcessCreate() {
         File file = new File(dataFile);
-        String path =   "split/" + tableName + "/cols/";
+        String tableDir = "split/" + tableName;
+        String path = tableDir + "/cols/";
         File processed = new File(path + "/exists.txt");
         if (!file.exists()) {
             throw new IllegalStateException("Data file doesn't exist for table = " + tableName);
@@ -87,8 +88,7 @@ public class DubTable {
                 e.printStackTrace();
                 System.exit(0);
             }
-        } 
-        else {
+        } else {
             int lines = 0;
             try {
                 BufferedReader reader = new BufferedReader(new FileReader(dataFile));
@@ -99,8 +99,11 @@ public class DubTable {
             }
             rowCount = lines;
         }
+        isDeleted = new Long[(rowCount/64)+1];
+        for (int i = 0; i < (rowCount/64)+1; ++i) {
+            isDeleted[i] = 0L;
+        }
     }
-
 
     private void splitTuplesAndWrite(List<DataOutputStream> colFiles) throws Exception {
 

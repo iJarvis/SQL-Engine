@@ -1,5 +1,6 @@
 package dubstep.executor;
 
+import dubstep.Main;
 import dubstep.storage.DubTable;
 import dubstep.storage.Scanner;
 import dubstep.storage.TableManager;
@@ -19,6 +20,7 @@ public class ScanNode extends BaseNode {
     private ArrayList<Tuple> tupleBuffer;
     private Expression filter;
     private int currentIndex = 0;
+    private int i = 0;
     private boolean readComplete = false;
     private Table fromTable;
     private Scanner scanner;
@@ -27,13 +29,14 @@ public class ScanNode extends BaseNode {
     private boolean isInit = false;
 
     public ScanNode(FromItem fromItem, Expression filter, TableManager mySchema) {
+        this((Table) fromItem, filter);
+    }
+
+    public ScanNode(Table table, Expression filter) {
         super();
-        if (!(fromItem instanceof Table)) {
-            throw new UnsupportedOperationException("Scan node call without table");
-        }
         parsetimer = new QueryTimer();
-        this.mySchema = mySchema;
-        this.fromTable = (Table) fromItem;
+        this.mySchema = Main.mySchema;
+        this.fromTable = table;
         String tableName = fromTable.getName();
         this.scanTable = mySchema.getTable(tableName);
         this.filter = filter;
@@ -42,7 +45,7 @@ public class ScanNode extends BaseNode {
         tupleBuffer = new ArrayList<>();
         scanner = new Scanner(this.scanTable);
         scanner.initRead();
-      //  readComplete = scanner.readTuples(15000, tupleBuffer, parsetimer);
+        //  readComplete = scanner.readTuples(15000, tupleBuffer, parsetimer);
         this.initProjectionInfo();
     }
 
@@ -52,13 +55,13 @@ public class ScanNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        if(!isInit)
-        {
+        if (!isInit) {
             readComplete = scanner.readTuples(80, tupleBuffer, parsetimer);
             isInit = true;
         }
 
         while (1 == 1) {
+            ++i;
             if (tupleBuffer.size() <= currentIndex) {
                 if (!readComplete) {
                     if(mySchema.isInMem())
@@ -70,8 +73,11 @@ public class ScanNode extends BaseNode {
                     continue;
                 } else
                     return null;
-            } else
+            } else if (DeleteManager.isDeleted(fromTable.getName(), i-1)) {
+                ++currentIndex;
+            } else {
                 return tupleBuffer.get(currentIndex++);
+            }
         }
     }
 

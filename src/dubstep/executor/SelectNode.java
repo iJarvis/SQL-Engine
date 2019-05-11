@@ -10,7 +10,6 @@ import net.sf.jsqlparser.schema.Column;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static dubstep.planner.PlanTree.getSelectExprColumnList;
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class SelectNode extends BaseNode {
@@ -49,13 +48,10 @@ public class SelectNode extends BaseNode {
                 return  null;
             if (filter == null)
                 return row;
-            if (Index == null && isBinarySingular)
-            {
+            if (Index == null && isBinarySingular) {
                 Index = row.GetPosition(singname,this.projectionInfo);
             }
-            if(isBinarySingular)
-            {
-
+            if(isBinarySingular) {
                 ((BinaryExpression)filter).setLeftExpression(row.valueArray[Index]);
             }
                 eval.setTuple(row);
@@ -66,6 +62,8 @@ public class SelectNode extends BaseNode {
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
+                } catch (NullPointerException e) {
+                    System.out.println("derp");
                 }
         }
     }
