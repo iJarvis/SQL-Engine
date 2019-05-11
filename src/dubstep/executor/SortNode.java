@@ -11,9 +11,11 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
 
-import static dubstep.planner.PlanTree.getSelectExprColumnList;
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class SortNode extends BaseNode {
@@ -43,10 +45,10 @@ public class SortNode extends BaseNode {
 
         //check for edge case that a column in order by clause isn't of the form tablename.columnname where it is so
         //in the select statement
-        for (OrderByElement elem: elems) {
+        for (OrderByElement elem : elems) {
             Column column = (Column) elem.getExpression();
             if (!projectionInfo.containsKey(column.getWholeColumnName()) && !projectionInfo.containsKey(column.getColumnName())) {
-                for (String key: projectionInfo.keySet()) {
+                for (String key : projectionInfo.keySet()) {
                     String[] parts = key.split("\\.");
                     if (parts.length == 2 && parts[1].equals(column.getWholeColumnName())) {
                         column.setColumnName(key);
@@ -181,15 +183,15 @@ public class SortNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = innerNode.projectionInfo;
+        typeList = innerNode.typeList;
     }
 
     @Override
     public void initProjPushDownInfo() {
-        if(this.parentNode !=null)
-        this.requiredList.addAll(this.parentNode.requiredList);
-        for(int i =0 ; i < orderByElements.size();i++ )
-        {
-            this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(orderByElements.get(i).getExpression()));
+        if (this.parentNode != null)
+            this.requiredList.addAll(this.parentNode.requiredList);
+        for (int i = 0; i < orderByElements.size(); i++) {
+            this.requiredList.addAll(getSelectExprColumnStrList(orderByElements.get(i).getExpression()));
         }
 
         this.innerNode.initProjPushDownInfo();

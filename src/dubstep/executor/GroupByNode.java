@@ -4,14 +4,18 @@ import dubstep.Aggregate.Aggregate;
 import dubstep.Main;
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
-import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 import static dubstep.utils.Tuple.deserializeTuple;
@@ -28,9 +32,9 @@ public class GroupByNode extends BaseNode {
     private Tuple next;
     private List<Column> groupbyCols = new ArrayList<>();
     private ArrayList<Integer> aggIndices;
-   // private Column groupByCol;
+    // private Column groupByCol;
     private String refCol;
-    private  boolean isFilled = false;
+    private boolean isFilled = false;
     //private Boolean done;
 
     public GroupByNode(BaseNode innernode, ArrayList<SelectExpressionItem> selectExpressionItems) {
@@ -51,24 +55,21 @@ public class GroupByNode extends BaseNode {
         this.evaluator = new Evaluator(this.innerNode.projectionInfo);
         this.next = null;
         this.refCol = "";
-         if (Main.mySchema.isInMem()){
-        }
-        else {
-           this.generateSortNode();
+        if (Main.mySchema.isInMem()) {
+        } else {
+            this.generateSortNode();
         }
     }
 
     public Tuple getNextRow() {
         if (Main.mySchema.isInMem()) {
-            if(!isFilled)
-            {
+            if (!isFilled) {
                 isFilled = true;
                 this.fillBuffer();
             }
             return inMemNextRow();
-        }
-        else
-           return onDiskNextRow();
+        } else
+            return onDiskNextRow();
 
     }
 
@@ -129,7 +130,7 @@ public class GroupByNode extends BaseNode {
             next = this.innerNode.getNextTuple();
         }
 
-        if(rowValues[0] != null)
+        if (rowValues[0] != null)
             return new Tuple(rowValues);
         return null;
     }
@@ -165,14 +166,11 @@ public class GroupByNode extends BaseNode {
         int currentAgg = 0;
 
         PrimitiveValue[] valueArray = new PrimitiveValue[result.valueArray.length];
-        for(int i =0 ; i<result.valueArray.length ;i++)
-        {
-            if(currentAgg < aggIndices.size() && aggIndices.get(currentAgg) == i )
-            {
+        for (int i = 0; i < result.valueArray.length; i++) {
+            if (currentAgg < aggIndices.size() && aggIndices.get(currentAgg) == i) {
                 currentAgg++;
-                valueArray[i] =result.getValue(aggIndicesIndex++);
-            }
-            else
+                valueArray[i] = result.getValue(aggIndicesIndex++);
+            } else
                 valueArray[i] = result.getValue(valueStartIndex++);
         }
         result.valueArray = valueArray;
@@ -190,10 +188,9 @@ public class GroupByNode extends BaseNode {
 
         if (next == null)
             return;
-        int count =0;
-        for(Expression expr : selectExpressions)
-        {
-            if(expr instanceof Column)
+        int count = 0;
+        for (Expression expr : selectExpressions) {
+            if (expr instanceof Column)
                 count++;
 
         }
@@ -202,14 +199,14 @@ public class GroupByNode extends BaseNode {
             this.evaluator.setTuple(next);
 
             PrimitiveValue[] rowValues = new PrimitiveValue[count];
-            int selindex =0;
+            int selindex = 0;
 
             for (int i = 0; i < selectExpressions.size(); i++) {
                 Expression selectExpression = selectExpressions.get(i);
                 if (selectExpression instanceof Column) {
                     try {
-                         rowValues[selindex] = (evaluator.eval(selectExpression));
-                         selindex++;
+                        rowValues[selindex] = (evaluator.eval(selectExpression));
+                        selindex++;
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -248,7 +245,7 @@ public class GroupByNode extends BaseNode {
             if (selectExpression instanceof Column) {
                 this.groupbyCols.add((Column) selectExpression);
                 sortElement = new OrderByElement();
-                sortElement.setExpression((Expression) selectExpression);
+                sortElement.setExpression(selectExpression);
                 elems.add(sortElement);
                 sortElement.setAsc(true);
             }
@@ -260,10 +257,15 @@ public class GroupByNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = new HashMap<>();
+        typeList = new ArrayList<>();
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
             SelectItem selectItem = selectExpressionItems.get(i);
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
             String alias = ((SelectExpressionItem) selectItem).getAlias();
+            if (((SelectExpressionItem) selectItem).getExpression() instanceof Column)
+                typeList.add(innerNode.typeList.get(innerNode.projectionInfo.get(columnName)));
+            else
+                typeList.add(null);
             if (alias == null) {
                 projectionInfo.put(columnName, i);
             } else {
@@ -274,11 +276,10 @@ public class GroupByNode extends BaseNode {
 
     @Override
     public void initProjPushDownInfo() {
-        if(this.parentNode !=null)
-        this.requiredList.addAll(this.parentNode.requiredList);
-        for(int i =0 ; i < selectExpressionItems.size();i++)
-        {
-            this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
+        if (this.parentNode != null)
+            this.requiredList.addAll(this.parentNode.requiredList);
+        for (int i = 0; i < selectExpressionItems.size(); i++) {
+            this.requiredList.addAll(getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
         }
         this.innerNode.initProjPushDownInfo();
 

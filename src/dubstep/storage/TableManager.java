@@ -40,12 +40,12 @@ public class TableManager {
         }
     }
 
-    public void setInMem(boolean inMem){
-        this.inMem = inMem;
-    }
-
     public boolean isInMem() {
         return inMem;
+    }
+
+    public void setInMem(boolean inMem) {
+        this.inMem = inMem;
     }
 }
 

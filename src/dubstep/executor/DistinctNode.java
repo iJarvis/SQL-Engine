@@ -5,7 +5,6 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -22,12 +21,12 @@ public class DistinctNode extends BaseNode {
         this.initProjectionInfo();
     }
 
-    public Tuple getNextRow(){
+    public Tuple getNextRow() {
         tuple = this.innerNode.getNextTuple();
-        if(tuple == null) return null;
+        if (tuple == null) return null;
         String tupleString = "";
         for (SelectItem column : distinctItems) {
-            tupleString = tupleString + tuple.getValue((Column)(((SelectExpressionItem) column).getExpression()), projectionInfo).toString();
+            tupleString = tupleString + tuple.getValue((Column) (((SelectExpressionItem) column).getExpression()), projectionInfo).toString();
         }
         while (tuples.contains(tupleString)) {
             tuple = this.innerNode.getNextTuple();
@@ -44,12 +43,13 @@ public class DistinctNode extends BaseNode {
 
     public void initProjectionInfo() {
         projectionInfo = innerNode.projectionInfo;
+        typeList = innerNode.typeList;
     }
 
     @Override
     public void initProjPushDownInfo() {
-        if(this.parentNode !=null)
-        this.requiredList = this.parentNode.requiredList;
+        if (this.parentNode != null)
+            this.requiredList = this.parentNode.requiredList;
         this.innerNode.initProjPushDownInfo();
     }
 }

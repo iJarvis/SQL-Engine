@@ -14,7 +14,7 @@ public class Sum extends Aggregate {
     public DoubleValue doubleValue = new DoubleValue(0);
     public Boolean isLong = null;
 
-    public Sum(Expression expression, Evaluator evaluator){
+    public Sum(Expression expression, Evaluator evaluator) {
         super(expression, evaluator);
     }
 
@@ -26,13 +26,13 @@ public class Sum extends Aggregate {
     }
 
     @Override
-    public PrimitiveValue yield(Tuple tuple){
+    public PrimitiveValue yield(Tuple tuple) {
         PrimitiveValue result = null;
         evaluator.setTuple(tuple);
 
-        try{
+        try {
             result = evaluator.eval(expression);
-            if (isLong == null) isLong = result instanceof LongValue ? true : false;
+            if (isLong == null) isLong = result instanceof LongValue;
             if (isLong) {
                 longValue.setValue(longValue.getValue() + result.toLong());
                 this.result = longValue;
@@ -42,7 +42,7 @@ public class Sum extends Aggregate {
                 this.result = doubleValue;
                 return doubleValue;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 

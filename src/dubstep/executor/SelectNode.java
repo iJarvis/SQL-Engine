@@ -28,11 +28,9 @@ public class SelectNode extends BaseNode {
         innerNode.parentNode = this;
         eval = new Evaluator(this.innerNode.projectionInfo);
 
-        if(filter instanceof BinaryExpression)
-        {
-            BinaryExpression be = (BinaryExpression)filter;
-            if(be.getRightExpression() instanceof PrimitiveValue && be.getLeftExpression()  instanceof Column)
-            {
+        if (filter instanceof BinaryExpression) {
+            BinaryExpression be = (BinaryExpression) filter;
+            if (be.getRightExpression() instanceof PrimitiveValue && be.getLeftExpression() instanceof Column) {
                 isBinarySingular = true;
                 singname = ((Column) be.getLeftExpression());
             }
@@ -42,29 +40,28 @@ public class SelectNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        while(true) {
+        while (true) {
             Tuple row = this.innerNode.getNextTuple();
-            if(row == null)
-                return  null;
+            if (row == null)
+                return null;
             if (filter == null)
                 return row;
             if (Index == null && isBinarySingular) {
-                Index = row.GetPosition(singname,this.projectionInfo);
+                Index = row.GetPosition(singname, this.projectionInfo);
             }
-            if(isBinarySingular) {
-                ((BinaryExpression)filter).setLeftExpression(row.valueArray[Index]);
+            if (isBinarySingular) {
+
+                ((BinaryExpression) filter).setLeftExpression(row.valueArray[Index]);
             }
-                eval.setTuple(row);
-                try {
-                    PrimitiveValue value = eval.eval(filter);
-                    if (value!= null && value.toBool()) {
-                        return row;
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (NullPointerException e) {
-                    System.out.println("derp");
+            eval.setTuple(row);
+            try {
+                PrimitiveValue value = eval.eval(filter);
+                if (value != null && value.toBool()) {
+                    return row;
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -76,12 +73,13 @@ public class SelectNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = innerNode.projectionInfo;
+        typeList = innerNode.typeList;
     }
 
     @Override
     public void initProjPushDownInfo() {
         requiredList.addAll(parentNode.requiredList);
-        requiredList.addAll((ArrayList)getSelectExprColumnStrList(filter));
+        requiredList.addAll(getSelectExprColumnStrList(filter));
         this.innerNode.initProjPushDownInfo();
     }
 }

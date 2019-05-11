@@ -22,7 +22,6 @@ public class PlanTree {
     private static final int ON_DISK_JOIN_THRESHOLD = 100;
 
 
-
     public static BaseNode generatePlan(PlainSelect plainSelect) {
         //Handle lowermost node
         FromItem fromItem = plainSelect.getFromItem();
@@ -39,18 +38,17 @@ public class PlanTree {
             }
         } else if (fromItem instanceof Table) {
             joins = plainSelect.getJoins();
-            if(joins != null && joins.size() > 0 )
-            {
-                for(Join join : joins)
-                {
-                    if(join.getOnExpression()!=null)
+            if (joins != null && joins.size() > 0) {
+                for (Join join : joins) {
+                    if (join.getOnExpression() != null)
                         onExpressions.add(join.getOnExpression());
                 }
 
                 Join join = new Join();
                 join.setRightItem(fromItem);
                 joins.add(join);
-                Collections.sort(joins,new tableComparator());
+                if (joins.size() < 4)
+                    Collections.sort(joins, new tableComparator());
                 join = joins.remove(0);
                 fromItem = join.getRightItem();
 
@@ -64,7 +62,7 @@ public class PlanTree {
                 throw new IllegalStateException("Table " + tableName + " not found in our schema");
             }
             BaseNode scanNode = new ScanNode(fromItem, null, mySchema);
-              scanRoot = generateJoin(scanNode, joins, mySchema);
+            scanRoot = generateJoin(scanNode, joins, mySchema);
         } else {
             throw new UnsupportedOperationException("We don't support this FROM clause");
         }
@@ -77,9 +75,8 @@ public class PlanTree {
             projInnerNode = selectNode;
         } else
             projInnerNode = scanRoot;
-        for(Expression expr : onExpressions)
-        {
-            projInnerNode = generateSelect(projInnerNode,expr);
+        for (Expression expr : onExpressions) {
+            projInnerNode = generateSelect(projInnerNode, expr);
         }
 
 
@@ -101,26 +98,10 @@ public class PlanTree {
             projNode = sortNode;
         }
 
-        if(plainSelect.getLimit() != null)
-        {
+        if (plainSelect.getLimit() != null) {
             projNode = new LimitNode(plainSelect.getLimit().getRowCount(), projNode);
         }
         return projNode;
-    }
-    static class tableComparator implements Comparator
-    {
-
-        @Override
-        public int compare(Object o1, Object o2) {
-             Object item1 = ((Join)o1).getRightItem();
-             Object item2 = ((Join)o2).getRightItem();
-             if(item1 instanceof Table && item2 instanceof Table)
-             {
-                 return (Long.compare(mySchema.getTable(((Table) item1).getWholeTableName()).getRowCount(),mySchema.getTable(((Table) item2).getWholeTableName()).getRowCount()));
-             }
-             else
-                 return 0;
-        }
     }
 
     private static BaseNode generateSelect(BaseNode lowerNode, Expression filter) {
@@ -134,7 +115,7 @@ public class PlanTree {
     }
 
     private static BaseNode generateJoin(BaseNode lowerNode, List<Join> Joins, TableManager mySchema) {
-        if(Joins == null)
+        if (Joins == null)
             return lowerNode;
         for (Join join : Joins) {
             BaseNode rightNode;
@@ -171,7 +152,7 @@ public class PlanTree {
     private static BaseNode getResponsibleChild(BaseNode currentNode, List<Column> columnList) {
         if (currentNode instanceof UnionNode || currentNode instanceof ScanNode)
             return currentNode;
-        if (currentNode.innerNode != null &&( currentNode instanceof JoinNode || currentNode instanceof HashJoinNode || currentNode instanceof SortMergeJoinNode) ){
+        if (currentNode.innerNode != null && (currentNode instanceof JoinNode || currentNode instanceof HashJoinNode || currentNode instanceof SortMergeJoinNode)) {
             boolean inner = false, outer = false;
 
             for (Column column : columnList) {
@@ -197,45 +178,40 @@ public class PlanTree {
             BinaryExpression bin = (BinaryExpression) expression;
             if (bin.getRightExpression() instanceof Column)
                 columnList.add((Column) bin.getRightExpression());
-            else if(bin.getRightExpression() instanceof BinaryExpression)
+            else if (bin.getRightExpression() instanceof BinaryExpression)
                 columnList.addAll(getSelectExprColumnList(bin.getRightExpression()));
 
             if (bin.getLeftExpression() instanceof Column)
                 columnList.add((Column) bin.getLeftExpression());
-            else if(bin.getLeftExpression() instanceof  BinaryExpression)
+            else if (bin.getLeftExpression() instanceof BinaryExpression)
                 columnList.addAll(getSelectExprColumnList(bin.getLeftExpression()));
 
-            if(bin.getLeftExpression() instanceof Function)
-            {
+            if (bin.getLeftExpression() instanceof Function) {
                 Function fun = (Function) bin.getLeftExpression();
-                if(fun.getName().equals("DATE"))
-                bin.setLeftExpression( new LongValue( (DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString())).getValue().getTime() ));
+                if (fun.getName().equals("DATE"))
+                    bin.setLeftExpression(new LongValue((DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString())).getValue().getTime()));
 
             }
 
-            if(bin.getRightExpression() instanceof Function)
-            {
+            if (bin.getRightExpression() instanceof Function) {
                 Function fun = (Function) bin.getRightExpression();
-                if(fun.getName().equals("DATE"))
-                bin.setRightExpression(new LongValue( (DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString())).getValue().getTime() ));
+                if (fun.getName().equals("DATE"))
+                    bin.setRightExpression(new LongValue((DateValue.parseEscaped(fun.getParameters().getExpressions().get(0).toString())).getValue().getTime()));
 
             }
         }
         return columnList;
     }
 
-
     public static List<String> getSelectExprColumnStrList(Expression expression) {
         List<String> columnList = new ArrayList<>();
-        if(expression instanceof  Column)
-        {
-            columnList.add(((Column)expression).getWholeColumnName());
+        if (expression instanceof Column) {
+            columnList.add(((Column) expression).getWholeColumnName());
         }
-        if(expression instanceof Function)
-        {
-            Function function = (Function)expression;
-            ExpressionList exprList= function.getParameters();
-            if(exprList!= null) {
+        if (expression instanceof Function) {
+            Function function = (Function) expression;
+            ExpressionList exprList = function.getParameters();
+            if (exprList != null) {
                 List<Expression> exprs = exprList.getExpressions();
 
                 for (Expression expression1 : exprs) {
@@ -243,8 +219,8 @@ public class PlanTree {
                 }
             }
         }
-        if(expression instanceof CaseExpression) {
-            CaseExpression c = (CaseExpression)expression;
+        if (expression instanceof CaseExpression) {
+            CaseExpression c = (CaseExpression) expression;
             if (c.getSwitchExpression() == null) {
                 Iterator var2 = c.getWhenClauses().iterator();
 
@@ -261,12 +237,12 @@ public class PlanTree {
             BinaryExpression bin = (BinaryExpression) expression;
             if (bin.getRightExpression() instanceof Column)
                 columnList.add(((Column) bin.getRightExpression()).getWholeColumnName());
-            else if(bin.getRightExpression() instanceof BinaryExpression)
+            else if (bin.getRightExpression() instanceof BinaryExpression)
                 columnList.addAll(getSelectExprColumnStrList(bin.getRightExpression()));
 
             if (bin.getLeftExpression() instanceof Column)
                 columnList.add(((Column) bin.getLeftExpression()).getWholeColumnName());
-            else if(bin.getLeftExpression() instanceof  BinaryExpression)
+            else if (bin.getLeftExpression() instanceof BinaryExpression)
                 columnList.addAll(getSelectExprColumnStrList(bin.getLeftExpression()));
         }
         return columnList;
@@ -284,11 +260,10 @@ public class PlanTree {
             child.parentNode = parent;
 
             BaseNode newParent = newNode.parentNode;
-            if(newNode.isInner) {
+            if (newNode.isInner) {
                 newParent.innerNode = selectNode;
                 selectNode.isInner = true;
-            }
-            else {
+            } else {
                 newParent.outerNode = selectNode;
                 selectNode.isInner = false;
             }
@@ -311,9 +286,9 @@ public class PlanTree {
                 if (currentNode.outerNode.projectionInfo.containsKey(column.getWholeColumnName()))
                     outer = true;
             }
-            if (inner && outer ) {
-                if(currentNode instanceof JoinNode)
-                return currentNode;
+            if (inner && outer) {
+                if (currentNode instanceof JoinNode)
+                    return currentNode;
                 else
                     return null;
             } else {
@@ -322,9 +297,7 @@ public class PlanTree {
                     return leftChild;
                 }
                 BaseNode rightChild = getResponsibleJoinChild(currentNode.outerNode, columnList);
-                if (rightChild != null) {
-                    return rightChild;
-                }
+                return rightChild;
             }
         } else if (currentNode instanceof SelectNode) {
             return getResponsibleJoinChild(currentNode.innerNode, columnList);
@@ -356,18 +329,15 @@ public class PlanTree {
             } else if (joinOuterChild.projectionInfo.containsKey(columnList.get(0).getWholeColumnName()) && joinInnerChild.projectionInfo.containsKey(columnList.get(1).getWholeColumnName())) {
                 column2 = columnList.get(0);
                 column1 = columnList.get(1);
+            } else {
+                throw new UnsupportedOperationException("join condition invalid");
             }
-            else
-                {
-                    throw  new UnsupportedOperationException("join condition invalid");
-                }
-            if(mySchema.isInMem()) {
+            if (mySchema.isInMem()) {
                 EqualsTo filter = new EqualsTo();
                 filter.setLeftExpression(column1);
                 filter.setRightExpression(column2);
-                newJoinNode = new HashJoinNode(joinInnerChild,joinOuterChild,filter);
-            }
-            else
+                newJoinNode = new HashJoinNode(joinInnerChild, joinOuterChild, filter);
+            } else
                 newJoinNode = new SortMergeJoinNode(joinInnerChild, joinOuterChild, column1, column2);
             newJoinNode.parentNode = joinParent;
             if (joinParent.innerNode == joinNode) {
@@ -376,8 +346,7 @@ public class PlanTree {
                 joinParent.outerNode = newJoinNode;
             }
 
-            if(mySchema.isInMem())
-            {
+            if (mySchema.isInMem()) {
                 newJoinNode.innerNode = joinInnerChild;
                 newJoinNode.outerNode = joinOuterChild;
                 return;
@@ -407,9 +376,9 @@ public class PlanTree {
         BaseNode inner = currentNode.innerNode;
         BaseNode outer = currentNode.outerNode;
 
-        if (currentNode instanceof SelectNode &&((SelectNode)(SelectNode) currentNode).isOptimized == false ) {
+        if (currentNode instanceof SelectNode && ((SelectNode) currentNode).isOptimized == false) {
             selectPushDown((SelectNode) currentNode);
-            ((SelectNode)(SelectNode) currentNode).isOptimized = true;
+            ((SelectNode) currentNode).isOptimized = true;
             convertJoins((SelectNode) currentNode);
 
         }
@@ -417,5 +386,18 @@ public class PlanTree {
         optimizePlan(outer);
 
         return optimizedPlan;
+    }
+
+    static class tableComparator implements Comparator {
+
+        @Override
+        public int compare(Object o1, Object o2) {
+            Object item1 = ((Join) o1).getRightItem();
+            Object item2 = ((Join) o2).getRightItem();
+            if (item1 instanceof Table && item2 instanceof Table) {
+                return (Long.compare(mySchema.getTable(((Table) item1).getWholeTableName()).getRowCount(), mySchema.getTable(((Table) item2).getWholeTableName()).getRowCount()));
+            } else
+                return 0;
+        }
     }
 }

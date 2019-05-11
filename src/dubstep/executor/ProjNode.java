@@ -2,7 +2,6 @@ package dubstep.executor;
 
 import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
-import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static dubstep.planner.PlanTree.getSelectExprColumnList;
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class ProjNode extends BaseNode {
@@ -52,13 +50,13 @@ public class ProjNode extends BaseNode {
 
     @Override
     Tuple getNextRow() {
-        PrimitiveValue values[] = new PrimitiveValue[this.selectExpressionItems.size()];
+        PrimitiveValue[] values = new PrimitiveValue[this.selectExpressionItems.size()];
         List<ColumnDefinition> colDefs = new ArrayList<>();
         Tuple nextRow = this.innerNode.getNextTuple();
         if (nextRow == null)
             return null;
         eval.setTuple(nextRow);
-        int index =0;
+        int index = 0;
         for (SelectExpressionItem expression : this.selectExpressionItems) {
             try {
                 PrimitiveValue value = eval.eval(expression.getExpression());
@@ -80,10 +78,16 @@ public class ProjNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = new HashMap<>();
+        typeList = new ArrayList<>();
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
             SelectItem selectItem = selectExpressionItems.get(i);
             String columnName = ((SelectExpressionItem) selectItem).getExpression().toString();
             String alias = ((SelectExpressionItem) selectItem).getAlias();
+
+            if (((SelectExpressionItem) selectItem).getExpression() instanceof Column)
+                typeList.add(innerNode.typeList.get(innerNode.projectionInfo.get(columnName)));
+            else
+                typeList.add(null);
             if (alias == null) {
                 projectionInfo.put(columnName, i);
             } else {
@@ -94,10 +98,10 @@ public class ProjNode extends BaseNode {
 
     @Override
     public void initProjPushDownInfo() {
-        if(this.parentNode !=null)
-        requiredList.addAll(this.parentNode.requiredList);
+        if (this.parentNode != null)
+            requiredList.addAll(this.parentNode.requiredList);
         for (int i = 0; i < selectExpressionItems.size(); ++i) {
-           requiredList.addAll ((ArrayList)getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
+            requiredList.addAll(getSelectExprColumnStrList(selectExpressionItems.get(i).getExpression()));
         }
         this.innerNode.initProjPushDownInfo();
     }

@@ -6,16 +6,15 @@ import dubstep.storage.Scanner;
 import dubstep.storage.TableManager;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
-import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class ScanNode extends BaseNode {
 
+    public QueryTimer parsetimer;
     private DubTable scanTable;
     private ArrayList<Tuple> tupleBuffer;
     private Expression filter;
@@ -25,7 +24,6 @@ public class ScanNode extends BaseNode {
     private Table fromTable;
     private Scanner scanner;
     private TableManager mySchema;
-    public QueryTimer parsetimer;
     private boolean isInit = false;
 
     public ScanNode(FromItem fromItem, Expression filter, TableManager mySchema) {
@@ -49,7 +47,7 @@ public class ScanNode extends BaseNode {
         this.initProjectionInfo();
     }
 
-    public String getScanTableName(){
+    public String getScanTableName() {
         return this.scanTable.GetTableName();
     }
 
@@ -64,10 +62,10 @@ public class ScanNode extends BaseNode {
             ++i;
             if (tupleBuffer.size() <= currentIndex) {
                 if (!readComplete) {
-                    if(mySchema.isInMem())
-                        readComplete = scanner.readTuples(8000, tupleBuffer,this.parsetimer );
+                    if (mySchema.isInMem())
+                        readComplete = scanner.readTuples(8000, tupleBuffer, this.parsetimer);
                     else
-                        readComplete = scanner.readTuples(8000, tupleBuffer,parsetimer);
+                        readComplete = scanner.readTuples(8000, tupleBuffer, parsetimer);
 
                     currentIndex = 0;
                     continue;
@@ -96,6 +94,7 @@ public class ScanNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         projectionInfo = scanTable.getColumnList(fromTable);
+        this.typeList = scanTable.typeList;
     }
 
     @Override

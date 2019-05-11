@@ -15,15 +15,15 @@ public class TupleComparator {
         try {
             if (leftPV.getType() == PrimitiveType.DOUBLE) {
                 if (leftPV.toDouble() < rightPV.toDouble()) {
-                    return isAsc? -1: 1;
+                    return isAsc ? -1 : 1;
                 } else if (leftPV.toDouble() > rightPV.toDouble()) {
-                    return isAsc? 1: -1;
+                    return isAsc ? 1 : -1;
                 }
             } else if (leftPV.getType() == PrimitiveType.LONG) {
                 if (leftPV.toLong() < rightPV.toLong()) {
-                    return isAsc? -1: 1;
+                    return isAsc ? -1 : 1;
                 } else if (leftPV.toLong() > rightPV.toLong()) {
-                    return isAsc? 1: -1;
+                    return isAsc ? 1 : -1;
                 }
             } else if (leftPV.getType() == PrimitiveType.DATE) {
                 Date leftDate = dateFormat.parse(leftPV.toRawString());
@@ -33,17 +33,14 @@ public class TupleComparator {
                 } else {
                     return rightDate.compareTo(leftDate);
                 }
-            }
-            else if(leftPV.getType() == PrimitiveType.STRING )
-            {
+            } else if (leftPV.getType() == PrimitiveType.STRING) {
                 String leftValue = leftPV.toString();
-                String rightValue =rightPV.toString();
+                String rightValue = rightPV.toString();
 
                 if (isAsc) {
-                    return  leftValue.compareTo(rightValue);
-                }
-                else
-                    return  rightValue.compareTo(leftValue);
+                    return leftValue.compareTo(rightValue);
+                } else
+                    return rightValue.compareTo(leftValue);
             }
         } catch (PrimitiveValue.InvalidPrimitive | ParseException e) {
             e.printStackTrace();

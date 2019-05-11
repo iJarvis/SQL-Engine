@@ -4,6 +4,7 @@ import dubstep.executor.BaseNode;
 import dubstep.executor.DeleteManager;
 import dubstep.planner.PlanTree;
 import dubstep.storage.TableManager;
+import dubstep.storage.datatypes;
 import dubstep.utils.Explainer;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
@@ -23,9 +24,10 @@ import java.io.*;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 
+import static dubstep.storage.datatypes.DATE_TYPE;
 
 public class Main {
     public static final String PROMPT = "$>";
@@ -45,7 +47,7 @@ public class Main {
             if (args[i].equals("--on-disk"))
                 mySchema.setInMem(false);
         }
-       mySchema.setInMem(true);
+        mySchema.setInMem(true);
 
         Scanner scanner = new Scanner(System.in);
         QueryTimer timer = new QueryTimer();
@@ -54,13 +56,12 @@ public class Main {
             String line = null;
             BufferedReader reader = null;
             reader = new BufferedReader(new FileReader("tables"));
-            if(reader == null)
+            if (reader == null)
                 line = null;
             else
                 line = reader.readLine();
 
-            while (line !=null)
-            {
+            while (line != null) {
                 CCJSqlParser parser = new CCJSqlParser(new StringReader(line));
                 Statement query = parser.Statement();
                 CreateTable createQuery = (CreateTable) query;
@@ -80,34 +81,12 @@ public class Main {
 
             while (sqlString.indexOf(';') < 0)
                 sqlString = sqlString + " " + scanner.nextLine();
-
-            File processed = new File("q1.txt");
-            if (sqlString.contains("SUM_BASE_PRICE")  && create) {
-                try {
-                    BufferedReader q1r = new BufferedReader(new FileReader(processed));
-                    String line = q1r.readLine();
-                    while (line!=null)
-                    {
-                        System.out.println(line);
-                        line = q1r.readLine();
-                    }
-                    System.out.println(PROMPT);
-                    q1r.close();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            else {
-
-                executeQuery(sqlString);
-            }
+            executeQuery(sqlString);
 
         }
     }
 
-    private static void executeQuery(String sqlString) throws ParseException, SQLException
-    {
+    private static void executeQuery(String sqlString) throws ParseException, SQLException {
 
         QueryTimer timer = new QueryTimer();
         CCJSqlParser parser = new CCJSqlParser(new StringReader(sqlString));
@@ -116,27 +95,18 @@ public class Main {
         timer.reset();
         timer.start();
 
-
-        File processed = new File("q1.txt");
-
-
         if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
             create = false;
-            processed.delete();
-
-
 
             if (!mySchema.createTable(createQuery)) {
                 System.out.println("Unable to create DubTable - DubTable already exists");
-            }
-            else
-            {
+            } else {
                 try {
-                    table_file = new BufferedWriter(new FileWriter("tables",true));
+                    table_file = new BufferedWriter(new FileWriter("tables", true));
 
-                    table_file.write(sqlString+"\n");
+                    table_file.write(sqlString + "\n");
                     table_file.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -151,61 +121,31 @@ public class Main {
             BaseNode root;
             if (selectBody instanceof PlainSelect) {
                 root = PlanTree.generatePlan((PlainSelect) selectBody);
-                if(EXPLAIN_MODE) {
-                   Explainer e1 = new Explainer(root);
-                   e1.explain();
-               }
+                if (EXPLAIN_MODE) {
+                    Explainer e1 = new Explainer(root);
+                    e1.explain();
+                }
 
-               root = PlanTree.optimizePlan(root);
+                root = PlanTree.optimizePlan(root);
                 root.initProjPushDownInfo();
-               if(EXPLAIN_MODE) {
-                   Explainer  e1 = new Explainer(root);
-                   e1.explain();
-               }
+                if (EXPLAIN_MODE) {
+                    Explainer e1 = new Explainer(root);
+                    e1.explain();
+                }
             } else {
                 root = PlanTree.generateUnionPlan((Union) selectBody);
             }
-            setDateCols(root);
             Tuple tuple = root.getNextTuple();
-            Boolean q1 = false;
-            BufferedWriter writer = null;
-
-            if (sqlString.contains("SUM_BASE_PRICE")) {
-                q1 = true;
-                try {
-                    processed.delete();
-                    writer = new BufferedWriter(new FileWriter(processed));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
 
             while (tuple != null) {
-                replaceDate(tuple);
+                replaceDate(tuple, root.typeList);
                 String t1 = tuple.getProjection();
                 System.out.println(t1);
-                if(q1)
-                {
-                    try {
-                        writer.write(t1+"\n");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return;
-                    }
-                }
 
                 tuple = root.getNextTuple();
             }
-            if(q1) {
-                try {
-                    writer.flush();
-                    writer.close();
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (EXPLAIN_MODE){
+            if (EXPLAIN_MODE) {
                 Explainer explainer = new Explainer(root);
                 explainer.explain();
             }
@@ -216,37 +156,22 @@ public class Main {
             throw new java.sql.SQLException("I can't understand " + sqlString);
         }
         timer.stop();
-        if(DEBUG_MODE)
+        if (DEBUG_MODE)
             System.out.println("Execution time = " + timer.getTotalTime());
         timer.reset();
         System.out.println(PROMPT);
     }
 
-    private static void setDateCols(BaseNode root)
-    {
-        dateSet = new ArrayList<>();
-        Iterator<String> it = root.projectionInfo.keySet().iterator();
-        while (it.hasNext())
-        {
-            String val = it.next();
-            if(val.indexOf("DATE") > 0)
-            {
-                dateSet.add(root.projectionInfo.get(val));
+    static private void replaceDate(Tuple tuple, List<datatypes> typeList) {
+
+        for (int i = 0; i < typeList.size(); i++) {
+            if (typeList.get(i) == DATE_TYPE) {
+                LongValue val = (LongValue) tuple.valueArray[i];
+                Date date = new Date(val.getValue());
+                DateValue dval = new DateValue(date.toString());
+                tuple.valueArray[i] = dval;
             }
-
         }
-    }
-
-    static private void replaceDate(Tuple tuple)
-    {
-        for(Integer dateIndex : dateSet)
-        {
-            LongValue val = (LongValue) tuple.valueArray[dateIndex];
-            Date date = new Date(val.getValue());
-            DateValue dval = new DateValue(date.toString());
-            tuple.valueArray[dateIndex] =dval;
-        }
-
     }
 
 }

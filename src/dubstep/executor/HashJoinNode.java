@@ -5,7 +5,6 @@ import dubstep.utils.Utils;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.expression.PrimitiveValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +17,7 @@ import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 public class HashJoinNode extends BaseNode {
 
     public Expression filter;
+    Integer leftIndex, leftIndex1, rightIndex, rightIndex1;
     private DataType condType = DataType.NONE;
     private Iterator<Tuple> leftTupleIterator;
     private Column rightCol;
@@ -25,12 +25,11 @@ public class HashJoinNode extends BaseNode {
     private HashMap<Object, LinkedList<Tuple>> hashJoinTable;
     private boolean initJoin = false;
     private Tuple outerTuple;
-    private  boolean isInit = false;
+    private boolean isInit = false;
     private boolean isEmpty = false;
-    private Expression filter1 =  null;
-    Integer leftIndex,leftIndex1,rightIndex,rightIndex1;
+    private Expression filter1 = null;
 
-    public HashJoinNode(BaseNode innerNode,BaseNode outerNode, Expression filter) {
+    public HashJoinNode(BaseNode innerNode, BaseNode outerNode, Expression filter) {
 
         this.innerNode = innerNode;
         this.innerNode.parentNode = this;
@@ -41,13 +40,12 @@ public class HashJoinNode extends BaseNode {
 
     }
 
-    public void initHashMap(){
-        if(this.parentNode instanceof SelectNode)
-        {
+    public void initHashMap() {
+        if (this.parentNode instanceof SelectNode) {
             SelectNode sel = (SelectNode) this.parentNode;
-            if(sel.filter instanceof BinaryExpression ) {
-                BinaryExpression binExpr = (BinaryExpression)sel.filter;
-                if(binExpr.getLeftExpression() instanceof Column && binExpr.getRightExpression() instanceof Column && binExpr instanceof EqualsTo)
+            if (sel.filter instanceof BinaryExpression) {
+                BinaryExpression binExpr = (BinaryExpression) sel.filter;
+                if (binExpr.getLeftExpression() instanceof Column && binExpr.getRightExpression() instanceof Column && binExpr instanceof EqualsTo)
                     filter1 = sel.filter;
             }
 
@@ -62,30 +60,30 @@ public class HashJoinNode extends BaseNode {
         Column rightColumn = (Column) binaryExpression.getRightExpression();
         Column tempColumn;
         Tuple innerTuple = innerNode.getNextTuple();
-        if(innerTuple == null) {
+        if (innerTuple == null) {
             isEmpty = true;
             return;
         }
         PrimitiveValue innerTupleValue = innerTuple.getValue(leftColumn, innerNode.projectionInfo);
 
-        if (innerTupleValue == null){       // if column is not found in one of the two children, swap left and right columns.
+        if (innerTupleValue == null) {       // if column is not found in one of the two children, swap left and right columns.
             tempColumn = rightColumn;
             rightColumn = leftColumn;
             leftColumn = tempColumn;
         }
-        Column leftColumn1 = null,rightColumn1=null ;
+        Column leftColumn1 = null, rightColumn1 = null;
         PrimitiveValue innerTupleValue1 = null;
-        if(filter1 != null) {
+        if (filter1 != null) {
             BinaryExpression binaryExpression1 = (BinaryExpression) filter1;
 
             leftColumn1 = (Column) binaryExpression1.getLeftExpression();
             rightColumn1 = (Column) binaryExpression1.getRightExpression();
             Column tempColumn1;
 
-            innerTupleValue1 = innerTuple.getValue(leftColumn, innerNode.projectionInfo);
+            innerTupleValue1 = innerTuple.getValue(leftColumn1, innerNode.projectionInfo);
 
 
-            if (innerTupleValue == null) {       // if column is not found in one of the two children, swap left and right columns.
+            if (innerTupleValue1 == null) {       // if column is not found in one of the two children, swap left and right columns.
                 tempColumn1 = rightColumn1;
                 rightColumn1 = leftColumn1;
                 leftColumn1 = tempColumn1;
@@ -94,19 +92,19 @@ public class HashJoinNode extends BaseNode {
         }
         this.rightCol = rightColumn;
 
-        leftIndex =  innerTuple.GetPosition(leftColumn,innerNode.projectionInfo);
+        leftIndex = innerTuple.GetPosition(leftColumn, innerNode.projectionInfo);
 
-        if(leftColumn1 !=null)
-        leftIndex1 =  innerTuple.GetPosition(leftColumn1,innerNode.projectionInfo);
+        if (leftColumn1 != null)
+            leftIndex1 = innerTuple.GetPosition(leftColumn1, innerNode.projectionInfo);
 
         int i = 1;
 
-        while(innerTuple != null){
+        while (innerTuple != null) {
 
             innerTupleValue = innerTuple.getValue(leftIndex);
-            if(leftColumn1 != null)
+            if (leftColumn1 != null)
                 innerTupleValue1 = innerTuple.getValue(leftIndex1);
-            if (condType == NONE){
+            if (condType == NONE) {
                 if (innerTupleValue instanceof LongValue)
                     condType = LONG;
                 else if (innerTupleValue instanceof DoubleValue)
@@ -118,12 +116,12 @@ public class HashJoinNode extends BaseNode {
             }
 
             String castedValue = innerTupleValue.toString();
-            if(this.filter1 != null)
+            if (this.filter1 != null)
                 castedValue += innerTupleValue1.toString();
 
             LinkedList<Tuple> values;
 
-            if (hashJoinTable.containsKey(castedValue)){
+            if (hashJoinTable.containsKey(castedValue)) {
                 values = hashJoinTable.get(castedValue);
             } else {
                 values = new LinkedList<Tuple>();
@@ -136,28 +134,27 @@ public class HashJoinNode extends BaseNode {
 
     }
 
-    private Object getCastedValue(PrimitiveValue value){
-        try{
+    private Object getCastedValue(PrimitiveValue value) {
+        try {
             if (condType == LONG)
                 return value.toString();
             else if (condType == DOUBLE)
                 return value.toString();
             else if (condType == DATE)
-                return ((DateValue)value).getValue().getTime();
+                return ((DateValue) value).getValue().getTime();
             else
                 return value.toString();
-        }catch (Exception error){
+        } catch (Exception error) {
             error.printStackTrace();
         }
         return null;
     }
 
-    Tuple getNextRow(){
-        if(isInit == false)
-        {
+    Tuple getNextRow() {
+        if (isInit == false) {
             isInit = true;
             this.initHashMap();
-            if(isEmpty)
+            if (isEmpty)
                 return null;
         }
 
@@ -177,34 +174,32 @@ public class HashJoinNode extends BaseNode {
 
         PrimitiveValue outerTupleValue;
         PrimitiveValue outerTupleValue1;
-        while (outerTuple != null){
-            if (leftTupleIterator == null){
-                if(rightIndex == null)
-                {
-                    rightIndex = outerTuple.GetPosition(this.rightCol,outerNode.projectionInfo);
-                    if(this.rightCol1 !=null)
-                        rightIndex1 = outerTuple.GetPosition(this.rightCol1,outerNode.projectionInfo);
+        while (outerTuple != null) {
+            if (leftTupleIterator == null) {
+                if (rightIndex == null) {
+                    rightIndex = outerTuple.GetPosition(this.rightCol, outerNode.projectionInfo);
+                    if (this.rightCol1 != null)
+                        rightIndex1 = outerTuple.GetPosition(this.rightCol1, outerNode.projectionInfo);
                 }
 
                 outerTupleValue = outerTuple.getValue(rightIndex);
 
 
                 String castedValue = outerTupleValue.toString();
-                if(this.rightCol1!=null)
-                {
+                if (this.rightCol1 != null) {
                     outerTupleValue1 = outerTuple.getValue(rightIndex1);
                     castedValue += outerTupleValue1;
                 }
 
 
-                if(hashJoinTable.containsKey(castedValue)) {
+                if (hashJoinTable.containsKey(castedValue)) {
                     leftTupleIterator = hashJoinTable.get(castedValue).iterator();
-                }else{
+                } else {
                     outerTuple = outerNode.getNextTuple();
                 }
 
-            }else {
-                if(leftTupleIterator.hasNext())
+            } else {
+                if (leftTupleIterator.hasNext())
                     return new Tuple(leftTupleIterator.next(), outerTuple);
                 leftTupleIterator = null;
                 outerTuple = outerNode.getNextTuple();
@@ -229,12 +224,14 @@ public class HashJoinNode extends BaseNode {
     void initProjectionInfo() {
         projectionInfo = new HashMap<>(innerNode.projectionInfo);
         Utils.mapPutAll(outerNode.projectionInfo, projectionInfo);
+        typeList = new ArrayList<>(innerNode.typeList);
+        typeList.addAll(outerNode.typeList);
     }
 
     @Override
     public void initProjPushDownInfo() {
         this.requiredList.addAll(this.parentNode.requiredList);
-        this.requiredList.addAll((ArrayList)getSelectExprColumnStrList(filter));
+        this.requiredList.addAll(getSelectExprColumnStrList(filter));
         this.innerNode.initProjPushDownInfo();
         this.outerNode.initProjPushDownInfo();
     }

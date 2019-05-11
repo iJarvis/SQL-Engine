@@ -26,12 +26,13 @@ public class LimitNode extends BaseNode {
     @Override
     void initProjectionInfo() {
         this.projectionInfo = this.innerNode.projectionInfo;
+        typeList = innerNode.typeList;
     }
 
     @Override
     public void initProjPushDownInfo() {
-        if(this.parentNode !=null)
-        this.requiredList = this.parentNode.requiredList;
+        if (this.parentNode != null)
+            this.requiredList = this.parentNode.requiredList;
         this.innerNode.initProjPushDownInfo();
     }
 
