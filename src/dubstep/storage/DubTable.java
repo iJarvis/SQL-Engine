@@ -23,7 +23,7 @@ public class DubTable {
     List<ColumnDefinition> columnDefinitions;
     String dataFile;
     private String tableName;
-    private int rowCount = -1;
+    public int rowCount = -1;
 
     public DubTable(CreateTable createTable) {
         tableName = createTable.getTable().getName();

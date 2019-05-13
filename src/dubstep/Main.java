@@ -2,17 +2,21 @@ package dubstep;
 
 import dubstep.executor.BaseNode;
 import dubstep.planner.PlanTree;
+import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
 import dubstep.storage.datatypes;
 import dubstep.utils.Explainer;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.ItemsList;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
@@ -113,7 +117,43 @@ public class Main {
                 }
 
             }
-        } else if (query instanceof Select) {
+        }
+        else  if (query instanceof Insert)
+        {
+            Insert insert = (Insert)query;
+            String tableName = insert.getTable().getName();
+
+            ExpressionList exprList =  (ExpressionList)insert.getItemsList() ;
+            List<Expression> exprs =  exprList.getExpressions();
+            DubTable table = mySchema.getTable(tableName);
+            int index = 0;
+            for(Expression expr : exprs)
+            {
+                try {
+                    DataOutputStream stream = new DataOutputStream(new FileOutputStream("split/" + tableName + "/cols/" + index, true));
+                    if (expr instanceof PrimitiveValue) {
+                        if (expr instanceof DateValue)
+                            stream.writeLong(((DateValue) expr).getValue().getTime());
+                        else if (expr instanceof LongValue)
+                            stream.writeLong(((LongValue) expr).toLong());
+                        else if (expr instanceof DoubleValue)
+                            stream.writeDouble(((DoubleValue) expr).toDouble());
+                        else if (expr instanceof StringValue)
+                            stream.writeBytes(((StringValue) expr).toRawString() + "\n");
+                    } else {
+                        System.out.println("illegal state");
+                    }
+                stream.flush();
+                    stream.close();
+
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            table.rowCount++;
+        }
+        else if (query instanceof Select) {
 
             Select selectQuery = (Select) query;
             SelectBody selectBody = selectQuery.getSelectBody();
