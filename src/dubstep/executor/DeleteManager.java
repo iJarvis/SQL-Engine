@@ -7,45 +7,47 @@ import dubstep.utils.Evaluator;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class DeleteManager {
-    public ArrayList<Tuple> deletedTuples;
+    public ArrayList<Tuple> updated_tuples;
 
-    public void delete(FromItem fromItem, Expression filter,Boolean preserveRows) {
+    public void delete(FromItem fromItem, Expression filter, List<Column> columnList, Boolean preserveRows) {
         Table table = (Table) fromItem;
         DubTable dubTable = Main.mySchema.getTable(table.getName());
         ScanNode scanNode = new ScanNode(fromItem, filter, Main.mySchema);
         scanNode.requiredList = new HashSet<>();
-        if(preserveRows)
-            scanNode.requiredList.addAll(scanNode.scanTable.getColumnList().keySet());
+        if(preserveRows) {
+            scanNode.requiredList.addAll(getSelectExprColumnStrList(filter));
+            for(Column column : columnList)
+            {
+                scanNode.requiredList.add(dubTable.GetTableName()+"."+column.getColumnName());
+            }
+        }
+
         else
             scanNode.requiredList =  new HashSet<>(getSelectExprColumnStrList(filter));
         scanNode.scanner.setupProjList(scanNode.requiredList);
         scanNode.projectionInfo = scanNode.scanTable.getColumnList1(scanNode.fromTable);
         Evaluator eval = new Evaluator(scanNode.projectionInfo);
-        deletedTuples = new ArrayList<>();
+        updated_tuples = new ArrayList<>();
         Tuple row = scanNode.getNextTuple();
         int i = 0;
         while (row != null) {
             eval.setTuple(row);
             try {
                 PrimitiveValue value = eval.eval(filter);
-                if (value!= null && value.toBool()) {
+                if (value!= null && value.toBool() && !preserveRows) {
                     dubTable.deletedSet.add(row.tid);
-                    long x = 1 << (i%64);
-                    dubTable.isDeleted[i/64] |= x;
                     if(preserveRows)
-                        deletedTuples.add(row);
+                        updated_tuples.add(row);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -57,7 +59,4 @@ public class DeleteManager {
         }
     }
 
-    public static boolean isDeleted(String tableName, int rowIdx) {
-        return (Main.mySchema.getTable(tableName).isDeleted[rowIdx/64] & (1 << (rowIdx % 64))) != 0;
-    }
 }

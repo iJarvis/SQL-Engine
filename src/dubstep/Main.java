@@ -165,12 +165,9 @@ public class Main {
 
         else if (query instanceof Update)
         {
-            if(updated_count > 10 )
-                System.exit(-1);
-            updated_count++;
             Update updateQuery = (Update)query;
             DeleteManager manager = new DeleteManager();
-            manager.delete(updateQuery.getTable(),updateQuery.getWhere(),true);
+            manager.delete(updateQuery.getTable(),updateQuery.getWhere(),updateQuery.getColumns(),true);
             DubTable table = mySchema.getTable(updateQuery.getTable().getName());
             Map<String,Integer> colList =  table.getColumnList1(updateQuery.getTable());
             Evaluator eval = new Evaluator(colList);
@@ -186,7 +183,7 @@ public class Main {
 
             }
 
-            for(Tuple tuple : manager.deletedTuples)
+            for(Tuple tuple : manager.updated_tuples)
             {
                 int colIndex = 0;
                 eval.setTuple(tuple);
@@ -197,41 +194,7 @@ public class Main {
                       index++;
                       colIndex++;
                 }
-
-                for(int i =0 ; i < tuple.valueArray.length;i++)
-                {
-                    try {
-
-                        PrimitiveValue pv = tuple.valueArray[i];
-                        DataOutputStream stream = disList.get(i);
-                        if (pv instanceof DateValue)
-                            stream.writeLong(((DateValue) pv).getValue().getTime());
-                        else if (pv instanceof LongValue)
-                            stream.writeLong(((LongValue) pv).toLong());
-                        else if (pv instanceof DoubleValue)
-                            stream.writeDouble(((DoubleValue) pv).toDouble());
-                        else if (pv instanceof StringValue)
-                            stream.writeBytes(pv.toRawString() + "\n");
-                    }
-                    catch (Exception e)
-                    {
-                        System.out.println("something went wrong in update");
-                    }
-
-
-                }
-
-                for(DataOutputStream dos : disList)
-                {
-                    try {
-                        dos.flush();
-                        dos.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-                table.rowCount = table.rowCount+manager.deletedTuples.size();
+                table.updatedSet.put(tuple.tid,tuple);
             }
 
 
@@ -274,7 +237,7 @@ public class Main {
         } else if (query instanceof Delete) {
             Delete deleteQuery = (Delete) query;
             DeleteManager manager = new DeleteManager();
-            manager.delete(deleteQuery.getTable(), deleteQuery.getWhere(),false);
+            manager.delete(deleteQuery.getTable(), deleteQuery.getWhere(),null,false);
         } else {
             throw new java.sql.SQLException("I can't understand " + sqlString);
         }

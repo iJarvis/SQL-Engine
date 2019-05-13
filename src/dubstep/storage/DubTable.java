@@ -19,6 +19,7 @@ public class DubTable {
     public List<String> primaryColumns = new ArrayList<>();
     public Long[] isDeleted;
     public HashSet<Integer> deletedSet = new HashSet<Integer>();
+    public HashMap<Integer,Tuple> updatedSet = new HashMap<>();
     List<ColumnDefinition> columnDefinitions;
     String dataFile;
     private String tableName;

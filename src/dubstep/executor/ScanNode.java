@@ -80,6 +80,15 @@ public class ScanNode extends BaseNode {
             else {
                 Tuple tuple = tupleBuffer.get(currentIndex++);
                 tuple.tid = i-1;
+                if(scanTable.updatedSet.containsKey(i-1))
+                {
+                    Tuple updated_Tuple = scanTable.updatedSet.get(i-1);
+                    for(i =0 ; i < tuple.valueArray.length;i++)
+                    {
+                        if(updated_Tuple.valueArray[i] !=null)
+                            tuple.valueArray[i] = updated_Tuple.valueArray[i];
+                    }
+                }
                 return tuple;
             }
         }
