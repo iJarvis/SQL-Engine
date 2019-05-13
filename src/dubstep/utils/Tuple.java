@@ -11,7 +11,7 @@ import java.util.Map;
 public class Tuple {
     static int length = 0;
     public PrimitiveValue[] valueArray;
-    int tid;
+    public int tid;
 
 
     public Tuple(String csv_string, int tid, List<datatypes> typeList) {

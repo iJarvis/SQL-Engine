@@ -34,7 +34,7 @@ public class DeleteManager {
             try {
                 PrimitiveValue value = eval.eval(filter);
                 if (value!= null && value.toBool()) {
-                    dubTable.deletedSet.add(i);
+                    dubTable.deletedSet.add(row.tid);
                     long x = 1 << (i%64);
                     dubTable.isDeleted[i/64] |= x;
                 }

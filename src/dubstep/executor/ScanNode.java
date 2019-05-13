@@ -78,6 +78,8 @@ public class ScanNode extends BaseNode {
             }
 
             else {
+                Tuple tuple = tupleBuffer.get(currentIndex++);
+                tuple.tid = i-1;
                 return tupleBuffer.get(currentIndex++);
             }
         }
