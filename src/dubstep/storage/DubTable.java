@@ -20,6 +20,7 @@ public class DubTable {
     public ArrayList<ArrayList<PrimitiveValue>> memCols;
     public ArrayList<ArrayList<Long>> dateCols;
     public List<String> primaryColumns = new ArrayList<>();
+    public Long[] isDeleted;
     List<ColumnDefinition> columnDefinitions;
     String dataFile;
     private String tableName;
@@ -56,7 +57,8 @@ public class DubTable {
 
     private final void postProcessCreate() {
         File file = new File(dataFile);
-        String path = "split/" + tableName + "/cols/";
+        String tableDir = "split/" + tableName;
+        String path = tableDir + "/cols/";
         File processed = new File(path + "/exists.txt");
         if (!file.exists()) {
             throw new IllegalStateException("Data file doesn't exist for table = " + tableName);
@@ -97,8 +99,11 @@ public class DubTable {
             }
             rowCount = lines;
         }
+        isDeleted = new Long[(rowCount/64)+1];
+        for (int i = 0; i < (rowCount/64)+1; ++i) {
+            isDeleted[i] = 0L;
+        }
     }
-
 
     private void splitTuplesAndWrite(List<DataOutputStream> colFiles) throws Exception {
 

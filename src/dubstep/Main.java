@@ -1,6 +1,7 @@
 package dubstep;
 
 import dubstep.executor.BaseNode;
+import dubstep.executor.DeleteManager;
 import dubstep.planner.PlanTree;
 import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
@@ -17,6 +18,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
@@ -53,7 +55,6 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         QueryTimer timer = new QueryTimer();
-
 
         try {
             String line = null;
@@ -188,6 +189,9 @@ public class Main {
                 Explainer explainer = new Explainer(root);
                 explainer.explain();
             }
+        } else if (query instanceof Delete) {
+            Delete deleteQuery = (Delete) query;
+            DeleteManager.delete(deleteQuery.getTable(), deleteQuery.getWhere());
         } else {
             throw new java.sql.SQLException("I can't understand " + sqlString);
         }
