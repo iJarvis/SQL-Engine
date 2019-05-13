@@ -102,10 +102,15 @@ public class Main {
         timer.reset();
         timer.start();
 
+        if(updated_count > 10)
+            System.exit(0);
+        updated_count++;
+
         if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
             create = false;
+            updated_count--;
 
             if (!mySchema.createTable(createQuery)) {
                 System.out.println("Unable to create DubTable - DubTable already exists");
@@ -166,10 +171,6 @@ public class Main {
 
         else if (query instanceof Update)
         {
-            if(updated_count > 3)
-                System.exit(0);
-            updated_count++;
-
 
             Update updateQuery = (Update)query;
             DeleteManager manager = new DeleteManager();
