@@ -166,7 +166,7 @@ public class Main {
 
         else if (query instanceof Update)
         {
-            if(updated_count > 7)
+            if(updated_count > 3)
                 System.exit(0);
             updated_count++;
 
@@ -250,7 +250,6 @@ public class Main {
         timer.stop();
         if(query instanceof Update  || query instanceof Delete || query instanceof Insert)
             System.out.println("Execution time = " + timer.getTotalTime());
-        timer.reset();
         System.out.println(PROMPT);
     }
 
