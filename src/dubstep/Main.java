@@ -144,7 +144,7 @@ public class Main {
                         else if (pv instanceof DoubleValue)
                             stream.writeDouble(((DoubleValue) pv).toDouble());
                         else if (pv instanceof StringValue)
-                            stream.writeBytes(((StringValue) pv).toRawString() + "\n");
+                            stream.writeBytes(pv.toRawString()+ "\n");
                     } else {
                         System.out.println("illegal state");
                     }
@@ -155,6 +155,7 @@ public class Main {
                 {
                     e.printStackTrace();
                 }
+                index++;
             }
             table.rowCount++;
         }
