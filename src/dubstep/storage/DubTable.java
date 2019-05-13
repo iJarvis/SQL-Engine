@@ -9,10 +9,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.Index;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DubTable {
 
@@ -21,6 +18,7 @@ public class DubTable {
     public ArrayList<ArrayList<Long>> dateCols;
     public List<String> primaryColumns = new ArrayList<>();
     public Long[] isDeleted;
+    public HashSet<Integer> deletedSet = new HashSet<Integer>();
     List<ColumnDefinition> columnDefinitions;
     String dataFile;
     private String tableName;
@@ -101,9 +99,9 @@ public class DubTable {
         }
         isDeleted = new Long[(rowCount/64)+1];
         for (int i = 0; i < (rowCount/64)+1; ++i) {
-            isDeleted[i] = 0L;
-        }
+        isDeleted[i] = 0L;
     }
+}
 
     private void splitTuplesAndWrite(List<DataOutputStream> colFiles) throws Exception {
 
@@ -160,6 +158,16 @@ public class DubTable {
         Map<String, Integer> columns = new HashMap<>();
         for (int i = 0; i < columnDefinitions.size(); ++i) {
             columns.put(fromName + "." + columnDefinitions.get(i).getColumnName(), i);
+        }
+        return columns;
+    }
+    public Map<String, Integer> getColumnList1(Table fromItem) {
+        String alias = fromItem.getAlias();
+        String fromName = alias == null ? this.tableName : alias;
+        Map<String, Integer> columns = new HashMap<>();
+        for (int i = 0; i < columnDefinitions.size(); ++i) {
+            columns.put(fromName + "." + columnDefinitions.get(i).getColumnName(), i);
+            columns.put(columnDefinitions.get(i).getColumnName(), i);
         }
         return columns;
     }

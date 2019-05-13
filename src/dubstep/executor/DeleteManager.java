@@ -11,8 +11,10 @@ import net.sf.jsqlparser.statement.select.FromItem;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
+import static dubstep.planner.PlanTree.getSelectExprColumnStrList;
 
 public class DeleteManager {
 
@@ -20,6 +22,10 @@ public class DeleteManager {
         Table table = (Table) fromItem;
         DubTable dubTable = Main.mySchema.getTable(table.getName());
         ScanNode scanNode = new ScanNode(fromItem, filter, Main.mySchema);
+        scanNode.requiredList = new HashSet<>();
+        scanNode.requiredList.addAll(getSelectExprColumnStrList(filter));
+        scanNode.scanner.setupProjList(scanNode.requiredList);
+        scanNode.projectionInfo = scanNode.scanTable.getColumnList1(scanNode.fromTable);
         Evaluator eval = new Evaluator(scanNode.projectionInfo);
         Tuple row = scanNode.getNextTuple();
         int i = 0;
@@ -28,6 +34,7 @@ public class DeleteManager {
             try {
                 PrimitiveValue value = eval.eval(filter);
                 if (value!= null && value.toBool()) {
+                    dubTable.deletedSet.add(i);
                     long x = 1 << (i%64);
                     dubTable.isDeleted[i/64] |= x;
                 }
@@ -36,6 +43,7 @@ public class DeleteManager {
             } catch (NullPointerException e) {
                 System.out.println("derp");
             }
+            row = scanNode.getNextRow();
             ++i;
         }
     }

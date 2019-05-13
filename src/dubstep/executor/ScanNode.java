@@ -4,6 +4,7 @@ import dubstep.Main;
 import dubstep.storage.DubTable;
 import dubstep.storage.Scanner;
 import dubstep.storage.TableManager;
+import dubstep.utils.Pair;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
 import net.sf.jsqlparser.expression.Expression;
@@ -15,14 +16,14 @@ import java.util.ArrayList;
 public class ScanNode extends BaseNode {
 
     public QueryTimer parsetimer;
-    private DubTable scanTable;
+    public DubTable scanTable;
     private ArrayList<Tuple> tupleBuffer;
     private Expression filter;
     private int currentIndex = 0;
     private int i = 0;
     private boolean readComplete = false;
-    private Table fromTable;
-    private Scanner scanner;
+    public Table fromTable;
+    public Scanner scanner;
     private TableManager mySchema;
     private boolean isInit = false;
 
@@ -72,10 +73,10 @@ public class ScanNode extends BaseNode {
                 } else
                     return null;
             }
-//            else if (DeleteManager.isDeleted(fromTable.getName(), i-1)) {
-//                ++currentIndex;
-//            }
-//
+            else if (scanTable.deletedSet.contains(i-1)) {
+                ++currentIndex;
+            }
+
             else {
                 return tupleBuffer.get(currentIndex++);
             }
