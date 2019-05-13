@@ -26,7 +26,10 @@ public class DeleteManager {
         DubTable dubTable = Main.mySchema.getTable(table.getName());
         ScanNode scanNode = new ScanNode(fromItem, filter, Main.mySchema);
         scanNode.requiredList = new HashSet<>();
-        scanNode.requiredList.addAll(scanNode.scanTable.getColumnList().keySet());
+        if(preserveRows)
+            scanNode.requiredList.addAll(scanNode.scanTable.getColumnList().keySet());
+        else
+            scanNode.requiredList =  new HashSet<>(getSelectExprColumnStrList(filter));
         scanNode.scanner.setupProjList(scanNode.requiredList);
         scanNode.projectionInfo = scanNode.scanTable.getColumnList1(scanNode.fromTable);
         Evaluator eval = new Evaluator(scanNode.projectionInfo);
