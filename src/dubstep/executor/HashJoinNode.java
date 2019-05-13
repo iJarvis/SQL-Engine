@@ -46,7 +46,7 @@ public class HashJoinNode extends BaseNode {
             if (sel.filter instanceof BinaryExpression) {
                 BinaryExpression binExpr = (BinaryExpression) sel.filter;
                 if (binExpr.getLeftExpression() instanceof Column && binExpr.getRightExpression() instanceof Column && binExpr instanceof EqualsTo)
-                    filter1 = sel.filter;
+           //         filter1 = sel.filter;
             }
 
         }
