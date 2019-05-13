@@ -21,6 +21,7 @@ public class DubTable {
     public HashSet<Integer> deletedSet = new HashSet<Integer>();
     public HashMap<Integer,Tuple> updatedSet = new HashMap<>();
     List<ColumnDefinition> columnDefinitions;
+    public List<DataOutputStream> InsertStreams = new ArrayList<>();
     String dataFile;
     private String tableName;
     public int rowCount = -1;
@@ -82,6 +83,14 @@ public class DubTable {
                 splitTuplesAndWrite(cols_files);
                 for (DataOutputStream stream : cols_files) {
                     stream.close();
+                }
+
+                index = 0;
+                for (datatypes type : typeList) {
+                    FileOutputStream file_ptr = new FileOutputStream(path + "/" + index,true);
+                    DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(file_ptr, 8000));
+                    InsertStreams.add(stream);
+                    index++;
                 }
             } catch (Exception e) {
                 e.printStackTrace();

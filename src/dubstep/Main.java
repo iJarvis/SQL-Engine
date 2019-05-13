@@ -10,10 +10,8 @@ import dubstep.utils.Evaluator;
 import dubstep.utils.Explainer;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
-import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.ItemsList;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
@@ -137,8 +135,12 @@ public class Main {
             for(Expression expr : exprs)
             {
                 try {
-                    DataOutputStream stream = new DataOutputStream(new FileOutputStream("split/" + tableName + "/cols/" + index, true));
-                    PrimitiveValue pv = eval.eval(expr);
+                    DataOutputStream stream = table.InsertStreams.get(index);
+                    PrimitiveValue pv;
+                    if(expr instanceof PrimitiveValue)
+                        pv = (PrimitiveValue)expr;
+                    else
+                        pv = eval.eval(expr);
                     if (expr instanceof PrimitiveValue) {
                         if (pv instanceof DateValue)
                             stream.writeLong(((DateValue) pv).getValue().getTime());
@@ -152,7 +154,6 @@ public class Main {
                         System.out.println("illegal state");
                     }
                 stream.flush();
-                    stream.close();
 
                 }catch (Exception e)
                 {
@@ -247,7 +248,7 @@ public class Main {
             throw new java.sql.SQLException("I can't understand " + sqlString);
         }
         timer.stop();
-        if(query instanceof Update)
+        if(query instanceof Update  || query instanceof Delete || query instanceof Insert)
             System.out.println("Execution time = " + timer.getTotalTime());
         timer.reset();
         System.out.println(PROMPT);
