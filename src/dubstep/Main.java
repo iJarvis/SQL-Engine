@@ -165,6 +165,11 @@ public class Main {
 
         else if (query instanceof Update)
         {
+            if(updated_count > 7)
+                System.exit(0);
+            updated_count++;
+
+
             Update updateQuery = (Update)query;
             DeleteManager manager = new DeleteManager();
             manager.delete(updateQuery.getTable(),updateQuery.getWhere(),updateQuery.getColumns(),true);
@@ -242,7 +247,7 @@ public class Main {
             throw new java.sql.SQLException("I can't understand " + sqlString);
         }
         timer.stop();
-        if (DEBUG_MODE)
+        if(query instanceof Update)
             System.out.println("Execution time = " + timer.getTotalTime());
         timer.reset();
         System.out.println(PROMPT);
