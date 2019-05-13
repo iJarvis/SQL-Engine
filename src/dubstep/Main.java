@@ -226,6 +226,7 @@ public class Main {
                     }
 
                 }
+                table.rowCount = table.rowCount+manager.deletedTuples.size();
             }
 
 
