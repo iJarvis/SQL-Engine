@@ -71,9 +71,12 @@ public class ScanNode extends BaseNode {
                     continue;
                 } else
                     return null;
-            } else if (DeleteManager.isDeleted(fromTable.getName(), i-1)) {
-                ++currentIndex;
-            } else {
+            }
+//            else if (DeleteManager.isDeleted(fromTable.getName(), i-1)) {
+//                ++currentIndex;
+//            }
+//
+            else {
                 return tupleBuffer.get(currentIndex++);
             }
         }
