@@ -168,7 +168,7 @@ public class Main {
             DeleteManager manager = new DeleteManager();
             manager.delete(updateQuery.getTable(),updateQuery.getWhere(),true);
             DubTable table = mySchema.getTable(updateQuery.getTable().getName());
-            Map<String,Integer> colList =  table.getColumnList();
+            Map<String,Integer> colList =  table.getColumnList1(updateQuery.getTable());
             Evaluator eval = new Evaluator(colList);
             ArrayList<DataOutputStream> disList = new ArrayList<>();
 
