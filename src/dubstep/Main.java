@@ -46,6 +46,7 @@ public class Main {
     static public boolean EXPLAIN_MODE = false; // will print statistics of the code
     static ArrayList<Integer> dateSet;
     static boolean create = true;
+    static Integer updated_count = 0;
 
     public static void main(String[] args) throws ParseException, SQLException {
         //Get all command line arguments
@@ -164,6 +165,9 @@ public class Main {
 
         else if (query instanceof Update)
         {
+            if(updated_count > 10 )
+                System.exit(-1);
+            updated_count++;
             Update updateQuery = (Update)query;
             DeleteManager manager = new DeleteManager();
             manager.delete(updateQuery.getTable(),updateQuery.getWhere(),true);
