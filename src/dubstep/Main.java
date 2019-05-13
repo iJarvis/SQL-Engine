@@ -175,7 +175,7 @@ public class Main {
             for(int i =0 ; i < table.typeList.size();i++)
             {
                 try {
-                    disList.add(new DataOutputStream(new FileOutputStream("split/"+table.GetTableName()+"/cols"+i,true)));
+                    disList.add(new DataOutputStream(new FileOutputStream("split/"+table.GetTableName()+"/cols/"+i,true)));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
