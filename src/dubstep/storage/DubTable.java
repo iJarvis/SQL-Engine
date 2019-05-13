@@ -152,6 +152,16 @@ public class DubTable {
         return this.tableName;
     }
 
+    public Map<String, Integer> getColumnList() {
+
+        String fromName = this.tableName;
+        Map<String, Integer> columns = new HashMap<>();
+        for (int i = 0; i < columnDefinitions.size(); ++i) {
+            columns.put(fromName + "." + columnDefinitions.get(i).getColumnName(), i);
+        }
+        return columns;
+    }
+
     public Map<String, Integer> getColumnList(Table fromItem) {
         String alias = fromItem.getAlias();
         String fromName = alias == null ? this.tableName : alias;
