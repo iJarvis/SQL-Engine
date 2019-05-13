@@ -169,7 +169,7 @@ public class Main {
             manager.delete(updateQuery.getTable(),updateQuery.getWhere(),true);
             DubTable table = mySchema.getTable(updateQuery.getTable().getName());
             Map<String,Integer> colList =  table.getColumnList();
-            Evaluator eval = new Evaluator(null);
+            Evaluator eval = new Evaluator(colList);
             ArrayList<DataOutputStream> disList = new ArrayList<>();
 
             for(int i =0 ; i < table.typeList.size();i++)
@@ -185,6 +185,7 @@ public class Main {
             for(Tuple tuple : manager.deletedTuples)
             {
                 int colIndex = 0;
+                eval.setTuple(tuple);
                 for(Column column : updateQuery.getColumns())
                 {
                       int index = colList.get(table.GetTableName()+"."+column.getColumnName());
