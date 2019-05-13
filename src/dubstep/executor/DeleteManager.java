@@ -31,7 +31,7 @@ public class DeleteManager {
                 scanNode.requiredList.add(dubTable.GetTableName()+"."+column.getColumnName());
             }
         }
-
+        
         else
             scanNode.requiredList =  new HashSet<>(getSelectExprColumnStrList(filter));
         scanNode.scanner.setupProjList(scanNode.requiredList);
@@ -48,6 +48,7 @@ public class DeleteManager {
                     dubTable.deletedSet.add(row.tid);
                     if(preserveRows)
                         updated_tuples.add(row);
+                    break;
                 }
             } catch (SQLException e) {
                 e.printStackTrace();

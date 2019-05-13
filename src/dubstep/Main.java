@@ -102,15 +102,13 @@ public class Main {
         timer.reset();
         timer.start();
 
-        if(updated_count > 10)
+        if(updated_count > 15)
             System.exit(0);
-        updated_count++;
 
         if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
             BufferedWriter table_file = null;
             create = false;
-            updated_count--;
 
             if (!mySchema.createTable(createQuery)) {
                 System.out.println("Unable to create DubTable - DubTable already exists");
@@ -244,6 +242,7 @@ public class Main {
         } else if (query instanceof Delete) {
             Delete deleteQuery = (Delete) query;
             DeleteManager manager = new DeleteManager();
+            updated_count++;
             manager.delete(deleteQuery.getTable(), deleteQuery.getWhere(),null,false);
         } else {
             throw new java.sql.SQLException("I can't understand " + sqlString);
