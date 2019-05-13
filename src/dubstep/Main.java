@@ -6,9 +6,11 @@ import dubstep.planner.PlanTree;
 import dubstep.storage.DubTable;
 import dubstep.storage.TableManager;
 import dubstep.storage.datatypes;
+import dubstep.utils.Evaluator;
 import dubstep.utils.Explainer;
 import dubstep.utils.QueryTimer;
 import dubstep.utils.Tuple;
+import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.ItemsList;
@@ -128,19 +130,21 @@ public class Main {
             List<Expression> exprs =  exprList.getExpressions();
             DubTable table = mySchema.getTable(tableName);
             int index = 0;
+            Evaluator eval = new Evaluator(null);
             for(Expression expr : exprs)
             {
                 try {
                     DataOutputStream stream = new DataOutputStream(new FileOutputStream("split/" + tableName + "/cols/" + index, true));
+                    PrimitiveValue pv = eval.eval(expr);
                     if (expr instanceof PrimitiveValue) {
-                        if (expr instanceof DateValue)
-                            stream.writeLong(((DateValue) expr).getValue().getTime());
-                        else if (expr instanceof LongValue)
-                            stream.writeLong(((LongValue) expr).toLong());
-                        else if (expr instanceof DoubleValue)
-                            stream.writeDouble(((DoubleValue) expr).toDouble());
-                        else if (expr instanceof StringValue)
-                            stream.writeBytes(((StringValue) expr).toRawString() + "\n");
+                        if (pv instanceof DateValue)
+                            stream.writeLong(((DateValue) pv).getValue().getTime());
+                        else if (pv instanceof LongValue)
+                            stream.writeLong(((LongValue) pv).toLong());
+                        else if (pv instanceof DoubleValue)
+                            stream.writeDouble(((DoubleValue) pv).toDouble());
+                        else if (pv instanceof StringValue)
+                            stream.writeBytes(((StringValue) pv).toRawString() + "\n");
                     } else {
                         System.out.println("illegal state");
                     }
