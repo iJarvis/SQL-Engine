@@ -40,14 +40,19 @@ public class DeleteManager {
                    try {
                        int Index = Collections.binarySearch(dubTable.primaryIndex,val.toLong());
 
-                       if(Index > 0)
+                       if(Index >=0 )
                        {
-                           while (dubTable.primaryIndex.get(Index) == val.toLong())
+                           while (Index >=0 && dubTable.primaryIndex.get(Index) == val.toLong())
+                           {
+                               Index--;
+                           }
+                           Index = Index+1;
+                           while (dubTable.primaryIndex.size()  > Index && dubTable.primaryIndex.get(Index) == val.toLong())
                            {
                                indexList.add(Index);
                                Index++;
-
                            }
+
                        }
                    } catch (PrimitiveValue.InvalidPrimitive throwables) {
                        throwables.printStackTrace();
