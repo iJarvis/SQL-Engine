@@ -44,7 +44,6 @@ public class Main {
     static public boolean EXPLAIN_MODE = false; // will print statistics of the code
     static ArrayList<Integer> dateSet;
     static boolean create = true;
-    static Integer updated_count = 0;
 
     public static void main(String[] args) throws ParseException, SQLException {
         //Get all command line arguments
@@ -102,8 +101,6 @@ public class Main {
         timer.reset();
         timer.start();
 
-        if(updated_count > 15)
-            System.exit(0);
 
         if (query instanceof CreateTable) {
             CreateTable createQuery = (CreateTable) query;
@@ -144,6 +141,10 @@ public class Main {
                         pv = (PrimitiveValue)expr;
                     else
                         pv = eval.eval(expr);
+                    if(index == 0)
+                    {
+                        table.primaryIndex.add(pv.toLong());
+                    }
                     if (expr instanceof PrimitiveValue) {
                         if (pv instanceof DateValue)
                             stream.writeLong(((DateValue) pv).getValue().getTime());
@@ -242,7 +243,6 @@ public class Main {
         } else if (query instanceof Delete) {
             Delete deleteQuery = (Delete) query;
             DeleteManager manager = new DeleteManager();
-            updated_count++;
             manager.delete(deleteQuery.getTable(), deleteQuery.getWhere(),null,false);
         } else {
             throw new java.sql.SQLException("I can't understand " + sqlString);

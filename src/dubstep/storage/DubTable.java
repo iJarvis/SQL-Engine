@@ -22,6 +22,7 @@ public class DubTable {
     public HashMap<Integer,Tuple> updatedSet = new HashMap<>();
     List<ColumnDefinition> columnDefinitions;
     public List<DataOutputStream> InsertStreams = new ArrayList<>();
+    public ArrayList<Long> primaryIndex = new ArrayList<>();
     String dataFile;
     private String tableName;
     public int rowCount = -1;
@@ -132,6 +133,10 @@ public class DubTable {
             int index = 0;
             for (PrimitiveValue t : tuple.valueArray) {
                 datatypes type = typeList.get(index);
+                if(index == 0)
+                {
+                    primaryIndex.add(t.toLong());
+                }
                 switch (type) {
                     case DATE_TYPE:
                         java.sql.Date dd = ((DateValue) t).getValue();
