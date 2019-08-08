@@ -1,2 +1,2 @@
-# UB_DATABASE_PROJECT
+# SQL-Database
 we made the fastest database in our class. 
